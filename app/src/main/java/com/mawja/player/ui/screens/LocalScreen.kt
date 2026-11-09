@@ -37,6 +37,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -120,10 +121,15 @@ private fun LocalContent() {
     val mediaItems = remember(visibleItems, media) {
         visibleItems.filter { if (media == DeviceMedia.VIDEO) it.isVideo else !it.isVideo }
     }
+
+    // Load string resources outside remember blocks
     val unknownFolder = stringResource(R.string.unknown_folder)
     val unknownAlbum = stringResource(R.string.unknown_album)
     val unknownArtist = stringResource(R.string.unknown_artist)
     val videoLabel = stringResource(R.string.videos)
+    val foldersTitle = stringResource(R.string.folders)
+    val albumsTitle = stringResource(R.string.albums)
+    val artistsTitle = stringResource(R.string.artists)
 
     val groups = remember(mediaItems, grouping, unknownFolder, unknownAlbum, unknownArtist, videoLabel) {
         mediaItems.groupBy { track ->
@@ -142,9 +148,9 @@ private fun LocalContent() {
         DeviceGrouping.ARTIST -> MediaGroupKind.ARTIST
     }
     val groupingTitle = when (grouping) {
-        DeviceGrouping.FOLDER -> stringResource(R.string.folders)
-        DeviceGrouping.ALBUM -> stringResource(R.string.albums)
-        DeviceGrouping.ARTIST -> stringResource(R.string.artists)
+        DeviceGrouping.FOLDER -> foldersTitle
+        DeviceGrouping.ALBUM -> albumsTitle
+        DeviceGrouping.ARTIST -> artistsTitle
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -170,21 +176,21 @@ private fun LocalContent() {
                 FilterChip(
                     selected = grouping == DeviceGrouping.FOLDER,
                     onClick = { grouping = DeviceGrouping.FOLDER; openedGroup = null },
-                    label = { Text(stringResource(R.string.folders)) },
+                    label = { Text(foldersTitle) },
                 )
             }
             item {
                 FilterChip(
                     selected = grouping == DeviceGrouping.ALBUM,
                     onClick = { grouping = DeviceGrouping.ALBUM; openedGroup = null },
-                    label = { Text(stringResource(R.string.albums)) },
+                    label = { Text(albumsTitle) },
                 )
             }
             item {
                 FilterChip(
                     selected = grouping == DeviceGrouping.ARTIST,
                     onClick = { grouping = DeviceGrouping.ARTIST; openedGroup = null },
-                    label = { Text(stringResource(R.string.artists)) },
+                    label = { Text(artistsTitle) },
                 )
             }
         }
