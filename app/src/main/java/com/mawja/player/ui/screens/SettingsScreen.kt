@@ -249,7 +249,6 @@ fun SettingsScreen() {
                 Switch(
                     checked = batterySaver,
                     onCheckedChange = { enabled ->
-                        container.preferences.setBatterySaver(enabled)
                         PlaybackService.setBatterySaver(context, enabled)
                     },
                 )
@@ -366,7 +365,6 @@ private fun EqualizerChip(container: AppContainer, context: Context, label: Int,
     FilterChip(
         selected = selectedPreset == preset,
         onClick = {
-            container.preferences.setEqualizerPreset(preset)
             PlaybackService.setEqualizerPreset(context, preset)
         },
         label = { Text(stringResource(label)) },
