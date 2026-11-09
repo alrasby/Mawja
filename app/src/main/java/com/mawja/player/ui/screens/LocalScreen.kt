@@ -93,7 +93,6 @@ fun LocalScreen() {
 
     var granted by remember { mutableStateOf(hasPermission()) }
 
-    // Re-check permission whenever the screen resumes (after exit/entry or settings change)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -204,37 +203,72 @@ private fun LocalContent() {
                 )
             }
         }
-        if (activeGroup == null) {
-            SectionTitle(groupingTitle)
-            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
-                items(groups.keys.toList(), key = { it }) { name ->
-                    val tracks = groups.getValue(name)
-                    MediaGroupArtwork(
-                        kind = groupKind,
-                        title = name,
-                        count = tracks.size,
-                        onClick = { openedGroup = name },
-                    )
+
+        when {
+            state.loading && state.items.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
+            mediaItems.isEmpty() -> MessageState(if (media == DeviceMedia.VIDEO) stringResource(R.string.empty_videos) else stringResource(R.string.empty_music), stringResource(R.string.retry), vm::refresh)
+            activeGroup == null -> {
+                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    item { SectionTitle(groupingTitle) }
+                    if (fileDisplayMode == FileDisplayMode.GRID) {
+                        val groupRows = groups.keys.toList().chunked(2)
+                        items(groupRows, key = { it.joinToString("|") }) { row ->
+                            Row(Modifier.fillMaxWidth().padding(horizontal = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                row.forEach { name ->
+                                    val groupTracks = groups.getValue(name)
+                                    val sample = groupTracks.firstOrNull { !it.artworkUrl.isNullOrBlank() } ?: groupTracks.firstOrNull()
+                                    Card(
+                                        modifier = Modifier.weight(1f).clickable { openedGroup = name },
+                                        shape = RoundedCornerShape(22.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .72f)),
+                                    ) {
+                                        Column(Modifier.padding(10.dp)) {
+                                            MediaGroupArtwork(sample, groupKind, Modifier.fillMaxWidth().aspectRatio(1.12f), corner = 17.dp)
+                                            Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp, start = 2.dp, end = 2.dp))
+                                            Text(pluralStringResource(R.plurals.item_count, groupTracks.size, groupTracks.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 2.dp, end = 2.dp, bottom = 2.dp))
+                                        }
+                                    }
+                                }
+                                if (row.size == 1) Spacer(Modifier.weight(1f))
+                            }
+                        }
+                    } else {
+                        items(groups.keys.toList(), key = { it }) { name ->
+                            val groupTracks = groups.getValue(name)
+                            val sample = groupTracks.firstOrNull { !it.artworkUrl.isNullOrBlank() } ?: groupTracks.firstOrNull()
+                            Row(
+                                Modifier.fillMaxWidth().clickable { openedGroup = name }.padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                MediaGroupArtwork(sample, groupKind, Modifier.size(56.dp), corner = 12.dp)
+                                Column(Modifier.weight(1f)) {
+                                    Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
+                                    Text(pluralStringResource(R.plurals.item_count, groupTracks.size, groupTracks.size), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        } else {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { openedGroup = null }) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null)
-                }
-                Text(activeGroup, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(pluralStringResource(R.plurals.item_count, activeTracks.size, activeTracks.size), style = MaterialTheme.typography.bodySmall)
-            }
-            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
-                items(activeTracks, key = { it.id }) { track ->
-                    val isFav = favorites.any { it.id == track.id }
-                    TrackRow(
-                        track = track,
-                        isPlaying = player.track?.id == track.id,
-                        isFavorite = isFav,
-                        onPlay = { scope.launch { container.player.play(track, activeTracks) } },
-                        onFavorite = { scope.launch { container.library.toggleFavorite(track) } },
-                    )
+            else -> {
+                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
+                    item {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { openedGroup = null }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.close)) }
+                            Text(activeGroup, style = MaterialTheme.typography.titleLarge)
+                        }
+                    }
+                    item {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { container.play(activeTracks, 0) }, enabled = activeTracks.isNotEmpty()) { Icon(Icons.Rounded.PlayArrow, contentDescription = null); Text(stringResource(R.string.play_all)) }
+                            OutlinedButton(onClick = { container.play(activeTracks.shuffled(), 0) }, enabled = activeTracks.isNotEmpty()) { Icon(Icons.Rounded.Shuffle, contentDescription = null); Text(stringResource(R.string.shuffle)) }
+                        }
+                    }
+                    items(activeTracks, key = { it.id }) { track ->
+                        val isFavorite = favorites.any { it.id == track.id }
+                        TrackRow(track, player.track?.id == track.id, player.isPlaying, if (isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder, isFavorite, stringResource(R.string.favorite), { container.play(activeTracks, activeTracks.indexOf(track)) }, { scope.launch { container.library.toggleFavorite(track) } })
+                    }
                 }
             }
         }
