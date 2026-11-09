@@ -37,10 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.DisposableEffect
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,7 +75,6 @@ private enum class DeviceGrouping { FOLDER, ALBUM, ARTIST }
 @Composable
 fun LocalScreen() {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
     val permissions = if (Build.VERSION.SDK_INT >= 33) {
         buildList {
             add(Manifest.permission.READ_MEDIA_AUDIO)
@@ -92,16 +87,6 @@ fun LocalScreen() {
         permissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
 
     var granted by remember { mutableStateOf(hasPermission()) }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                granted = hasPermission()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         granted = result.values.any { it } || hasPermission()
