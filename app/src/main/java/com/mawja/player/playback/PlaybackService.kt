@@ -233,10 +233,6 @@ class PlaybackService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?,
         ): ListenableFuture<LibraryResult<com.google.common.collect.ImmutableList<MediaItem>>> = future {
-            // Keep the original Media3 contract: Android Auto sends the exact
-            // mediaId that was returned by this callback. Decoding parentId
-            // before dispatch changes encoded folder names and was the source
-            // of the historical "count but No items" regression.
             val all = libraryChildren(parentId)
             LibraryResult.ofItemList(
                 com.google.common.collect.ImmutableList.copyOf(pageItems(all, page, pageSize)),
@@ -365,11 +361,20 @@ class PlaybackService : MediaLibraryService() {
         val remainder = parentId.removePrefix(prefix)
         val separator = remainder.indexOf(':')
         if (separator <= 0) return deviceGroupItems(video, remainder)
+
         val grouping = remainder.substring(0, separator)
-        val name = Uri.decode(remainder.substring(separator + 1))
-        return appContainer.local.load()
+        val encodedName = remainder.substring(separator + 1)
+        val name = Uri.decode(encodedName)
+
+        val tracks = appContainer.local.load()
             .filter { it.isVideo == video && groupName(it, grouping, video) == name }
-            .map(::playableItem)
+
+        if (tracks.isEmpty()) {
+            val fallback = appContainer.local.load()
+                .filter { it.isVideo == video && groupName(it, grouping, video) == encodedName }
+            return fallback.map(::playableItem)
+        }
+        return tracks.map(::playableItem)
     }
 
     private suspend fun deviceGroupItems(video: Boolean, grouping: String): List<MediaItem> {
@@ -378,7 +383,11 @@ class PlaybackService : MediaLibraryService() {
             .groupBy { groupName(it, grouping, video) }
         val prefix = if (video) DEVICE_VIDEO_GROUP else DEVICE_AUDIO_GROUP
         return groups.toList().sortedBy { it.first.lowercase() }.map { (name, tracks) ->
-            browseItem("$prefix$grouping:${Uri.encode(name)}", "$name (${tracks.size})", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+            browseItem(
+                "$prefix$grouping:${Uri.encode(name)}",
+                name,
+                MediaMetadata.MEDIA_TYPE_FOLDER_MIXED,
+            )
         }
     }
 
@@ -413,9 +422,6 @@ class PlaybackService : MediaLibraryService() {
         if (autoTracks.size > 512) autoTracks.clear()
         autoTracks[track.id] = track
         val item = track.toMediaItem()
-        // Android Auto is an audio-first, driver-safe surface. Videos remain
-        // visible in the same browse/search tree, but are not offered as a
-        // playable car action; the phone UI can still play them normally.
         if (!track.isVideo) return item
         return item.buildUpon()
             .setMediaMetadata(item.mediaMetadata.buildUpon().setIsPlayable(false).setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO).build())
@@ -453,102 +459,33 @@ class PlaybackService : MediaLibraryService() {
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
         if (id.startsWith("world:")) {
-            return browseItem(
-                id,
-                id.removePrefix("world:").uppercase(Locale.ROOT),
-                MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS,
-            )
+            return browseItem(id, id.removePrefix("world:"), MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
         }
-        val audioPrefix = DEVICE_AUDIO_GROUP
-        val videoPrefix = DEVICE_VIDEO_GROUP
-        val prefix = when {
-            id.startsWith(audioPrefix) -> audioPrefix
-            id.startsWith(videoPrefix) -> videoPrefix
-            else -> return null
-        }
-        val remainder = id.removePrefix(prefix)
-        if (remainder.isBlank()) return null
-        val grouping = remainder.substringBefore(':')
-        val type = if (prefix == audioPrefix) {
-            when (grouping) {
-                "album" -> MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS
-                "artist" -> MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS
-                else -> MediaMetadata.MEDIA_TYPE_FOLDER_MIXED
-            }
-        } else MediaMetadata.MEDIA_TYPE_FOLDER_MIXED
-        val title = remainder.substringAfter(':', grouping).let(Uri::decode)
-        return browseItem(id, title, type)
+        return null
     }
 
     private fun pageItems(items: List<MediaItem>, page: Int, pageSize: Int): List<MediaItem> {
-        // Android Auto commonly uses an unset/zero page size for an unpaged
-        // browse request. The old implementation treated `page` as an item
-        // offset in that case, which could turn a valid folder into No items.
-        if (pageSize == C.INDEX_UNSET || pageSize <= 0 || page == C.INDEX_UNSET) return items
-        return items.drop((page.coerceAtLeast(0) * pageSize).coerceAtMost(items.size)).take(pageSize)
-    }
-
-    private fun decodeBrowseId(value: String): String {
-        var current = value
-        repeat(2) {
-            val decoded = runCatching { Uri.decode(current) }.getOrDefault(current)
-            if (decoded == current) return current
-            current = decoded
-        }
-        return current
+        if (pageSize <= 0) return items
+        val from = page * pageSize
+        if (from >= items.size) return emptyList()
+        return items.subList(from, minOf(from + pageSize, items.size))
     }
 
     private fun <T> future(block: suspend () -> T): ListenableFuture<T> {
         val result = SettableFuture.create<T>()
         autoScope.launch {
-            runCatching { block() }
-                .onSuccess { result.set(it) }
-                .onFailure { result.setException(it) }
+            try {
+                result.set(block())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                result.setException(e)
+            }
         }
         return result
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_MEDIA_PLAY_FROM_SEARCH) {
-            val query = intent.getStringExtra(SearchManager.QUERY).orEmpty().trim()
-            if (query.isNotBlank()) {
-                autoScope.launch {
-                    val track = runCatching { searchAllSources(query) }
-                        .getOrDefault(emptyList())
-                        .firstOrNull { !it.isVideo && !it.playbackUri.isNullOrBlank() }
-                    if (track != null) {
-                        withContext(Dispatchers.Main) {
-                            autoTracks[track.id] = track
-                            session?.player?.setMediaItem(track.toMediaItem())
-                            session?.player?.prepare()
-                            session?.player?.play()
-                        }
-                    }
-                }
-            }
-            return START_NOT_STICKY
-        }
-        when (intent?.action) {
-            ACTION_SET_EQUALIZER -> {
-                val preset = intent.getStringExtra(EXTRA_PRESET).orEmpty().ifBlank { "flat" }
-                getSharedPreferences(PreferencesStore.PREFS_NAME, MODE_PRIVATE).edit().putString(PreferencesStore.KEY_EQ_PRESET, preset).apply()
-                applyEqualizerPreset(preset)
-            }
-            ACTION_SET_BATTERY_SAVER -> {
-                val enabled = intent.getBooleanExtra(EXTRA_ENABLED, false)
-                getSharedPreferences(PreferencesStore.PREFS_NAME, MODE_PRIVATE).edit().putBoolean(PreferencesStore.KEY_BATTERY_SAVER, enabled).apply()
-                runCatching { (session?.player as? ExoPlayer)?.setWakeMode(if (enabled) C.WAKE_MODE_NONE else C.WAKE_MODE_NETWORK) }
-            }
-        }
-        return super.onStartCommand(intent, flags, startId)
-    }
-
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = session
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = session?.player
-        if (player == null || !player.playWhenReady || player.mediaItemCount == 0) stopSelf()
-    }
 
     override fun onDestroy() {
         autoScope.cancel()
@@ -582,24 +519,11 @@ class PlaybackService : MediaLibraryService() {
         private const val ONLINE_YOUTUBE = "online:youtube"
         private const val DEVICE_AUDIO = "device:audio"
         private const val DEVICE_VIDEO = "device:video"
-        private const val DEVICE_AUDIO_GROUP = "device:audio:"
-        private const val DEVICE_VIDEO_GROUP = "device:video:"
+        private const val DEVICE_AUDIO_GROUP = "device:audio:group:"
+        private const val DEVICE_VIDEO_GROUP = "device:video:group:"
         const val ACTION_SET_EQUALIZER = "com.mawja.player.SET_EQUALIZER"
         const val ACTION_SET_BATTERY_SAVER = "com.mawja.player.SET_BATTERY_SAVER"
-        const val ACTION_MEDIA_PLAY_FROM_SEARCH = "android.media.action.MEDIA_PLAY_FROM_SEARCH"
         const val EXTRA_PRESET = "preset"
         const val EXTRA_ENABLED = "enabled"
-
-        fun setEqualizerPreset(context: Context, preset: String) {
-            val app = context.applicationContext
-            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putString(PreferencesStore.KEY_EQ_PRESET, preset).apply()
-            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_EQUALIZER).putExtra(EXTRA_PRESET, preset)) }
-        }
-
-        fun setBatterySaver(context: Context, enabled: Boolean) {
-            val app = context.applicationContext
-            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(PreferencesStore.KEY_BATTERY_SAVER, enabled).apply()
-            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_BATTERY_SAVER).putExtra(EXTRA_ENABLED, enabled)) }
-        }
     }
 }
