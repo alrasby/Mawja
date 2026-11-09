@@ -33,7 +33,7 @@
     <string name="all_sources">All</string>
     <string name="source_audius">Audius</string>
     <string name="source_youtube">YouTube</string>
-    <string name="albums_and_singles">Albums &amp; singles</string>
+    <string name="albums_and_singles">Albums & singles</string>
     <string name="new_albums">New albums</string>
     <string name="artists">Artists</string>
     <string name="youtube_picks">YouTube picks</string>
@@ -113,6 +113,6 @@
     <string name="display_grid">Grid</string>
     <string name="display_list">Vertical list</string>
     <string name="open_youtube_official">Open official YouTube player</string>
-    <string name="youtube_country" translatable="false">YouTube country</string>
-    <string name="youtube_country_auto" translatable="false">Auto • GPS / Network / SIM</string>
+    <string name="youtube_country">YouTube country</string>
+    <string name="youtube_country_auto">Auto • GPS / Network / SIM</string>
 </resources>
