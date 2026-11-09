@@ -113,6 +113,6 @@
     <string name="display_grid">شبكة</string>
     <string name="display_list">قائمة عمودية</string>
     <string name="open_youtube_official">فتح مشغل YouTube الرسمي</string>
-    <string name="youtube_country" translatable="false">دولة محتوى YouTube</string>
-    <string name="youtube_country_auto" translatable="false">تلقائي • GPS / الشبكة / الشريحة</string>
+    <string name="youtube_country">دولة محتوى YouTube</string>
+    <string name="youtube_country_auto">تلقائي • GPS / الشبكة / الشريحة</string>
 </resources>
