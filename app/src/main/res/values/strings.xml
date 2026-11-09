@@ -20,7 +20,7 @@
     <string name="filter_news">News</string>
     <string name="live">LIVE</string>
     <string name="retry">Retry</string>
-    <string name="error_generic">Couldn't load. Check your connection and try again.</string>
+    <string name="error_generic">Couldn\'t load. Check your connection and try again.</string>
     <string name="empty_stations">No stations found.</string>
     <string name="empty_music">No songs found.</string>
     <string name="empty_home">Nothing to show yet. Pull to retry or search for an artist.</string>
@@ -67,7 +67,7 @@
     <string name="pause">Pause</string>
     <string name="stop">Stop</string>
     <string name="repeat">Repeat</string>
-    <string name="playback_error">Couldn't play this. Tap play to try again.</string>
+    <string name="playback_error">Couldn\'t play this. Tap play to try again.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="settings_playback">Playback</string>
     <string name="language">Language</string>
