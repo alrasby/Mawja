@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Secure-by-default: HTTPS is required except for legacy radio hosts explicitly allowlisted below. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">internet-radio.com</domain>
+        <domain includeSubdomains="true">sharp-stream.com</domain>
+        <domain includeSubdomains="true">mosaiquefm.net</domain>
+    </domain-config>
+</network-security-config>
