@@ -34,7 +34,7 @@ jobs:
         run: gradle wrapper --gradle-version 9.3.1
 
       - name: Decode keystore (release only)
-        if: github.event.inputs.build_type == 'release'
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
         run: |
           if [ -n "${{ secrets.MAWJA_KEYSTORE_BASE64 }}" ]; then
             mkdir -p ../keys
@@ -46,11 +46,11 @@ jobs:
           fi
 
       - name: Build Debug APK
-        if: github.event.inputs.build_type != 'release'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_type != 'release')
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Build Release APK
-        if: github.event.inputs.build_type == 'release'
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
         env:
           MAWJA_KEYSTORE: ${{ github.workspace }}/../keys/mawja-upload.jks
           MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
@@ -59,7 +59,7 @@ jobs:
         run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload Debug APK
-        if: github.event.inputs.build_type != 'release'
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_type != 'release')
         uses: actions/upload-artifact@v4
         with:
           name: Mawja-debug
@@ -67,7 +67,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Release APK
-        if: github.event.inputs.build_type == 'release'
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
         uses: actions/upload-artifact@v4
         with:
           name: Mawja-release
