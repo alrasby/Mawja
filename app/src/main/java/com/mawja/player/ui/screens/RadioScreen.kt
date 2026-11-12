@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -81,6 +82,13 @@ fun RadioScreen() {
     val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         hasPermission = result.values.any { it }
         if (hasPermission) readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
+    }
+
+    // Auto-load local stations when permission is already granted, without requiring a chip click
+    LaunchedEffect(hasPermission, filter.id, localReady) {
+        if (hasPermission && filter.id == RadioFilters.local.id && !localReady) {
+            readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
+        }
     }
 
     Column(Modifier.fillMaxSize()) {

@@ -364,15 +364,22 @@ class PlaybackService : MediaLibraryService() {
 
         val grouping = remainder.substring(0, separator)
         val encodedName = remainder.substring(separator + 1)
-        val name = Uri.decode(encodedName)
+        val name = Uri.decode(encodedName).trim()
 
-        val tracks = appContainer.local.load()
-            .filter { it.isVideo == video && groupName(it, grouping, video) == name }
-
+        val all = appContainer.local.load().filter { it.isVideo == video }
+        var tracks = all.filter { groupName(it, grouping, video).trim() == name }
         if (tracks.isEmpty()) {
-            val fallback = appContainer.local.load()
-                .filter { it.isVideo == video && groupName(it, grouping, video) == encodedName }
-            return fallback.map(::playableItem)
+            tracks = all.filter { groupName(it, grouping, video).trim().equals(name, ignoreCase = true) }
+        }
+        if (tracks.isEmpty()) {
+            tracks = all.filter { groupName(it, grouping, video).trim() == encodedName.trim() }
+        }
+        if (tracks.isEmpty()) {
+            // Last resort: partial contains match for robustness with encoding quirks
+            tracks = all.filter { 
+                val g = groupName(it, grouping, video).trim()
+                g.contains(name, ignoreCase = true) || name.contains(g, ignoreCase = true)
+            }
         }
         return tracks.map(::playableItem)
     }
@@ -380,12 +387,13 @@ class PlaybackService : MediaLibraryService() {
     private suspend fun deviceGroupItems(video: Boolean, grouping: String): List<MediaItem> {
         val groups = appContainer.local.load()
             .filter { it.isVideo == video }
-            .groupBy { groupName(it, grouping, video) }
+            .groupBy { groupName(it, grouping, video).trim() }
         val prefix = if (video) DEVICE_VIDEO_GROUP else DEVICE_AUDIO_GROUP
         return groups.toList().sortedBy { it.first.lowercase() }.map { (name, tracks) ->
+            // Restore item count in the folder title so Android Auto shows it again
             browseItem(
                 "$prefix$grouping:${Uri.encode(name)}",
-                name,
+                "$name (${tracks.size})",
                 MediaMetadata.MEDIA_TYPE_FOLDER_MIXED,
             )
         }
@@ -459,13 +467,38 @@ class PlaybackService : MediaLibraryService() {
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
         if (id.startsWith("world:")) {
-            return browseItem(id, id.removePrefix("world:"), MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+            return browseItem(
+                id,
+                id.removePrefix("world:").uppercase(java.util.Locale.ROOT),
+                MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS,
+            )
         }
-        return null
+        val audioPrefix = DEVICE_AUDIO_GROUP
+        val videoPrefix = DEVICE_VIDEO_GROUP
+        val prefix = when {
+            id.startsWith(audioPrefix) -> audioPrefix
+            id.startsWith(videoPrefix) -> videoPrefix
+            else -> return null
+        }
+        val remainder = id.removePrefix(prefix)
+        if (remainder.isBlank()) return null
+        val grouping = remainder.substringBefore(':')
+        val type = if (prefix == audioPrefix) {
+            when (grouping) {
+                "album" -> MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS
+                "artist" -> MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS
+                else -> MediaMetadata.MEDIA_TYPE_FOLDER_MIXED
+            }
+        } else MediaMetadata.MEDIA_TYPE_FOLDER_MIXED
+        val title = remainder.substringAfter(':', grouping).let(Uri::decode)
+        return browseItem(id, title, type)
     }
 
     private fun pageItems(items: List<MediaItem>, page: Int, pageSize: Int): List<MediaItem> {
-        if (pageSize <= 0) return items
+        // Android Auto commonly uses an unset/zero page size for an unpaged
+        // browse request. Treating page as an offset in that case turned valid
+        // folders into "No items".
+        if (pageSize <= 0 || page < 0) return items
         val from = page * pageSize
         if (from >= items.size) return emptyList()
         return items.subList(from, minOf(from + pageSize, items.size))

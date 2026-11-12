@@ -48,6 +48,22 @@ class PreferencesStore(context: Context) {
     fun setYoutubeCountry(value: String) { prefs.edit().putString(KEY_YOUTUBE_COUNTRY, value).apply(); _youtubeCountry.value = value }
     fun markLocationPromptHandled() { prefs.edit().putBoolean(KEY_LOCATION_PROMPT_HANDLED, true).apply() }
 
+    fun saveLastLocation(lat: Double, lon: Double, country: String?) {
+        prefs.edit()
+            .putString(KEY_LAST_LAT, lat.toString())
+            .putString(KEY_LAST_LON, lon.toString())
+            .putString(KEY_LAST_COUNTRY, country ?: "")
+            .apply()
+    }
+
+    fun lastLocation(): Pair<Double, Double>? {
+        val lat = prefs.getString(KEY_LAST_LAT, null)?.toDoubleOrNull()
+        val lon = prefs.getString(KEY_LAST_LON, null)?.toDoubleOrNull()
+        return if (lat != null && lon != null) lat to lon else null
+    }
+
+    fun lastCountryCode(): String? = prefs.getString(KEY_LAST_COUNTRY, null)?.takeIf { it.isNotBlank() }
+
     fun setFolderVisible(folder: String, visible: Boolean) {
         val clean = folder.trim()
         if (clean.isBlank()) return
@@ -78,6 +94,9 @@ class PreferencesStore(context: Context) {
         const val KEY_FILE_DISPLAY_MODE = "file_display_mode"
         const val KEY_YOUTUBE_COUNTRY = "youtube_country"
         const val KEY_LOCATION_PROMPT_HANDLED = "location_prompt_handled"
+        const val KEY_LAST_LAT = "last_location_lat"
+        const val KEY_LAST_LON = "last_location_lon"
+        const val KEY_LAST_COUNTRY = "last_location_country"
         private const val KEY_THEME = "theme"
     }
 }

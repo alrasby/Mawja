@@ -49,7 +49,16 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
     private var localCountryCode: String? = null
     private var job: Job? = null
 
-    init { viewModelScope.launch { worldCountries.value = c.radio.countries() }; load() }
+    init {
+        // Restore last known location so local stations appear immediately on reopen
+        c.preferences.lastLocation()?.let { (lat, lon) ->
+            localLocation = lat to lon
+            localCountryCode = c.preferences.lastCountryCode()
+            localReady.value = true
+        }
+        viewModelScope.launch { worldCountries.value = c.radio.countries() }
+        load()
+    }
 
     fun select(f: RadioFilter) {
         filter.value = f
@@ -65,6 +74,7 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
         localReady.value = true
         viewModelScope.launch {
             localCountryCode = c.radio.countryCodeFor(latitude, longitude)
+            c.preferences.saveLastLocation(latitude, longitude, localCountryCode)
             if (filter.value.id == RadioFilters.local.id) load()
         }
     }
