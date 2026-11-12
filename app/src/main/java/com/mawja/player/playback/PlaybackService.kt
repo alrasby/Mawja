@@ -525,5 +525,17 @@ class PlaybackService : MediaLibraryService() {
         const val ACTION_SET_BATTERY_SAVER = "com.mawja.player.SET_BATTERY_SAVER"
         const val EXTRA_PRESET = "preset"
         const val EXTRA_ENABLED = "enabled"
+
+        fun setEqualizerPreset(context: Context, preset: String) {
+            val app = context.applicationContext
+            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putString(PreferencesStore.KEY_EQ_PRESET, preset).apply()
+            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_EQUALIZER).putExtra(EXTRA_PRESET, preset)) }
+        }
+
+        fun setBatterySaver(context: Context, enabled: Boolean) {
+            val app = context.applicationContext
+            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(PreferencesStore.KEY_BATTERY_SAVER, enabled).apply()
+            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_BATTERY_SAVER).putExtra(EXTRA_ENABLED, enabled)) }
+        }
     }
 }
