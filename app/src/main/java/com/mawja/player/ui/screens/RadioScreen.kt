@@ -84,9 +84,9 @@ fun RadioScreen() {
         if (hasPermission) readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
     }
 
-    // Auto-load local stations when permission is already granted, without requiring a chip click
-    LaunchedEffect(hasPermission, filter.id, localReady) {
-        if (hasPermission && filter.id == RadioFilters.local.id && !localReady) {
+    // Auto-load local stations whenever permission is granted and Local filter is active
+    LaunchedEffect(hasPermission, filter.id) {
+        if (hasPermission && filter.id == RadioFilters.local.id) {
             readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
         }
     }

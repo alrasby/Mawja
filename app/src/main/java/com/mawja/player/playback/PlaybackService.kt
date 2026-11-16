@@ -233,7 +233,12 @@ class PlaybackService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?,
         ): ListenableFuture<LibraryResult<com.google.common.collect.ImmutableList<MediaItem>>> = future {
-            val all = libraryChildren(parentId)
+            Log.d(TAG, "onGetChildren parentId=$parentId page=$page pageSize=$pageSize")
+            val all = runCatching { libraryChildren(parentId) }.getOrElse { e ->
+                Log.e(TAG, "libraryChildren failed for $parentId", e)
+                emptyList()
+            }
+            Log.d(TAG, "onGetChildren returning ${all.size} items for $parentId")
             LibraryResult.ofItemList(
                 com.google.common.collect.ImmutableList.copyOf(pageItems(all, page, pageSize)),
                 params,
@@ -439,11 +444,26 @@ class PlaybackService : MediaLibraryService() {
     private fun playableItem(track: Track): MediaItem {
         if (autoTracks.size > 512) autoTracks.clear()
         autoTracks[track.id] = track
-        val item = track.toMediaItem()
-        if (!track.isVideo) return item
-        return item.buildUpon()
-            .setMediaMetadata(item.mediaMetadata.buildUpon().setIsPlayable(false).setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO).build())
-            .build()
+        return runCatching {
+            val item = track.toMediaItem()
+            if (!track.isVideo) item
+            else item.buildUpon()
+                .setMediaMetadata(item.mediaMetadata.buildUpon().setIsPlayable(false).setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO).build())
+                .build()
+        }.getOrElse { e ->
+            Log.w(TAG, "Failed to create MediaItem for ${track.id}: ${e.message}")
+            // Minimal fallback item that Android Auto can still display
+            MediaItem.Builder()
+                .setMediaId(track.id)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(track.title.ifBlank { "Unknown" })
+                        .setIsPlayable(true)
+                        .setMediaType(if (track.isVideo) MediaMetadata.MEDIA_TYPE_VIDEO else MediaMetadata.MEDIA_TYPE_MUSIC)
+                        .build()
+                )
+                .build()
+        }
     }
 
     private fun browseItem(id: String, title: String, mediaType: Int): MediaItem =
