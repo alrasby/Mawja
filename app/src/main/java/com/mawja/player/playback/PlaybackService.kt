@@ -405,9 +405,9 @@ class PlaybackService : MediaLibraryService() {
             .groupBy { groupName(it, grouping, video).trim() }
         val prefix = if (video) DEVICE_VIDEO_GROUP else DEVICE_AUDIO_GROUP
         return groups.toList().sortedBy { it.first.lowercase() }.map { (name, tracks) ->
-            // Restore item count in the folder title so Android Auto shows it again
+            val safeName = Uri.encode(name.ifBlank { "Unknown" })
             browseItem(
-                "$prefix$grouping:${Uri.encode(name)}",
+                "$prefix$grouping:$safeName",
                 "$name (${tracks.size})",
                 MediaMetadata.MEDIA_TYPE_FOLDER_MIXED,
             )
