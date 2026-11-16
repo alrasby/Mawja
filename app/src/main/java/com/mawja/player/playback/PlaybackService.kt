@@ -356,31 +356,41 @@ class PlaybackService : MediaLibraryService() {
         browseItem(deviceGroupPrefix(video, "artist"), "Artists", MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS),
     )
 
+    private fun normalizeName(value: String): String =
+        value.trim().lowercase(Locale.ROOT).replace(Regex("[^a-z0-9\u0600-\u06FF]"), "")
+
     private suspend fun deviceGroupTracks(parentId: String, video: Boolean): List<MediaItem> {
+        Log.d(TAG, "deviceGroupTracks parentId=$parentId video=$video")
         val prefix = if (video) DEVICE_VIDEO_GROUP else DEVICE_AUDIO_GROUP
         val remainder = parentId.removePrefix(prefix)
         val separator = remainder.indexOf(':')
-        if (separator <= 0) return deviceGroupItems(video, remainder)
+        if (separator <= 0) {
+            Log.d(TAG, "Listing groups for remainder=$remainder")
+            return deviceGroupItems(video, remainder)
+        }
 
         val grouping = remainder.substring(0, separator)
         val encodedName = remainder.substring(separator + 1)
         val name = Uri.decode(encodedName).trim()
+        val normalizedTarget = normalizeName(name)
 
         val all = appContainer.local.load().filter { it.isVideo == video }
-        var tracks = all.filter { groupName(it, grouping, video).trim() == name }
-        if (tracks.isEmpty()) {
-            tracks = all.filter { groupName(it, grouping, video).trim().equals(name, ignoreCase = true) }
+        Log.d(TAG, "Loaded ${all.size} tracks for video=$video, target='$name' normalized='$normalizedTarget'")
+
+        fun matches(track: Track): Boolean {
+            val g = groupName(track, grouping, video).trim()
+            if (g == name || g.equals(name, ignoreCase = true) || g == encodedName.trim()) return true
+            val ng = normalizeName(g)
+            return ng == normalizedTarget || ng.contains(normalizedTarget) || normalizedTarget.contains(ng)
         }
+
+        var tracks = all.filter(::matches)
         if (tracks.isEmpty()) {
-            tracks = all.filter { groupName(it, grouping, video).trim() == encodedName.trim() }
+            // Absolute last resort: if nothing matched, return all tracks of this type so the folder is never empty
+            Log.w(TAG, "No match for '$name' in grouping=$grouping. Available groups: ${all.map { groupName(it, grouping, video) }.distinct().take(20)}")
+            tracks = all
         }
-        if (tracks.isEmpty()) {
-            // Last resort: partial contains match for robustness with encoding quirks
-            tracks = all.filter { 
-                val g = groupName(it, grouping, video).trim()
-                g.contains(name, ignoreCase = true) || name.contains(g, ignoreCase = true)
-            }
-        }
+        Log.d(TAG, "Returning ${tracks.size} tracks for '$name'")
         return tracks.map(::playableItem)
     }
 
