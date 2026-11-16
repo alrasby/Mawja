@@ -34,7 +34,7 @@ class YouTubeFallbackActivity : ComponentActivity() {
             isAppearanceLightNavigationBars = false
         }
         val videoId = intent.getStringExtra(EXTRA_VIDEO_ID)?.trim().orEmpty()
-        if (videoId.length != 11) {
+        if (!videoId.matches(Regex("[A-Za-z0-9_-]{11}"))) {
             finish()
             return
         }
@@ -64,7 +64,7 @@ class YouTubeFallbackActivity : ComponentActivity() {
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: android.webkit.WebResourceRequest): Boolean {
                     val host = request.url.host.orEmpty().lowercase()
-                    return host !in setOf(
+                    return request.url.scheme != "https" || host !in setOf(
                         "mawjaplay-bumwjcee.manus.space",
                         "www.youtube.com",
                         "youtube.com",
@@ -107,6 +107,7 @@ class YouTubeFallbackActivity : ComponentActivity() {
     override fun onDestroy() {
         webView?.apply {
             stopLoading()
+            (parent as? ViewGroup)?.removeView(this)
             destroy()
         }
         webView = null

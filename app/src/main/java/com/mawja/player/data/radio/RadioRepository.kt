@@ -111,20 +111,32 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         longitude: Double? = null,
         countryCode: String? = null,
     ): List<Track> = if (filter.id == RadioFilters.local.id) {
-        // Local is deliberately strict: never use a cache or a popular/global
-        // fallback, because a cached station may belong to a previous location.
-        runCatching {
-            withContext(Dispatchers.IO) { fetchFilter(filter, latitude, longitude, countryCode) }
-        }.getOrDefault(emptyList())
+        if (countryCode.isNullOrBlank()) emptyList()
+        else {
+            val key = "local_$countryCode"
+            val fallback = { loadCache(key) ?: if (countryCode == "OM") fallbackStations(RadioFilters.oman) else emptyList() }
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    if (latitude != null && longitude != null) fetchNearby(latitude, longitude, countryCode)
+                    else fetchCountry(countryCode)
+                }
+                if (result.isNotEmpty()) saveCache(key, result)
+                result.ifEmpty(fallback)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                fallback()
+            }
+        }
     } else try {
         val key = cacheKey(filter, countryCode)
         val result = withContext(Dispatchers.IO) { fetchFilter(filter, latitude, longitude, countryCode) }
         if (result.isNotEmpty()) saveCache(key, result)
-        result.ifEmpty { loadCache(key) ?: fallbackStations(filter) }
+        result.ifEmpty { loadCache(key) ?: fallbackStations(filter, countryCode) }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        loadCache(cacheKey(filter, countryCode)) ?: fallbackStations(filter)
+        loadCache(cacheKey(filter, countryCode)) ?: fallbackStations(filter, countryCode)
     }
 
     suspend fun search(query: String): List<Track> = withContext(Dispatchers.IO) {
@@ -280,7 +292,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     )
 
     /** Small, verified fallback set so a temporary directory outage never blanks the radio screen. */
-    private fun fallbackStations(filter: RadioFilter): List<Track> {
+    private fun fallbackStations(filter: RadioFilter, countryCode: String? = null): List<Track> {
         val oman = officialOmanStations() + listOf(
             direct("radio:fallback-hala", "Hala FM", "Oman • Arabic", "https://listen-halafm.sharp-stream.com/halafmlow.mp3"),
             direct("radio:fallback-wisal", "Al Wisal", "Oman • Arabic", "http://uk7.internet-radio.com:8067/;"),
@@ -300,7 +312,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             RadioFilters.arab.id -> arabic
             RadioFilters.quran.id -> quran + officialOmanStations().last()
             RadioFilters.news.id -> arabic.filter { it.title.contains("Arabiya", ignoreCase = true) }
-            RadioFilters.world.id -> oman.filter { it.subtitle.contains("English", ignoreCase = true) }
+            RadioFilters.world.id -> if (countryCode == "OM") oman else emptyList()
             else -> emptyList()
         }
     }

@@ -56,7 +56,10 @@ jobs:
           MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
           MAWJA_KEY_ALIAS: ${{ secrets.MAWJA_KEY_ALIAS }}
           MAWJA_KEY_PASSWORD: ${{ secrets.MAWJA_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --stacktrace
+        run: |
+          test -n "$MAWJA_KEYSTORE_PASSWORD" || { echo "Missing release keystore password"; exit 1; }
+          test -f "$MAWJA_KEYSTORE" || { echo "Missing release keystore"; exit 1; }
+          ./gradlew assembleRelease --stacktrace
 
       - name: Upload Debug APK
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_type != 'release')

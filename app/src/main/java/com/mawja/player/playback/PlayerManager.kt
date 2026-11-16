@@ -248,6 +248,7 @@ fun Track.toMediaItem(uriOverride: String? = null): MediaItem {
         .setAlbumTitle(album.ifBlank { null })
         .setArtworkUri(artworkUrl?.takeUnless { isVideo }?.let { Uri.parse(it) })
         .setMediaType(if (isVideo) MediaMetadata.MEDIA_TYPE_VIDEO else MediaMetadata.MEDIA_TYPE_MUSIC)
+        .setIsBrowsable(false)
         .setIsPlayable(true)
         .build()
     return MediaItem.Builder()

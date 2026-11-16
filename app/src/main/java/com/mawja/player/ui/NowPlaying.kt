@@ -408,6 +408,7 @@ private fun VideoPlayerSurface(
             }
         },
         update = { view -> view.player = mediaController },
+        onRelease = { view -> view.player = null },
     )
 }
 

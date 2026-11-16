@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.media.audiofx.Equalizer
 import android.net.Uri
 import android.location.LocationManager
+import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.media3.common.AudioAttributes
@@ -54,7 +55,7 @@ import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
-import java.util.concurrent.ConcurrentHashMap
+import java.util.Collections
 import java.util.concurrent.TimeUnit
 import java.util.Locale
 
@@ -65,7 +66,12 @@ class PlaybackService : MediaLibraryService() {
     private var equalizer: Equalizer? = null
     private lateinit var redirectClient: OkHttpClient
     private val autoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val autoTracks = ConcurrentHashMap<String, Track>()
+    private val autoTracks = Collections.synchronizedMap(
+        object : LinkedHashMap<String, Track>(512, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Track>?): Boolean =
+                size > 2048
+        },
+    )
     private val searchGate = Mutex()
     private val appContainer: AppContainer
         get() = (application as MawjaApp).container
@@ -125,8 +131,10 @@ class PlaybackService : MediaLibraryService() {
     private fun installEqualizer(audioSessionId: Int) {
         if (audioSessionId <= 0) return
         runCatching {
-            equalizer?.release()
-            equalizer = Equalizer(0, audioSessionId).apply { enabled = true }
+            val previous = equalizer
+            equalizer = null
+            previous?.release()
+            equalizer = Equalizer(0, audioSessionId)
             applyEqualizerPreset(
                 getSharedPreferences(PreferencesStore.PREFS_NAME, MODE_PRIVATE)
                     .getString(PreferencesStore.KEY_EQ_PRESET, "flat").orEmpty(),
@@ -233,14 +241,14 @@ class PlaybackService : MediaLibraryService() {
             pageSize: Int,
             params: LibraryParams?,
         ): ListenableFuture<LibraryResult<com.google.common.collect.ImmutableList<MediaItem>>> = future {
-            Log.d(TAG, "onGetChildren parentId=$parentId page=$page pageSize=$pageSize")
             val all = runCatching { libraryChildren(parentId) }.getOrElse { e ->
-                Log.e(TAG, "libraryChildren failed for $parentId", e)
+                if (e is CancellationException) throw e
+                Log.e(TAG, "Library browse failed: ${e.javaClass.simpleName}")
                 emptyList()
             }
-            Log.d(TAG, "onGetChildren returning ${all.size} items for $parentId")
             LibraryResult.ofItemList(
-                com.google.common.collect.ImmutableList.copyOf(pageItems(all, page, pageSize)),
+                if (session.isAutoCompanionController(browser) || session.isAutomotiveController(browser)) all
+                else pageItems(all, page, pageSize),
                 params,
             )
         }
@@ -285,8 +293,13 @@ class PlaybackService : MediaLibraryService() {
             controller: MediaSession.ControllerInfo,
             mediaItems: MutableList<MediaItem>,
         ): ListenableFuture<MutableList<MediaItem>> {
-            val playable = mediaItems.map { item ->
-                item.buildUpon().setUri(item.requestMetadata.mediaUri ?: item.localConfiguration?.uri).build()
+            val playable = mediaItems.mapNotNull { item ->
+                val uri = if (controller.uid == applicationInfo.uid) {
+                    item.requestMetadata.mediaUri ?: item.localConfiguration?.uri
+                } else {
+                    autoTracks[item.mediaId]?.takeUnless { it.isVideo }?.playbackUri?.let(Uri::parse)
+                }
+                uri?.let { item.buildUpon().setUri(it).build() }
             }.toMutableList()
             return Futures.immediateFuture(playable)
         }
@@ -345,14 +358,29 @@ class PlaybackService : MediaLibraryService() {
     private suspend fun localRadioItems(): List<MediaItem> {
         val hasLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        if (!hasLocation) return emptyList()
-        val manager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val location = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
-            .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }
-            .maxByOrNull { it.time }
-            ?: return emptyList()
-        val country = appContainer.radio.countryCodeFor(location.latitude, location.longitude) ?: return emptyList()
-        return appContainer.radio.stations(RadioFilters.local, location.latitude, location.longitude, country).map(::playableItem)
+        val manager = getSystemService(LocationManager::class.java)
+        val location = if (hasLocation && manager != null) {
+            listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
+                .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }
+                .filter { System.currentTimeMillis() - it.time in 0L..21_600_000L }
+                .maxByOrNull { it.time }
+        } else null
+        val locationCountry = location?.let {
+            appContainer.radio.countryCodeFor(it.latitude, it.longitude)
+        }
+        val networkCountry = runCatching {
+            getSystemService(TelephonyManager::class.java)?.networkCountryIso
+        }.getOrNull()?.uppercase(Locale.ROOT)?.takeIf { it.matches(Regex("[A-Z]{2}")) }
+        val country = locationCountry ?: networkCountry
+        val stations = if (country == null) emptyList() else appContainer.radio.stations(
+            RadioFilters.local,
+            location?.latitude?.takeIf { locationCountry != null },
+            location?.longitude?.takeIf { locationCountry != null },
+            country,
+        )
+        return if (stations.isEmpty()) {
+            listOf(browseItem(RADIO_WORLD, "World", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS))
+        } else stations.map(::playableItem)
     }
 
     private suspend fun deviceCategoryItems(video: Boolean): List<MediaItem> = listOf(
@@ -361,42 +389,17 @@ class PlaybackService : MediaLibraryService() {
         browseItem(deviceGroupPrefix(video, "artist"), "Artists", MediaMetadata.MEDIA_TYPE_FOLDER_ARTISTS),
     )
 
-    private fun normalizeName(value: String): String =
-        value.trim().lowercase(Locale.ROOT).replace(Regex("[^a-z0-9\u0600-\u06FF]"), "")
-
     private suspend fun deviceGroupTracks(parentId: String, video: Boolean): List<MediaItem> {
-        Log.d(TAG, "deviceGroupTracks parentId=$parentId video=$video")
         val prefix = if (video) DEVICE_VIDEO_GROUP else DEVICE_AUDIO_GROUP
         val remainder = parentId.removePrefix(prefix)
-        val separator = remainder.indexOf(':')
-        if (separator <= 0) {
-            Log.d(TAG, "Listing groups for remainder=$remainder")
-            return deviceGroupItems(video, remainder)
-        }
+        val grouping = remainder.substringBefore(':')
+        if (grouping !in setOf("folder", "album", "artist")) return emptyList()
+        if (':' !in remainder) return deviceGroupItems(video, grouping)
 
-        val grouping = remainder.substring(0, separator)
-        val encodedName = remainder.substring(separator + 1)
-        val name = Uri.decode(encodedName).trim()
-        val normalizedTarget = normalizeName(name)
-
-        val all = appContainer.local.load().filter { it.isVideo == video }
-        Log.d(TAG, "Loaded ${all.size} tracks for video=$video, target='$name' normalized='$normalizedTarget'")
-
-        fun matches(track: Track): Boolean {
-            val g = groupName(track, grouping, video).trim()
-            if (g == name || g.equals(name, ignoreCase = true) || g == encodedName.trim()) return true
-            val ng = normalizeName(g)
-            return ng == normalizedTarget || ng.contains(normalizedTarget) || normalizedTarget.contains(ng)
-        }
-
-        var tracks = all.filter(::matches)
-        if (tracks.isEmpty()) {
-            // Absolute last resort: if nothing matched, return all tracks of this type so the folder is never empty
-            Log.w(TAG, "No match for '$name' in grouping=$grouping. Available groups: ${all.map { groupName(it, grouping, video) }.distinct().take(20)}")
-            tracks = all
-        }
-        Log.d(TAG, "Returning ${tracks.size} tracks for '$name'")
-        return tracks.map(::playableItem)
+        val name = Uri.decode(remainder.substringAfter(':'))
+        return appContainer.local.load()
+            .filter { it.isVideo == video && groupName(it, grouping, video).trim() == name }
+            .map(::playableItem)
     }
 
     private suspend fun deviceGroupItems(video: Boolean, grouping: String): List<MediaItem> {
@@ -442,7 +445,6 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun playableItem(track: Track): MediaItem {
-        if (autoTracks.size > 512) autoTracks.clear()
         autoTracks[track.id] = track
         return runCatching {
             val item = track.toMediaItem()
@@ -451,14 +453,15 @@ class PlaybackService : MediaLibraryService() {
                 .setMediaMetadata(item.mediaMetadata.buildUpon().setIsPlayable(false).setMediaType(MediaMetadata.MEDIA_TYPE_VIDEO).build())
                 .build()
         }.getOrElse { e ->
-            Log.w(TAG, "Failed to create MediaItem for ${track.id}: ${e.message}")
+            Log.w(TAG, "Failed to create media item: ${e.javaClass.simpleName}")
             // Minimal fallback item that Android Auto can still display
             MediaItem.Builder()
                 .setMediaId(track.id)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
                         .setTitle(track.title.ifBlank { "Unknown" })
-                        .setIsPlayable(true)
+                        .setIsBrowsable(false)
+                        .setIsPlayable(!track.isVideo)
                         .setMediaType(if (track.isVideo) MediaMetadata.MEDIA_TYPE_VIDEO else MediaMetadata.MEDIA_TYPE_MUSIC)
                         .build()
                 )
@@ -529,14 +532,14 @@ class PlaybackService : MediaLibraryService() {
         // browse request. Treating page as an offset in that case turned valid
         // folders into "No items".
         if (pageSize <= 0 || page < 0) return items
-        val from = page * pageSize
+        val from = page.toLong() * pageSize
         if (from >= items.size) return emptyList()
-        return items.subList(from, minOf(from + pageSize, items.size))
+        return items.subList(from.toInt(), minOf(from + pageSize, items.size.toLong()).toInt())
     }
 
     private fun <T> future(block: suspend () -> T): ListenableFuture<T> {
         val result = SettableFuture.create<T>()
-        autoScope.launch {
+        val job = autoScope.launch {
             try {
                 result.set(block())
             } catch (e: CancellationException) {
@@ -545,10 +548,15 @@ class PlaybackService : MediaLibraryService() {
                 result.setException(e)
             }
         }
+        job.invokeOnCompletion { cause ->
+            if (cause is CancellationException) result.cancel(false)
+        }
+        result.addListener({ if (result.isCancelled) job.cancel() }, Runnable::run)
         return result
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = session
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
+        session?.takeIf { controllerInfo.uid == applicationInfo.uid || controllerInfo.isTrusted }
 
     override fun onDestroy() {
         autoScope.cancel()
@@ -561,6 +569,7 @@ class PlaybackService : MediaLibraryService() {
         }
         session = null
         runCatching {
+            redirectClient.dispatcher.cancelAll()
             redirectClient.dispatcher.executorService.shutdown()
             redirectClient.connectionPool.evictAll()
             redirectClient.cache?.close()
