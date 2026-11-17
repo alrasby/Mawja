@@ -51,6 +51,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mawja.player.R
@@ -70,12 +72,14 @@ import com.mawja.player.ui.TrackRow
 import com.mawja.player.ui.VmFactory
 import kotlinx.coroutines.launch
 
-private enum class DeviceMedia { MUSIC, VIDEO }
+private enum class DeviceMedia { ALL, MUSIC, VIDEO }
 private enum class DeviceGrouping { FOLDER, ALBUM, ARTIST }
 
 @Composable
 fun LocalScreen() {
     val context = LocalContext.current
+    val container = LocalContainer.current
+    val vm: LocalVm = viewModel(factory = VmFactory(container))
     val permissions = if (Build.VERSION.SDK_INT >= 33) {
         buildList {
             add(Manifest.permission.READ_MEDIA_AUDIO)
@@ -84,26 +88,34 @@ fun LocalScreen() {
         }.toTypedArray()
     } else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
-    fun hasPermission(): Boolean =
-        permissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+    fun grantedPermissions() = permissions.filter {
+        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+    }.toSet()
 
-    var granted by remember { mutableStateOf(hasPermission()) }
-
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        granted = result.values.any { it } || hasPermission()
+    var granted by remember { mutableStateOf(grantedPermissions()) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        granted = grantedPermissions()
+        vm.refresh()
     }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        granted = grantedPermissions()
+        vm.refresh()
+    }
+    val requestAccess = { launcher.launch(permissions) }
 
-    if (granted) LocalContent() else MessageState(stringResource(R.string.permission_needed), stringResource(R.string.grant_access)) {
-        launcher.launch(permissions)
+    if (granted.isEmpty()) {
+        MessageState(stringResource(R.string.permission_needed), stringResource(R.string.grant_access), requestAccess)
+    } else {
+        val hasFullAccess = Build.VERSION.SDK_INT < 33 ||
+            (Manifest.permission.READ_MEDIA_AUDIO in granted && Manifest.permission.READ_MEDIA_VIDEO in granted)
+        LocalContent(vm, if (hasFullAccess) null else requestAccess)
     }
 }
 
 @Composable
-private fun LocalContent() {
+private fun LocalContent(vm: LocalVm, onRequestAccess: (() -> Unit)?) {
     val container = LocalContainer.current
-    val vm: LocalVm = viewModel(factory = VmFactory(container))
     val state by vm.state.collectAsStateWithLifecycle()
-    val query by vm.query.collectAsStateWithLifecycle()
     val player by container.player.state.collectAsStateWithLifecycle()
     val showMusicFolders by container.preferences.showMusicFolders.collectAsStateWithLifecycle()
     val hiddenFolders by container.preferences.hiddenFolders.collectAsStateWithLifecycle()
@@ -111,7 +123,7 @@ private fun LocalContent() {
     val footerBottomPadding = LocalFooterBottomPadding.current
     val favorites by container.library.favorites.collectAsStateWithLifecycle(initialValue = emptyList())
     val scope = rememberCoroutineScope()
-    var media by rememberSaveable { mutableStateOf(DeviceMedia.MUSIC) }
+    var media by rememberSaveable { mutableStateOf(DeviceMedia.ALL) }
     var grouping by rememberSaveable { mutableStateOf(DeviceGrouping.FOLDER) }
     var openedGroup by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -119,7 +131,11 @@ private fun LocalContent() {
         state.items.filter { it.folder.isBlank() || it.folder !in hiddenFolders }
     }
     val mediaItems = remember(visibleItems, media) {
-        visibleItems.filter { if (media == DeviceMedia.VIDEO) it.isVideo else !it.isVideo }
+        when (media) {
+            DeviceMedia.ALL -> visibleItems
+            DeviceMedia.MUSIC -> visibleItems.filterNot { it.isVideo }
+            DeviceMedia.VIDEO -> visibleItems.filter { it.isVideo }
+        }
     }
 
     // Load string resources outside remember blocks
@@ -135,8 +151,8 @@ private fun LocalContent() {
         mediaItems.groupBy { track ->
             when (grouping) {
                 DeviceGrouping.FOLDER -> track.folder.ifBlank { unknownFolder }
-                DeviceGrouping.ALBUM -> track.album.ifBlank { track.folder.ifBlank { if (media == DeviceMedia.VIDEO) videoLabel else unknownAlbum } }
-                DeviceGrouping.ARTIST -> track.artist.ifBlank { track.folder.ifBlank { if (media == DeviceMedia.VIDEO) videoLabel else unknownArtist } }
+                DeviceGrouping.ALBUM -> track.album.ifBlank { track.folder.ifBlank { if (track.isVideo) videoLabel else unknownAlbum } }
+                DeviceGrouping.ARTIST -> track.artist.ifBlank { track.folder.ifBlank { if (track.isVideo) videoLabel else unknownArtist } }
             }
         }.toSortedMap(String.CASE_INSENSITIVE_ORDER)
     }
@@ -157,6 +173,13 @@ private fun LocalContent() {
         LazyRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 FilterChip(
+                    selected = media == DeviceMedia.ALL,
+                    onClick = { media = DeviceMedia.ALL; openedGroup = null },
+                    label = { Text(stringResource(R.string.all_sources)) },
+                )
+            }
+            item {
+                FilterChip(
                     selected = media == DeviceMedia.MUSIC,
                     onClick = { media = DeviceMedia.MUSIC; openedGroup = null },
                     label = { Text(stringResource(R.string.music)) },
@@ -168,6 +191,11 @@ private fun LocalContent() {
                     onClick = { media = DeviceMedia.VIDEO; openedGroup = null },
                     label = { Text(stringResource(R.string.videos)) },
                 )
+            }
+        }
+        if (onRequestAccess != null) {
+            androidx.compose.material3.TextButton(onClick = onRequestAccess, modifier = Modifier.padding(horizontal = 12.dp)) {
+                Text(stringResource(R.string.grant_access))
             }
         }
         LazyRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

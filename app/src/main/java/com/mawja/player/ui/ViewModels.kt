@@ -206,27 +206,22 @@ class OnlineVm(private val c: AppContainer) : ViewModel() {
 }
 
 class LocalVm(private val c: AppContainer) : ViewModel() {
-    private val all = MutableStateFlow<List<Track>>(emptyList())
-    private val filtered = MutableStateFlow<List<Track>>(emptyList())
-    private val loading = MutableStateFlow(true)
-    val query = MutableStateFlow("")
-    val state = combine(filtered, loading) { items, isLoading -> ListState(loading = isLoading, items = items) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ListState(loading = true))
-    private var searchJob: Job? = null
+    val state = MutableStateFlow(ListState(loading = true))
+    private var refreshJob: Job? = null
+
     init { refresh() }
-    fun onQuery(value: String) {
-        query.value = value
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            val q = value.trim()
-            val source = all.value
-            filtered.value = if (q.isBlank()) source else withContext(Dispatchers.Default) {
-                source.filter { track ->
-                    track.title.contains(q, true) || track.subtitle.contains(q, true) ||
-                        track.album.contains(q, true) || track.artist.contains(q, true) || track.folder.contains(q, true)
-                }
+
+    fun refresh() {
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
+            state.value = state.value.copy(loading = true, error = null)
+            state.value = try {
+                ListState(items = c.local.load())
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                ListState(error = "device")
             }
         }
     }
-    fun refresh() { viewModelScope.launch { loading.value = true; val items = runCatching { c.local.load() }.getOrDefault(emptyList()); all.value = items; filtered.value = items; loading.value = false } }
 }
