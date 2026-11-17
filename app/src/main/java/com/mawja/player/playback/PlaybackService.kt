@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.audiofx.Equalizer
 import android.net.Uri
+import android.os.Bundle
 import android.location.LocationManager
 import android.telephony.TelephonyManager
 import android.util.Log
@@ -24,15 +25,22 @@ import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.FilteringMediaSource
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.session.CommandButton
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionError
+import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import com.mawja.player.AppContainer
 import com.mawja.player.MawjaApp
+import com.mawja.player.R
+import com.mawja.player.data.SourceType
 import com.mawja.player.data.Track
 import com.mawja.player.data.PreferencesStore
 import com.mawja.player.data.radio.RadioFilters
@@ -73,6 +81,9 @@ class PlaybackService : MediaLibraryService() {
         },
     )
     private val searchGate = Mutex()
+    private val rewindCommand = SessionCommand("com.mawja.player.REWIND_LOCAL", Bundle.EMPTY)
+    private val forwardCommand = SessionCommand("com.mawja.player.FORWARD_LOCAL", Bundle.EMPTY)
+    private var showLocalSeekButtons = false
     private val appContainer: AppContainer
         get() = (application as MawjaApp).container
 
@@ -100,8 +111,16 @@ class PlaybackService : MediaLibraryService() {
             )
         val upstream = DefaultDataSource.Factory(this, http)
         val resolving = ResolvingDataSource.Factory(upstream) { spec -> resolve(spec) }
+        val mediaSources = DefaultMediaSourceFactory(resolving)
         val player = ExoPlayer.Builder(this)
-            .setMediaSourceFactory(DefaultMediaSourceFactory(resolving))
+            .setMediaSourceFactory(object : MediaSource.Factory by mediaSources {
+                override fun createMediaSource(mediaItem: MediaItem): MediaSource {
+                    val source = mediaSources.createMediaSource(mediaItem)
+                    return if (mediaItem.mediaId.startsWith(VIDEO_AUDIO_PREFIX)) {
+                        FilteringMediaSource(source, C.TRACK_TYPE_AUDIO)
+                    } else source
+                }
+            })
             .setLoadControl(
                 DefaultLoadControl.Builder()
                     .setBufferDurationsMs(10_000, 30_000, 1_000, 5_000)
@@ -120,6 +139,13 @@ class PlaybackService : MediaLibraryService() {
             .build()
 
         player.addListener(object : Player.Listener {
+            override fun onEvents(player: Player, events: Player.Events) {
+                val seekable = canSeekLocal(player)
+                if (seekable == showLocalSeekButtons) return
+                showLocalSeekButtons = seekable
+                session?.setMediaButtonPreferences(if (seekable) localSeekButtons() else emptyList())
+            }
+
             override fun onAudioSessionIdChanged(audioSessionId: Int) {
                 installEqualizer(audioSessionId)
             }
@@ -225,6 +251,23 @@ class PlaybackService : MediaLibraryService() {
         throw IOException("Audius redirect chain is too long")
     }
 
+    private fun canSeekLocal(player: Player): Boolean {
+        val id = player.currentMediaItem?.mediaId ?: return false
+        return (id.startsWith("local:") || id.startsWith("external:") || id.startsWith(VIDEO_AUDIO_PREFIX)) &&
+            player.isCurrentMediaItemSeekable && player.isCommandAvailable(Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM)
+    }
+
+    private fun localSeekButtons(): List<CommandButton> = listOf(
+        CommandButton.Builder(CommandButton.ICON_SKIP_BACK_10)
+            .setDisplayName(getString(R.string.auto_rewind))
+            .setSessionCommand(rewindCommand)
+            .build(),
+        CommandButton.Builder(CommandButton.ICON_SKIP_FORWARD_10)
+            .setDisplayName(getString(R.string.auto_forward))
+            .setSessionCommand(forwardCommand)
+            .build(),
+    )
+
     private inner class LibraryCallback : MediaLibrarySession.Callback {
         override fun onConnect(
             session: MediaSession,
@@ -235,7 +278,35 @@ class PlaybackService : MediaLibraryService() {
             if (controller.uid != applicationInfo.uid && !controller.isTrusted && !isAndroidAuto) {
                 return MediaSession.ConnectionResult.reject()
             }
-            return MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
+            return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                .setAvailableSessionCommands(
+                    MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+                        .add(rewindCommand)
+                        .add(forwardCommand)
+                        .build(),
+                )
+                .build()
+        }
+
+        override fun onCustomCommand(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            customCommand: SessionCommand,
+            args: Bundle,
+        ): ListenableFuture<SessionResult> {
+            val delta = when (customCommand.customAction) {
+                rewindCommand.customAction -> -10_000L
+                forwardCommand.customAction -> 10_000L
+                else -> return Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED))
+            }
+            val player = session.player
+            if (!canSeekLocal(player)) {
+                return Futures.immediateFuture(SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED))
+            }
+            val target = (player.currentPosition + delta).coerceAtLeast(0L)
+            val duration = player.duration
+            player.seekTo(if (duration == C.TIME_UNSET) target else target.coerceAtMost(duration))
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
         }
 
         override fun onGetLibraryRoot(
@@ -306,12 +377,12 @@ class PlaybackService : MediaLibraryService() {
             mediaItems: MutableList<MediaItem>,
         ): ListenableFuture<MutableList<MediaItem>> {
             val playable = mediaItems.mapNotNull { item ->
-                val uri = if (controller.uid == applicationInfo.uid) {
-                    item.requestMetadata.mediaUri ?: item.localConfiguration?.uri
+                if (controller.uid == applicationInfo.uid) {
+                    val uri = item.requestMetadata.mediaUri ?: item.localConfiguration?.uri
+                    uri?.let { item.buildUpon().setUri(it).build() }
                 } else {
-                    autoTracks[item.mediaId]?.takeUnless { it.isVideo }?.playbackUri?.let(Uri::parse)
+                    autoTracks[item.mediaId]?.takeIf { !it.isVideo && it.playbackUri != null }?.toMediaItem()
                 }
-                uri?.let { item.buildUpon().setUri(it).build() }
             }.toMutableList()
             return Futures.immediateFuture(playable)
         }
@@ -336,7 +407,7 @@ class PlaybackService : MediaLibraryService() {
         )
         parentId == DEVICE -> listOf(
             browseItem(DEVICE_AUDIO, "Music", MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS),
-            browseItem(DEVICE_VIDEO, "Videos", MediaMetadata.MEDIA_TYPE_FOLDER_MOVIES),
+            browseItem(DEVICE_VIDEO, getString(R.string.auto_video_audio), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
         )
         parentId == DEVICE_AUDIO -> deviceCategoryItems(video = false)
         parentId == DEVICE_VIDEO -> deviceCategoryItems(video = true)
@@ -456,7 +527,15 @@ class PlaybackService : MediaLibraryService() {
         }.orEmpty()
     }
 
-    private fun playableItem(track: Track): MediaItem {
+    private fun playableItem(original: Track): MediaItem {
+        val track = if (original.isVideo && original.source == SourceType.LOCAL) {
+            original.copy(
+                id = if (original.id.startsWith(VIDEO_AUDIO_PREFIX)) original.id else VIDEO_AUDIO_PREFIX + original.id,
+                subtitle = getString(R.string.auto_video_audio),
+                artworkUrl = null,
+                isVideo = false,
+            )
+        } else original
         autoTracks[track.id] = track
         return runCatching {
             val item = track.toMediaItem()
@@ -505,7 +584,7 @@ class PlaybackService : MediaLibraryService() {
         ONLINE_YOUTUBE -> browseItem(ONLINE_YOUTUBE, "YouTube", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
         DEVICE -> browseItem(DEVICE, "Device", MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS)
         DEVICE_AUDIO -> browseItem(DEVICE_AUDIO, "Music", MediaMetadata.MEDIA_TYPE_FOLDER_ALBUMS)
-        DEVICE_VIDEO -> browseItem(DEVICE_VIDEO, "Videos", MediaMetadata.MEDIA_TYPE_FOLDER_MOVIES)
+        DEVICE_VIDEO -> browseItem(DEVICE_VIDEO, getString(R.string.auto_video_audio), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
         LIBRARY -> browseItem(LIBRARY, "Library", MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS)
         else -> null
     }
@@ -590,6 +669,7 @@ class PlaybackService : MediaLibraryService() {
     }
 
     companion object {
+        private const val VIDEO_AUDIO_PREFIX = "auto:video-audio:"
         private const val ANDROID_AUTO_PACKAGE = "com.google.android.projection.gearhead"
         private const val TAG = "MawjaAuto"
         private const val ROOT = "root"

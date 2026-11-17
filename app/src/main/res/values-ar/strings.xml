@@ -115,4 +115,7 @@
     <string name="open_youtube_official">فتح مشغل YouTube الرسمي</string>
     <string name="youtube_country">دولة محتوى YouTube</string>
     <string name="youtube_country_auto">تلقائي • GPS / الشبكة / الشريحة</string>
+    <string name="auto_video_audio">صوت الفيديو</string>
+    <string name="auto_rewind">رجوع ١٠ ثوانٍ</string>
+    <string name="auto_forward">تقديم ١٠ ثوانٍ</string>
 </resources>

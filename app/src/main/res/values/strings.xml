@@ -115,4 +115,7 @@
     <string name="open_youtube_official">Open official YouTube player</string>
     <string name="youtube_country">YouTube country</string>
     <string name="youtube_country_auto">Auto • GPS / Network / SIM</string>
+    <string name="auto_video_audio">Video audio</string>
+    <string name="auto_rewind">Back 10 seconds</string>
+    <string name="auto_forward">Forward 10 seconds</string>
 </resources>
