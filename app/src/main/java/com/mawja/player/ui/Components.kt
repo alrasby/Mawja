@@ -266,7 +266,7 @@ fun RadioCardGrid(
         else -> if (displayMode == FileDisplayMode.GRID) {
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 8.dp + footerBottomPadding),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = footerBottomPadding),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(items.chunked(2), key = { row -> row.joinToString("|") { it.id } }) { row ->
@@ -281,7 +281,7 @@ fun RadioCardGrid(
         } else {
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 8.dp + footerBottomPadding),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 12.dp, top = 8.dp, end = 12.dp, bottom = footerBottomPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(items, key = { it.id }) { track ->

@@ -90,7 +90,7 @@ fun MawjaRoot() {
         var showSearch by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
         var footerHeightPx by remember { mutableIntStateOf(0) }
-        val footerClearance = with(LocalDensity.current) { footerHeightPx.toDp() } + 13.dp
+        val footerClearance = with(LocalDensity.current) { footerHeightPx.toDp() } + 6.dp
 
         // Paint the selected tab first. The screen swap is scheduled for the
         // next frame so a heavy screen cannot delay the footer's pressed state.
@@ -166,7 +166,7 @@ fun MawjaRoot() {
     }
 }
 
-private val FooterExpandedHeight = 68.dp
+private val FooterExpandedHeight = 60.dp
 private val FooterVerticalPadding = 8.dp
 
 @Composable

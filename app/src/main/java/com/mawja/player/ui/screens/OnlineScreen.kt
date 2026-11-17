@@ -179,7 +179,7 @@ private fun HomeContent(
 
     when {
         state.loading && localState.loading && state.sections.isEmpty() && !hasLocal -> Box(modifier, Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
-        else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = 16.dp + footerBottomPadding)) {
+        else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = footerBottomPadding)) {
             if (!mediaGranted) item { PermissionCard(onRequestMedia) }
             state.sections.forEachIndexed { sectionIndex, section ->
                 item(key = "online-title:$sectionIndex:${section.titleRes}") { SectionHeader(stringResource(section.titleRes)) }

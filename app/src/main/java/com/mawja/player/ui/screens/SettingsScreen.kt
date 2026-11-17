@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -121,6 +122,7 @@ fun SettingsScreen() {
     val youtubeCountry by container.preferences.youtubeCountry.collectAsStateWithLifecycle()
     val player by container.player.state.collectAsStateWithLifecycle()
     val footerBottomPadding = LocalFooterBottomPadding.current
+    val uriHandler = LocalUriHandler.current
     var showLanguages by remember { mutableStateOf(false) }
     var showYoutubeCountries by remember { mutableStateOf(false) }
     var folders by remember { mutableStateOf<List<MediaFolder>>(emptyList()) }
@@ -132,7 +134,8 @@ fun SettingsScreen() {
     }
 
     Column(
-        Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+        Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)
+            .padding(top = 8.dp, bottom = footerBottomPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         SectionTitle(stringResource(R.string.settings_appearance))
@@ -275,7 +278,10 @@ fun SettingsScreen() {
                 }
             }
         }
-        GlassCard(Modifier.fillMaxWidth()) {
+        GlassCard(
+            Modifier.fillMaxWidth(),
+            onClick = { uriHandler.openUri("https://nabdhserv.net") },
+        ) {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
@@ -284,11 +290,10 @@ fun SettingsScreen() {
                 ) {
                     Text("Made with ", style = MaterialTheme.typography.labelMedium)
                     Text("♥", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
-                    Text(" by NabdhServ.net", style = MaterialTheme.typography.labelMedium)
+                    Text(" By NabdhServ.Net", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
-        Spacer(Modifier.height(20.dp + footerBottomPadding))
     }
 
     if (showLanguages) {
