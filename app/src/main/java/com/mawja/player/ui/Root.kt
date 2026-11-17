@@ -124,9 +124,9 @@ fun MawjaRoot() {
             }
         }
         val contentBottomSpace = if (footerOccupiedPx == 0) {
-            116.dp
+            129.dp
         } else {
-            with(density) { footerOccupiedPx.toDp() } + 10.dp
+            with(density) { footerOccupiedPx.toDp() } + 23.dp
         }
 
         // One app canvas. The footer is a transparent overlay with one glass

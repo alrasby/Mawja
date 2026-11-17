@@ -1,5 +1,10 @@
 package com.mawja.player.ui
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -62,3 +67,29 @@ internal fun Modifier.fadeTopEdge(): Modifier =
                 drawRect(mask, size = androidx.compose.ui.geometry.Size(size.width, fadeHeight), blendMode = BlendMode.DstIn)
             }
         }
+
+@Composable
+internal fun GlassDialog(
+    onDismissRequest: () -> Unit,
+    title: @Composable () -> Unit,
+    text: @Composable () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: (@Composable () -> Unit)? = null,
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismissRequest) {
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp)) {
+                androidx.compose.material3.ProvideTextStyle(MaterialTheme.typography.headlineSmall, title)
+                androidx.compose.foundation.layout.Spacer(Modifier.height(16.dp))
+                text()
+                androidx.compose.foundation.layout.Row(
+                    Modifier.fillMaxWidth().padding(top = 16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End,
+                ) {
+                    dismissButton?.invoke()
+                    confirmButton()
+                }
+            }
+        }
+    }
+}

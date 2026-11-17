@@ -18,12 +18,16 @@ class LocalMusicRepository(private val context: Context) {
         output
     }
 
-    /** Lightweight folder-only scan used by Settings; it does not allocate Track objects or artwork URLs. */
-    suspend fun folders(): List<String> = withContext(Dispatchers.IO) {
-        buildSet {
-            runCatching { queryFolders(video = false, this) }
-            runCatching { queryFolders(video = true, this) }
-        }.filter { it.isNotBlank() }.sortedWith(String.CASE_INSENSITIVE_ORDER)
+    data class MediaFolder(val name: String, val hasAudio: Boolean, val hasVideo: Boolean)
+
+    /** Uses the same playable-media filter and folder names as the Device tab. */
+    suspend fun folders(): List<MediaFolder> = withContext(Dispatchers.IO) {
+        val audio = mutableSetOf<String>()
+        val video = mutableSetOf<String>()
+        runCatching { queryFolders(video = false, audio) }
+        runCatching { queryFolders(video = true, video) }
+        (audio + video).sortedWith(String.CASE_INSENSITIVE_ORDER)
+            .map { MediaFolder(it, it in audio, it in video) }
     }
 
     private fun queryMedia(video: Boolean, output: MutableList<Track>) {
@@ -42,7 +46,7 @@ class LocalMusicRepository(private val context: Context) {
                 add(MediaStore.Audio.Media.ALBUM_ID)
             }
         }.toTypedArray()
-        val selection = "${MediaStore.MediaColumns.DURATION} > 0"
+        val selection = playableMediaSelection
         val order = "${MediaStore.MediaColumns.TITLE} COLLATE NOCASE ASC"
         context.contentResolver.query(collection, projection, selection, null, order)?.use { cursor ->
             val idCol = cursor.getColumnIndex(MediaStore.MediaColumns._ID)
@@ -92,20 +96,19 @@ class LocalMusicRepository(private val context: Context) {
         val collection = if (video) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
         else MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val pathColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH else MediaStore.MediaColumns.DATA
-        context.contentResolver.query(collection, arrayOf(pathColumn), null, null, null)?.use { cursor ->
+        context.contentResolver.query(collection, arrayOf(pathColumn), playableMediaSelection, null, null)?.use { cursor ->
             val pathCol = cursor.getColumnIndex(pathColumn)
             if (pathCol < 0) return
             while (cursor.moveToNext()) {
                 val path = cursor.text(pathCol)
-                val folder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    path.replace('\\', '/').trimEnd('/').substringAfterLast('/').ifBlank { path }
-                } else {
-                    extractFolder("", path)
-                }
-                if (folder.isNotBlank()) output += folder
+                val folder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) extractFolder(path, "")
+                    else extractFolder("", path)
+                output += folder
             }
         }
     }
+
+    private val playableMediaSelection = "${MediaStore.MediaColumns.DURATION} > 0 AND ${MediaStore.MediaColumns._ID} > 0"
 
     private fun extractFolder(relativePath: String, absolutePath: String): String {
         val relative = relativePath.replace('\\', '/').trimEnd('/')

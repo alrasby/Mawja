@@ -47,6 +47,7 @@ import com.mawja.player.R
 import com.mawja.player.data.FileDisplayMode
 import com.mawja.player.data.radio.RadioFilter
 import com.mawja.player.data.radio.RadioFilters
+import com.mawja.player.ui.glassSurface
 import com.mawja.player.ui.fadeTopEdge
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.MessageState
@@ -131,7 +132,7 @@ fun RadioScreen() {
                     DropdownMenu(
                         expanded = worldMenuOpen,
                         onDismissRequest = { worldMenuOpen = false },
-                        modifier = Modifier.heightIn(max = 560.dp),
+                        modifier = Modifier.heightIn(max = 560.dp).glassSurface(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)),
                     ) {
                         worldCountries.filter { it.name.isNotBlank() }.forEach { country ->
                             DropdownMenuItem(

@@ -44,6 +44,7 @@ import kotlinx.coroutines.delay
 internal fun SearchScreen(tab: Int) {
     val container = LocalContainer.current
     val context = LocalContext.current
+    val hiddenFolders by container.preferences.hiddenFolders.collectAsStateWithLifecycle()
     val audiusEnabled by container.preferences.audiusEnabled.collectAsStateWithLifecycle()
     val youtubeEnabled by container.preferences.youtubeEnabled.collectAsStateWithLifecycle()
     val sources = buildList {
@@ -69,14 +70,14 @@ internal fun SearchScreen(tab: Int) {
         }
     }
     var localTracks by remember(granted) { mutableStateOf<List<Track>?>(null) }
-    var result by remember(source, term, granted, retry) { mutableStateOf(ListState(loading = term.isNotEmpty())) }
-    LaunchedEffect(source, term, granted, retry) {
+    var result by remember(source, term, granted, retry, hiddenFolders) { mutableStateOf(ListState(loading = term.isNotEmpty())) }
+    LaunchedEffect(source, term, granted, retry, hiddenFolders) {
         if (term.isEmpty() || (source == SourceType.LOCAL && !granted)) return@LaunchedEffect
         delay(350)
         result = try {
             val tracks = when (source) {
                 SourceType.LOCAL -> (localTracks ?: container.local.load().also { localTracks = it }).filter { track ->
-                    listOf(track.title, track.artist, track.album, track.folder).any { it.contains(term, ignoreCase = true) }
+                    track.folder !in hiddenFolders && listOf(track.title, track.artist, track.album, track.folder).any { it.contains(term, ignoreCase = true) }
                 }
                 SourceType.RADIO -> container.radio.search(term)
                 SourceType.AUDIUS -> container.audius.search(term)

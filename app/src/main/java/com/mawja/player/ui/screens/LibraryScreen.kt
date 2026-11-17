@@ -11,7 +11,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mawja.player.R
 import com.mawja.player.data.Track
+import com.mawja.player.ui.GlassDialog
 import com.mawja.player.ui.HintText
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.LocalFooterBottomPadding
@@ -108,7 +108,7 @@ private fun AddStationDialog(onDismiss: () -> Unit, onAdd: (String, String) -> U
     var url by remember { mutableStateOf("") }
     val valid = url.trim().startsWith("https://", ignoreCase = true)
 
-    AlertDialog(
+    GlassDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.add_station)) },
         text = {

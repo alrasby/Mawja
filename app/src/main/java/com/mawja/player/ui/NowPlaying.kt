@@ -38,7 +38,6 @@ import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Timer
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -417,7 +416,7 @@ private fun VideoPlayerSurface(
 
 @Composable
 private fun SleepTimerDialog(remainingMs: Long, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
+    GlassDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.sleep_timer)) },
         text = {

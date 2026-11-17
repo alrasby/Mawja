@@ -59,6 +59,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.mawja.player.data.LocalMusicRepository.MediaFolder
 import com.mawja.player.ui.GlassCard
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.LocalFooterBottomPadding
@@ -122,7 +123,7 @@ fun SettingsScreen() {
     val footerBottomPadding = LocalFooterBottomPadding.current
     var showLanguages by remember { mutableStateOf(false) }
     var showYoutubeCountries by remember { mutableStateOf(false) }
-    var folders by remember { mutableStateOf<List<String>>(emptyList()) }
+    var folders by remember { mutableStateOf<List<MediaFolder>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         folders = withContext(Dispatchers.IO) {
@@ -223,8 +224,8 @@ fun SettingsScreen() {
                     folders.forEach { folder ->
                         FolderVisibilityRow(
                             folder = folder,
-                            visible = folder !in hiddenFolders,
-                            onVisibleChange = { container.preferences.setFolderVisible(folder, it) },
+                            visible = folder.name !in hiddenFolders,
+                            onVisibleChange = { container.preferences.setFolderVisible(folder.name, it) },
                         )
                     }
                 }
@@ -340,9 +341,16 @@ private fun LeftSwitchRow(
 }
 
 @Composable
-private fun FolderVisibilityRow(folder: String, visible: Boolean, onVisibleChange: (Boolean) -> Unit) {
+private fun FolderVisibilityRow(folder: MediaFolder, visible: Boolean, onVisibleChange: (Boolean) -> Unit) {
     LeftSwitchRow(visible, onVisibleChange) {
-        Text(folder, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        Column(Modifier.weight(1f)) {
+            Text(folder.name, style = MaterialTheme.typography.bodyMedium)
+            val music = stringResource(R.string.music)
+            val videos = stringResource(R.string.videos)
+            val categories = listOfNotNull(music.takeIf { folder.hasAudio }, videos.takeIf { folder.hasVideo })
+            Text(categories.joinToString(" · "), style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
         Text(
             stringResource(if (visible) R.string.folder_visible else R.string.folder_hidden),
             style = MaterialTheme.typography.labelSmall,
