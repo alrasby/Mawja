@@ -79,7 +79,7 @@
     <string name="show_music_folders_desc">Show or hide the Folders tab in Device.</string>
     <string name="choose_world_country">Choose a country to browse its radio stations.</string>
     <string name="battery_saver">Battery saver</string>
-    <string name="battery_saver_desc">Uses less background work and avoids keeping a network wake lock when the player starts again.</string>
+    <string name="battery_saver_desc">Reduces background work and releases the network wake lock when enabled.</string>
     <string name="volume">Volume</string>
     <string name="equalizer">Equalizer</string>
     <string name="eq_flat">Flat</string>

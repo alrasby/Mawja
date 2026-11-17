@@ -3,8 +3,6 @@ package com.mawja.player.playback
 import android.annotation.SuppressLint
 import android.Manifest
 import android.app.SearchManager
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.audiofx.Equalizer
 import android.net.Uri
@@ -42,7 +40,6 @@ import com.mawja.player.MawjaApp
 import com.mawja.player.R
 import com.mawja.player.data.SourceType
 import com.mawja.player.data.Track
-import com.mawja.player.data.PreferencesStore
 import com.mawja.player.data.radio.RadioFilters
 import com.mawja.player.data.youtube.YouTubeSource
 import kotlinx.coroutines.CoroutineScope
@@ -89,8 +86,8 @@ class PlaybackService : MediaLibraryService() {
 
     override fun onCreate() {
         super.onCreate()
-        val prefs = getSharedPreferences(PreferencesStore.PREFS_NAME, MODE_PRIVATE)
-        val saver = prefs.getBoolean(PreferencesStore.KEY_BATTERY_SAVER, false)
+        val preferences = appContainer.preferences
+        val saver = preferences.batterySaver.value
         redirectClient = OkHttpClient.Builder()
             .followRedirects(false)
             .followSslRedirects(false)
@@ -152,6 +149,14 @@ class PlaybackService : MediaLibraryService() {
         })
         installEqualizer(player.audioSessionId)
         session = MediaLibrarySession.Builder(this, player, LibraryCallback()).build()
+        autoScope.launch(Dispatchers.Main.immediate) {
+            preferences.batterySaver.collect { enabled ->
+                player.setWakeMode(if (enabled) C.WAKE_MODE_NONE else C.WAKE_MODE_NETWORK)
+            }
+        }
+        autoScope.launch(Dispatchers.Main.immediate) {
+            preferences.equalizerPreset.collect(::applyEqualizerPreset)
+        }
     }
 
     private fun installEqualizer(audioSessionId: Int) {
@@ -161,10 +166,7 @@ class PlaybackService : MediaLibraryService() {
             equalizer = null
             previous?.release()
             equalizer = Equalizer(0, audioSessionId)
-            applyEqualizerPreset(
-                getSharedPreferences(PreferencesStore.PREFS_NAME, MODE_PRIVATE)
-                    .getString(PreferencesStore.KEY_EQ_PRESET, "flat").orEmpty(),
-            )
+            applyEqualizerPreset(appContainer.preferences.equalizerPreset.value)
         }
     }
 
@@ -686,21 +688,5 @@ class PlaybackService : MediaLibraryService() {
         private const val DEVICE_VIDEO = "device:video"
         private const val DEVICE_AUDIO_GROUP = "device:audio:group:"
         private const val DEVICE_VIDEO_GROUP = "device:video:group:"
-        const val ACTION_SET_EQUALIZER = "com.mawja.player.SET_EQUALIZER"
-        const val ACTION_SET_BATTERY_SAVER = "com.mawja.player.SET_BATTERY_SAVER"
-        const val EXTRA_PRESET = "preset"
-        const val EXTRA_ENABLED = "enabled"
-
-        fun setEqualizerPreset(context: Context, preset: String) {
-            val app = context.applicationContext
-            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putString(PreferencesStore.KEY_EQ_PRESET, preset).apply()
-            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_EQUALIZER).putExtra(EXTRA_PRESET, preset)) }
-        }
-
-        fun setBatterySaver(context: Context, enabled: Boolean) {
-            val app = context.applicationContext
-            app.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(PreferencesStore.KEY_BATTERY_SAVER, enabled).apply()
-            runCatching { app.startService(Intent(app, PlaybackService::class.java).setAction(ACTION_SET_BATTERY_SAVER).putExtra(EXTRA_ENABLED, enabled)) }
-        }
     }
 }

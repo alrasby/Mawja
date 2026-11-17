@@ -1,7 +1,6 @@
 package com.mawja.player.ui.screens
 
 import android.app.Activity
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.SettingsSuggest
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +53,12 @@ import com.mawja.player.R
 import com.mawja.player.data.FileDisplayMode
 import com.mawja.player.data.LanguageOption
 import com.mawja.player.data.ThemeMode
-import com.mawja.player.playback.PlaybackService
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.mawja.player.ui.GlassCard
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.LocalFooterBottomPadding
@@ -241,7 +244,7 @@ fun SettingsScreen() {
         GlassCard(Modifier.fillMaxWidth()) {
             LeftSwitchRow(
                 batterySaver,
-                { enabled -> PlaybackService.setBatterySaver(context, enabled) },
+                container.preferences::setBatterySaver,
                 Modifier.padding(16.dp),
             ) {
                 Icon(Icons.Rounded.BatterySaver, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -264,10 +267,10 @@ fun SettingsScreen() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 ) {
-                    item { EqualizerChip(container, context, R.string.eq_flat, "flat", equalizerPreset) }
-                    item { EqualizerChip(container, context, R.string.eq_bass, "bass", equalizerPreset) }
-                    item { EqualizerChip(container, context, R.string.eq_vocal, "vocal", equalizerPreset) }
-                    item { EqualizerChip(container, context, R.string.eq_treble, "treble", equalizerPreset) }
+                    item { EqualizerChip(container, R.string.eq_flat, "flat", equalizerPreset) }
+                    item { EqualizerChip(container, R.string.eq_bass, "bass", equalizerPreset) }
+                    item { EqualizerChip(container, R.string.eq_vocal, "vocal", equalizerPreset) }
+                    item { EqualizerChip(container, R.string.eq_treble, "treble", equalizerPreset) }
                 }
             }
         }
@@ -378,31 +381,39 @@ private fun SettingCard(icon: androidx.compose.ui.graphics.vector.ImageVector, t
 }
 
 @Composable
-private fun EqualizerChip(container: AppContainer, context: Context, label: Int, preset: String, selectedPreset: String) {
+private fun EqualizerChip(container: AppContainer, label: Int, preset: String, selectedPreset: String) {
     FilterChip(
         selected = selectedPreset == preset,
-        onClick = {
-            PlaybackService.setEqualizerPreset(context, preset)
-        },
+        onClick = { container.preferences.setEqualizerPreset(preset) },
         label = { Text(stringResource(label)) },
     )
 }
 
 @Composable
 private fun ChoiceDialog(title: String, options: List<LanguageOption>, selected: String, onSelect: (LanguageOption) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            LazyColumn(Modifier.heightIn(max = 500.dp)) {
-                items(options, key = { it.code }) { option ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(selected = option.code == selected, onClick = { onSelect(option) })
-                        Text(option.label, modifier = Modifier.padding(start = 8.dp))
+    Dialog(onDismissRequest = onDismiss) {
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+                Text(title, style = MaterialTheme.typography.headlineSmall)
+                LazyColumn(Modifier.padding(top = 12.dp).heightIn(max = 440.dp).selectableGroup()) {
+                    items(options, key = { it.code }) { option ->
+                        val checked = option.code == selected
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
+                                .selectable(selected = checked, role = Role.RadioButton, onClick = { onSelect(option) })
+                                .padding(horizontal = 10.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            RadioButton(selected = checked, onClick = null)
+                            Text(option.label, style = MaterialTheme.typography.bodyLarge)
+                        }
                     }
                 }
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(R.string.close))
+                }
             }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
-    )
+        }
+    }
 }

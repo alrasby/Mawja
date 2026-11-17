@@ -79,7 +79,7 @@
     <string name="show_music_folders_desc">إظهار أو إخفاء تبويب المجلدات في الجهاز.</string>
     <string name="choose_world_country">اختر دولة لعرض إذاعاتها.</string>
     <string name="battery_saver">توفير البطارية</string>
-    <string name="battery_saver_desc">يقلل العمل في الخلفية ويتجنب إبقاء قفل الشبكة عند بدء المشغل مجددًا.</string>
+    <string name="battery_saver_desc">يقلّل العمل في الخلفية ويحرّر قفل تنشيط الشبكة عند التفعيل.</string>
     <string name="volume">الصوت</string>
     <string name="equalizer">المعادل الصوتي</string>
     <string name="eq_flat">متوازن</string>
