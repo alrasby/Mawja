@@ -1,4 +1,4 @@
-name: Build Mawja APK
+name: Build Mawja
 
 on:
   workflow_dispatch:
@@ -17,6 +17,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BUILD_RELEASE: ${{ inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]')) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,35 +36,38 @@ jobs:
         run: gradle wrapper --gradle-version 9.3.1
 
       - name: Decode keystore (release only)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
+        if: env.BUILD_RELEASE == 'true'
+        env:
+          MAWJA_KEYSTORE_BASE64: ${{ secrets.MAWJA_KEYSTORE_BASE64 }}
         run: |
-          if [ -n "${{ secrets.MAWJA_KEYSTORE_BASE64 }}" ]; then
-            mkdir -p ../keys
-            echo "${{ secrets.MAWJA_KEYSTORE_BASE64 }}" | base64 -d > ../keys/mawja-upload.jks
-            echo "Keystore decoded"
-          else
-            echo "No keystore secret found"
-            exit 1
-          fi
+          test -n "$MAWJA_KEYSTORE_BASE64" || { echo "::error::Missing MAWJA_KEYSTORE_BASE64"; exit 1; }
+          umask 077
+          printf '%s' "$MAWJA_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mawja-upload.jks"
 
       - name: Build Debug APK
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_type != 'release')
+        if: env.BUILD_RELEASE != 'true'
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Build Release APK
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
+      - name: Build signed release APK and AAB
+        if: env.BUILD_RELEASE == 'true'
         env:
-          MAWJA_KEYSTORE: ${{ github.workspace }}/../keys/mawja-upload.jks
+          MAWJA_KEYSTORE: ${{ runner.temp }}/mawja-upload.jks
           MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
           MAWJA_KEY_ALIAS: ${{ secrets.MAWJA_KEY_ALIAS }}
           MAWJA_KEY_PASSWORD: ${{ secrets.MAWJA_KEY_PASSWORD }}
         run: |
           test -n "$MAWJA_KEYSTORE_PASSWORD" || { echo "Missing release keystore password"; exit 1; }
           test -f "$MAWJA_KEYSTORE" || { echo "Missing release keystore"; exit 1; }
-          ./gradlew assembleRelease --stacktrace
+          test -n "$MAWJA_KEY_ALIAS" || export MAWJA_KEY_ALIAS=mawjaUpload
+          test -n "$MAWJA_KEY_PASSWORD" || export MAWJA_KEY_PASSWORD="$MAWJA_KEYSTORE_PASSWORD"
+          ./gradlew assembleRelease bundleRelease --stacktrace
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          jarsigner -verify "$bundle" | tee "$RUNNER_TEMP/mawja-bundle-verification.txt"
+          grep -q '^jar verified' "$RUNNER_TEMP/mawja-bundle-verification.txt"
+          wc -c "$bundle" app/build/outputs/apk/release/app-release.apk
 
       - name: Upload Debug APK
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_type != 'release')
+        if: env.BUILD_RELEASE != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Mawja-debug
@@ -70,9 +75,19 @@ jobs:
           retention-days: 14
 
       - name: Upload Release APK
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.build_type == 'release'
+        if: env.BUILD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Mawja-release
           path: app/build/outputs/apk/release/*.apk
           retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload signed Google Play bundle
+        if: env.BUILD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mawja-Google-Play
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+          if-no-files-found: error
