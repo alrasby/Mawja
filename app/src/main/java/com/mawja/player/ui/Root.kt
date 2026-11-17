@@ -3,10 +3,7 @@ package com.mawja.player.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -24,7 +21,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
@@ -44,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,16 +49,11 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -98,7 +88,6 @@ fun MawjaRoot() {
         var showPlayer by remember { mutableStateOf(false) }
         var showSearch by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
-        var footerCompact by rememberSaveable { mutableStateOf(false) }
 
         // Paint the selected tab first. The screen swap is scheduled for the
         // next frame so a heavy screen cannot delay the footer's pressed state.
@@ -107,19 +96,6 @@ fun MawjaRoot() {
             contentTab = selectedTab
         }
 
-        val footerScrollConnection = remember {
-            object : NestedScrollConnection {
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                    if (available.y != 0f) footerCompact = true
-                    return Offset.Zero
-                }
-
-                override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                    footerCompact = false
-                    return Velocity.Zero
-                }
-            }
-        }
         Box(
             Modifier
                 .fillMaxSize()
@@ -133,8 +109,7 @@ fun MawjaRoot() {
                 Box(
                     Modifier.fillMaxWidth()
                         .weight(1f)
-                        .clipToBounds()
-                        .nestedScroll(footerScrollConnection),
+                        .clipToBounds(),
                 ) {
                     CompositionLocalProvider(LocalFooterBottomPadding provides 13.dp) {
                         when {
@@ -149,11 +124,9 @@ fun MawjaRoot() {
                 }
                 Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
                     MiniPlayer(onOpen = { showPlayer = true })
-                    // Reserve the expanded height so scroll bounds stay steady during animation.
                     Box(Modifier.fillMaxWidth().height(FooterExpandedHeight + FooterVerticalPadding * 2)) {
                         MawjaFloatingBar(
                             modifier = Modifier.align(Alignment.BottomCenter),
-                            compact = footerCompact,
                             selected = selectedTab,
                             onSelect = { index ->
                                 if (showSettings && index == 0) {
@@ -163,7 +136,6 @@ fun MawjaRoot() {
                                     contentTab = 0
                                 } else if (selectedTab != index) {
                                     selectedTab = index
-                                    footerCompact = false
                                     showSettings = false
                                     showSearch = false
                                 }
@@ -194,7 +166,7 @@ private val FooterExpandedHeight = 68.dp
 private val FooterVerticalPadding = 8.dp
 
 @Composable
-private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, selected: Int, onSelect: (Int) -> Unit) {
+private fun MawjaFloatingBar(modifier: Modifier = Modifier, selected: Int, onSelect: (Int) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val glassShape = RoundedCornerShape(38.dp)
     val glassBrush = Brush.linearGradient(
@@ -211,32 +183,15 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, se
             colors.onSurface.copy(alpha = .18f),
         ),
     )
-    val expansion by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (compact) 0f else 1f,
-        animationSpec = tween(220),
-        label = "footerExpansion",
-    )
-    val animatedHeight by animateDpAsState(
-        targetValue = if (compact) 48.dp else FooterExpandedHeight,
-        animationSpec = tween(220),
-        label = "footerHeight",
-    )
-    val widthFraction = .62f + (.38f * expansion)
-
     Row(
         modifier
-            .fillMaxWidth(widthFraction)
+            .fillMaxWidth()
             .padding(horizontal = 18.dp, vertical = FooterVerticalPadding)
-            .height(animatedHeight)
+            .height(FooterExpandedHeight)
             .clip(glassShape)
             .background(glassBrush, glassShape)
             .border(1.dp, glassBorder, glassShape)
             .padding(horizontal = 6.dp, vertical = 5.dp),
-        horizontalArrangement = if (compact) {
-            Arrangement.spacedBy(3.dp, Alignment.CenterHorizontally)
-        } else {
-            Arrangement.spacedBy(0.dp)
-        },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         tabs.forEachIndexed { index, item ->
@@ -245,15 +200,9 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, se
                 animationSpec = tween(180),
                 label = "footerSelection",
             )
-            val itemShape = if (compact) CircleShape else RoundedCornerShape(30.dp)
-            val itemModifier = if (compact) {
-                Modifier.size(33.dp)
-            } else {
-                Modifier.weight(1f).fillMaxHeight()
-            }
             Column(
-                itemModifier
-                    .clip(itemShape)
+                Modifier.weight(1f).fillMaxHeight()
+                    .clip(RoundedCornerShape(30.dp))
                     .background(selectedColor)
                     .clickable { onSelect(index) }
                     .padding(horizontal = 4.dp, vertical = 4.dp),
@@ -266,18 +215,12 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, se
                     tint = if (selected == index) colors.primary else colors.onSurfaceVariant,
                     modifier = Modifier.size(22.dp),
                 )
-                AnimatedVisibility(
-                    visible = !compact,
-                    enter = fadeIn(tween(120)),
-                    exit = fadeOut(tween(80)),
-                ) {
-                    Text(
-                        stringResource(item.label),
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (selected == index) colors.onPrimaryContainer else colors.onSurfaceVariant,
-                    )
-                }
+                Text(
+                    stringResource(item.label),
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (selected == index) colors.onPrimaryContainer else colors.onSurfaceVariant,
+                )
             }
         }
     }
