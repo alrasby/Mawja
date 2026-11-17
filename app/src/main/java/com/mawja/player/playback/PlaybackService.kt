@@ -226,6 +226,18 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private inner class LibraryCallback : MediaLibrarySession.Callback {
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+        ): MediaSession.ConnectionResult {
+            val isAndroidAuto = controller.packageName == ANDROID_AUTO_PACKAGE &&
+                packageManager.getPackagesForUid(controller.uid)?.contains(ANDROID_AUTO_PACKAGE) == true
+            if (controller.uid != applicationInfo.uid && !controller.isTrusted && !isAndroidAuto) {
+                return MediaSession.ConnectionResult.reject()
+            }
+            return super<MediaLibrarySession.Callback>.onConnect(session, controller)
+        }
+
         override fun onGetLibraryRoot(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
@@ -555,8 +567,8 @@ class PlaybackService : MediaLibraryService() {
         return result
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
-        session?.takeIf { controllerInfo.uid == applicationInfo.uid || controllerInfo.isTrusted }
+    // Legacy browsers bind with a placeholder identity before onConnect supplies the real caller.
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = session
 
     override fun onDestroy() {
         autoScope.cancel()
@@ -578,6 +590,7 @@ class PlaybackService : MediaLibraryService() {
     }
 
     companion object {
+        private const val ANDROID_AUTO_PACKAGE = "com.google.android.projection.gearhead"
         private const val TAG = "MawjaAuto"
         private const val ROOT = "root"
         private const val RADIO = "radio"

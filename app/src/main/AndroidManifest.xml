@@ -20,6 +20,10 @@
         android:name="android.hardware.type.automotive"
         android:required="false" />
 
+    <queries>
+        <package android:name="com.google.android.projection.gearhead" />
+    </queries>
+
     <application
         android:name=".MawjaApp"
         android:allowBackup="false"
