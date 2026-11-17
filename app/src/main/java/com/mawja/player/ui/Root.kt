@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,8 +58,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -100,8 +99,6 @@ fun MawjaRoot() {
         var showSearch by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
         var footerCompact by rememberSaveable { mutableStateOf(false) }
-        var footerOccupiedPx by remember { mutableIntStateOf(0) }
-        val density = LocalDensity.current
 
         // Paint the selected tab first. The screen swap is scheduled for the
         // next frame so a heavy screen cannot delay the footer's pressed state.
@@ -123,32 +120,23 @@ fun MawjaRoot() {
                 }
             }
         }
-        val contentBottomSpace = if (footerOccupiedPx == 0) {
-            129.dp
-        } else {
-            with(density) { footerOccupiedPx.toDp() } + 23.dp
-        }
-
-        // One app canvas. The footer is a transparent overlay with one glass
-        // surface only. The measured inset is consumed inside scrollable lists
-        // so the canvas remains fully transparent behind the floating capsule.
         Box(
             Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background),
         ) {
-            CompositionLocalProvider(LocalFooterBottomPadding provides contentBottomSpace) {
-                Column(Modifier.fillMaxSize()) {
-                    MawjaHeader(
-                        onSearch = { showSettings = false; showSearch = !showSearch },
-                        onSettings = { showSettings = true; showSearch = false },
-                    )
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .nestedScroll(footerScrollConnection),
-                    ) {
+            Column(Modifier.fillMaxSize()) {
+                MawjaHeader(
+                    onSearch = { showSettings = false; showSearch = !showSearch },
+                    onSettings = { showSettings = true; showSearch = false },
+                )
+                Box(
+                    Modifier.fillMaxWidth()
+                        .weight(1f)
+                        .clipToBounds()
+                        .nestedScroll(footerScrollConnection),
+                ) {
+                    CompositionLocalProvider(LocalFooterBottomPadding provides 13.dp) {
                         when {
                             showSettings -> SettingsScreen()
                             showSearch -> SearchScreen(contentTab)
@@ -159,37 +147,29 @@ fun MawjaRoot() {
                         }
                     }
                 }
-            }
-
-            // The outer column is transparent and measured only to reserve the
-            // exact occupied space of MiniPlayer + the animated glass bar.
-            Column(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .onGloballyPositioned { footerOccupiedPx = it.size.height },
-            ) {
-                MiniPlayer(onOpen = { showPlayer = true })
-                Box(Modifier.fillMaxWidth()) {
-                    MawjaFloatingBar(
-                        modifier = Modifier.align(Alignment.Center),
-                        compact = footerCompact,
-                        selected = selectedTab,
-                        onSelect = { index ->
-                            if (showSettings && index == 0) {
-                                showSettings = false
-                                showSearch = false
-                                selectedTab = 0
-                                contentTab = 0
-                            } else if (selectedTab != index) {
-                                selectedTab = index
-                                footerCompact = false
-                                showSettings = false
-                                showSearch = false
-                            }
-                        },
-                    )
+                Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
+                    MiniPlayer(onOpen = { showPlayer = true })
+                    // Reserve the expanded height so scroll bounds stay steady during animation.
+                    Box(Modifier.fillMaxWidth().height(FooterExpandedHeight + FooterVerticalPadding * 2)) {
+                        MawjaFloatingBar(
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            compact = footerCompact,
+                            selected = selectedTab,
+                            onSelect = { index ->
+                                if (showSettings && index == 0) {
+                                    showSettings = false
+                                    showSearch = false
+                                    selectedTab = 0
+                                    contentTab = 0
+                                } else if (selectedTab != index) {
+                                    selectedTab = index
+                                    footerCompact = false
+                                    showSettings = false
+                                    showSearch = false
+                                }
+                            },
+                        )
+                    }
                 }
             }
 
@@ -210,30 +190,23 @@ fun MawjaRoot() {
     }
 }
 
+private val FooterExpandedHeight = 68.dp
+private val FooterVerticalPadding = 8.dp
+
 @Composable
 private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, selected: Int, onSelect: (Int) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val glassShape = RoundedCornerShape(38.dp)
-    val expandedAlpha = 1.30f
-    fun glassColor(color: Color, alpha: Float): Color = Color(
-        red = color.red * .84f,
-        green = color.green * .84f,
-        blue = color.blue * .84f,
-        alpha = (alpha * expandedAlpha).coerceAtMost(.94f),
-    )
-    // A further 15% opacity increase over the previous glass values. The RGB
-    // tint is also slightly shaded, while alpha remains below 1 so content can
-    // still be seen through the single glass surface.
     val glassBrush = Brush.linearGradient(
-        colors = listOf(
-            glassColor(colors.primaryContainer, .78f),
-            glassColor(colors.surfaceVariant, .66f),
-            glassColor(colors.secondary, .40f),
+        listOf(
+            colors.primaryContainer.copy(alpha = .94f),
+            colors.surfaceVariant.copy(alpha = .858f),
+            colors.primary.copy(alpha = .52f),
         ),
     )
     val glassBorder = Brush.linearGradient(
-        colors = listOf(
-            Color.White.copy(alpha = .72f),
+        listOf(
+            colors.surface.copy(alpha = .72f),
             colors.primary.copy(alpha = .38f),
             colors.onSurface.copy(alpha = .18f),
         ),
@@ -244,7 +217,7 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, se
         label = "footerExpansion",
     )
     val animatedHeight by animateDpAsState(
-        targetValue = if (compact) 48.dp else 68.dp,
+        targetValue = if (compact) 48.dp else FooterExpandedHeight,
         animationSpec = tween(220),
         label = "footerHeight",
     )
@@ -253,7 +226,7 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, compact: Boolean, se
     Row(
         modifier
             .fillMaxWidth(widthFraction)
-            .padding(horizontal = 18.dp, vertical = 8.dp)
+            .padding(horizontal = 18.dp, vertical = FooterVerticalPadding)
             .height(animatedHeight)
             .clip(glassShape)
             .background(glassBrush, glassShape)
