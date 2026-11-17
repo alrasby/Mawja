@@ -12,7 +12,7 @@ on:
           - debug
           - release
   push:
-    branches: [ main ]
+    branches: [ main, design/glass-preview ]
 
 jobs:
   build:
