@@ -27,7 +27,6 @@ import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.SettingsSuggest
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +56,7 @@ import com.mawja.player.data.FileDisplayMode
 import com.mawja.player.data.LanguageOption
 import com.mawja.player.data.ThemeMode
 import com.mawja.player.playback.PlaybackService
+import com.mawja.player.ui.GlassCard
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.LocalFooterBottomPadding
 import com.mawja.player.ui.SectionTitle
@@ -145,7 +145,7 @@ fun SettingsScreen() {
                 ?: stringResource(R.string.youtube_country_auto),
             onClick = { showYoutubeCountries = true },
         )
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
@@ -177,7 +177,7 @@ fun SettingsScreen() {
                 }
             }
         }
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Rounded.GridView, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -204,15 +204,14 @@ fun SettingsScreen() {
                 }
             }
         }
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                LeftSwitchRow(showMusicFolders, container.preferences::setShowMusicFolders) {
                     Icon(Icons.Rounded.Folder, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     Column(Modifier.weight(1f).padding(start = 14.dp, end = 8.dp)) {
                         Text(stringResource(R.string.show_music_folders), style = MaterialTheme.typography.titleMedium)
                         Text(stringResource(R.string.show_music_folders_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    Switch(checked = showMusicFolders, onCheckedChange = container.preferences::setShowMusicFolders)
                 }
                 Text(stringResource(R.string.folders_in_device), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 4.dp))
                 if (folders.isEmpty()) {
@@ -230,7 +229,7 @@ fun SettingsScreen() {
         }
 
         SectionTitle(stringResource(R.string.settings_online_sources))
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.settings_online_sources_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 OnlineSourceRow(stringResource(R.string.enable_audius), audiusEnabled, container.preferences::setAudiusEnabled)
@@ -239,22 +238,20 @@ fun SettingsScreen() {
         }
 
         SectionTitle(stringResource(R.string.settings_playback))
-        Card(Modifier.fillMaxWidth()) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        GlassCard(Modifier.fillMaxWidth()) {
+            LeftSwitchRow(
+                batterySaver,
+                { enabled -> PlaybackService.setBatterySaver(context, enabled) },
+                Modifier.padding(16.dp),
+            ) {
                 Icon(Icons.Rounded.BatterySaver, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Column(Modifier.weight(1f).padding(start = 14.dp, end = 8.dp)) {
                     Text(stringResource(R.string.battery_saver), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.battery_saver_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Switch(
-                    checked = batterySaver,
-                    onCheckedChange = { enabled ->
-                        PlaybackService.setBatterySaver(context, enabled)
-                    },
-                )
             }
         }
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
@@ -274,7 +271,7 @@ fun SettingsScreen() {
                 }
             }
         }
-        Card(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth()) {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
@@ -318,8 +315,30 @@ fun SettingsScreen() {
 }
 
 @Composable
+private fun LeftSwitchRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit,
+) {
+    val direction = LocalLayoutDirection.current
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(
+            modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, content = content)
+            }
+        }
+    }
+}
+
+@Composable
 private fun FolderVisibilityRow(folder: String, visible: Boolean, onVisibleChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    LeftSwitchRow(visible, onVisibleChange) {
         Text(folder, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         Text(
             stringResource(if (visible) R.string.folder_visible else R.string.folder_hidden),
@@ -327,18 +346,16 @@ private fun FolderVisibilityRow(folder: String, visible: Boolean, onVisibleChang
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 8.dp),
         )
-        Switch(checked = visible, onCheckedChange = onVisibleChange)
     }
 }
 
 @Composable
 private fun OnlineSourceRow(label: String, enabled: Boolean, onChanged: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    LeftSwitchRow(enabled, onChanged) {
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.online_source_enabled_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = enabled, onCheckedChange = onChanged)
     }
 }
 
@@ -349,7 +366,7 @@ private fun ThemeButton(mode: ThemeMode, label: String, selected: ThemeMode, con
 
 @Composable
 private fun SettingCard(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, value: String, onClick: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    GlassCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Column(Modifier.weight(1f).padding(start = 14.dp)) {

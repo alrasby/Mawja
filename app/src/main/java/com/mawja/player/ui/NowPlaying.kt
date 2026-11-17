@@ -46,7 +46,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -115,14 +114,11 @@ fun MiniPlayer(onOpen: () -> Unit) {
     val track = state.track ?: return
     val colors = MaterialTheme.colorScheme
 
-    Surface(
-        color = colors.surface.copy(alpha = .88f),
-        shape = RoundedCornerShape(26.dp),
-        tonalElevation = 8.dp,
-        shadowElevation = 10.dp,
-        modifier = Modifier
-            .fillMaxWidth()
+    val accent = rememberArtworkColor(track.artworkUrl, colors.primary)
+    Column(
+        Modifier.fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp)
+            .glassSurface(RoundedCornerShape(26.dp), accent)
             .clickable(onClick = onOpen),
     ) {
         Column {

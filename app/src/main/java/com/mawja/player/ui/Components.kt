@@ -210,8 +210,7 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawWave(color: Col
 fun TrackCard(track: Track, onClick: () -> Unit, modifier: Modifier = Modifier, fixedWidth: Boolean = true) {
     Column(
         modifier.then(if (fixedWidth) Modifier.width(164.dp) else Modifier.fillMaxWidth())
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .72f))
+            .glassSurface(RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
             .padding(10.dp),
     ) {
@@ -328,11 +327,7 @@ private fun RadioListRow(track: Track, current: Boolean, playing: Boolean, onCli
 
 @Composable
 private fun RadioCard(track: Track, current: Boolean, playing: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .76f)),
-    ) {
+    GlassCard(modifier = modifier, onClick = onClick) {
         Column(Modifier.padding(10.dp)) {
             Box {
                 Artwork(track.artworkUrl, track.source, Modifier.fillMaxWidth().height(126.dp), corner = 17.dp)
