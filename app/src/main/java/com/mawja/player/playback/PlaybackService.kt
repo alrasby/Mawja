@@ -235,7 +235,7 @@ class PlaybackService : MediaLibraryService() {
             if (controller.uid != applicationInfo.uid && !controller.isTrusted && !isAndroidAuto) {
                 return MediaSession.ConnectionResult.reject()
             }
-            return super<MediaLibrarySession.Callback>.onConnect(session, controller)
+            return MediaSession.ConnectionResult.AcceptedResultBuilder(session).build()
         }
 
         override fun onGetLibraryRoot(
