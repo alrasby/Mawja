@@ -29,8 +29,6 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,13 +56,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mawja.player.R
 import com.mawja.player.data.FileDisplayMode
 import com.mawja.player.data.Track
+import com.mawja.player.ui.glassSurface
+import com.mawja.player.ui.GlassCard
+import com.mawja.player.ui.fadeTopEdge
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.LocalFooterBottomPadding
 import com.mawja.player.ui.LocalVm
 import com.mawja.player.ui.MediaGroupArtwork
 import com.mawja.player.ui.MediaGroupKind
 import com.mawja.player.ui.MessageState
-import com.mawja.player.ui.SearchField
 import com.mawja.player.ui.SectionTitle
 import com.mawja.player.ui.TrackRow
 import com.mawja.player.ui.VmFactory
@@ -154,7 +154,6 @@ private fun LocalContent() {
     }
 
     Column(Modifier.fillMaxSize()) {
-        SearchField(value = query, onValueChange = vm::onQuery, hint = stringResource(R.string.search_device))
         LazyRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 FilterChip(
@@ -199,7 +198,7 @@ private fun LocalContent() {
             state.loading && state.items.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
             mediaItems.isEmpty() -> MessageState(if (media == DeviceMedia.VIDEO) stringResource(R.string.empty_videos) else stringResource(R.string.empty_music), stringResource(R.string.retry), vm::refresh)
             activeGroup == null -> {
-                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                LazyColumn(Modifier.fillMaxSize().fadeTopEdge(), contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     item { SectionTitle(groupingTitle) }
                     if (fileDisplayMode == FileDisplayMode.GRID) {
                         val groupRows = groups.keys.toList().chunked(2)
@@ -208,11 +207,7 @@ private fun LocalContent() {
                                 row.forEach { name ->
                                     val groupTracks = groups.getValue(name)
                                     val sample = groupTracks.firstOrNull { !it.artworkUrl.isNullOrBlank() } ?: groupTracks.firstOrNull()
-                                    Card(
-                                        modifier = Modifier.weight(1f).clickable { openedGroup = name },
-                                        shape = RoundedCornerShape(22.dp),
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .72f)),
-                                    ) {
+                                    GlassCard(Modifier.weight(1f), onClick = { openedGroup = name }) {
                                         Column(Modifier.padding(10.dp)) {
                                             MediaGroupArtwork(sample, groupKind, Modifier.fillMaxWidth().aspectRatio(1.12f), corner = 17.dp)
                                             Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp, start = 2.dp, end = 2.dp))
@@ -228,7 +223,9 @@ private fun LocalContent() {
                             val groupTracks = groups.getValue(name)
                             val sample = groupTracks.firstOrNull { !it.artworkUrl.isNullOrBlank() } ?: groupTracks.firstOrNull()
                             Row(
-                                Modifier.fillMaxWidth().clickable { openedGroup = name }.padding(horizontal = 16.dp, vertical = 8.dp),
+                                Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 3.dp)
+                                    .glassSurface(RoundedCornerShape(18.dp)).clickable { openedGroup = name }
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
@@ -243,7 +240,7 @@ private fun LocalContent() {
                 }
             }
             else -> {
-                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
+                LazyColumn(Modifier.fillMaxSize().fadeTopEdge(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
                     item {
                         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = { openedGroup = null }) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.close)) }

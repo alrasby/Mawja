@@ -47,10 +47,10 @@ import com.mawja.player.R
 import com.mawja.player.data.FileDisplayMode
 import com.mawja.player.data.radio.RadioFilter
 import com.mawja.player.data.radio.RadioFilters
+import com.mawja.player.ui.fadeTopEdge
 import com.mawja.player.ui.LocalContainer
 import com.mawja.player.ui.MessageState
 import com.mawja.player.ui.RadioVm
-import com.mawja.player.ui.SearchField
 import com.mawja.player.ui.RadioCardGrid
 import com.mawja.player.ui.VmFactory
 import java.util.Locale
@@ -92,7 +92,6 @@ fun RadioScreen() {
     }
 
     Column(Modifier.fillMaxSize()) {
-        SearchField(value = query, onValueChange = vm::onQuery, hint = stringResource(R.string.search_stations), onSubmit = vm::load)
         if (query.isBlank()) {
             LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(RadioFilters.all, key = { it.id }) { f ->
@@ -158,7 +157,7 @@ fun RadioScreen() {
                 displayMode = displayMode,
                 emptyText = stringResource(R.string.empty_stations),
                 onRetry = vm::load,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fadeTopEdge(),
             )
             filter.id == RadioFilters.world.id && worldCountry == null -> MessageState(stringResource(R.string.choose_world_country))
             else -> RadioCardGrid(
@@ -166,7 +165,7 @@ fun RadioScreen() {
                 displayMode = displayMode,
                 emptyText = stringResource(R.string.empty_stations),
                 onRetry = vm::load,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fadeTopEdge(),
             )
         }
     }

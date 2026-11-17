@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mawja.player.R
+import com.mawja.player.ui.screens.SearchScreen
 import com.mawja.player.ui.screens.HomeScreen
 import com.mawja.player.ui.screens.LibraryScreen
 import com.mawja.player.ui.screens.LocalScreen
@@ -139,7 +140,7 @@ fun MawjaRoot() {
             CompositionLocalProvider(LocalFooterBottomPadding provides contentBottomSpace) {
                 Column(Modifier.fillMaxSize()) {
                     MawjaHeader(
-                        onSearch = { selectedTab = 0; showSettings = false; showSearch = !showSearch },
+                        onSearch = { showSettings = false; showSearch = !showSearch },
                         onSettings = { showSettings = true; showSearch = false },
                     )
                     Box(
@@ -150,7 +151,8 @@ fun MawjaRoot() {
                     ) {
                         when {
                             showSettings -> SettingsScreen()
-                            contentTab == 0 -> HomeScreen(showSearch)
+                            showSearch -> SearchScreen(contentTab)
+                            contentTab == 0 -> HomeScreen()
                             contentTab == 1 -> RadioScreen()
                             contentTab == 2 -> LocalScreen()
                             else -> LibraryScreen()
@@ -198,6 +200,7 @@ fun MawjaRoot() {
             ) {
                 NowPlayingScreen(onClose = { showPlayer = false })
             }
+            BackHandler(enabled = showSearch && !showPlayer) { showSearch = false }
             BackHandler(enabled = showPlayer) { showPlayer = false }
             BackHandler(enabled = showSettings && !showPlayer) {
                 showSettings = false

@@ -30,8 +30,6 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -58,6 +56,9 @@ import com.mawja.player.R
 import com.mawja.player.data.ListState
 import com.mawja.player.data.SourceType
 import com.mawja.player.data.Track
+import com.mawja.player.ui.GlassCard
+import com.mawja.player.ui.glassSurface
+import com.mawja.player.ui.fadeTopEdge
 import com.mawja.player.ui.Artwork
 import com.mawja.player.ui.HomeState
 import com.mawja.player.ui.LocalContainer
@@ -67,11 +68,10 @@ import com.mawja.player.ui.MediaGroupArtwork
 import com.mawja.player.ui.MediaGroupKind
 import com.mawja.player.ui.MessageState
 import com.mawja.player.ui.OnlineVm
-import com.mawja.player.ui.SearchField
 import com.mawja.player.ui.TrackCard
 import com.mawja.player.ui.VmFactory
 
-private fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33) {
+internal fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33) {
     buildList {
         add(Manifest.permission.READ_MEDIA_AUDIO)
         add(Manifest.permission.READ_MEDIA_VIDEO)
@@ -79,7 +79,7 @@ private fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33)
 } else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
 @Composable
-fun HomeScreen(showSearch: Boolean) {
+fun HomeScreen() {
     val context = LocalContext.current
     val container = LocalContainer.current
     val vm: OnlineVm = viewModel(factory = VmFactory(container))
@@ -103,8 +103,7 @@ fun HomeScreen(showSearch: Boolean) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        if (showSearch) SearchField(value = query, onValueChange = vm::onQuery, hint = stringResource(R.string.search_music), onSubmit = vm::submitQuery)
-        else HomeHero()
+        HomeHero()
         SourceFilterBar(selected, audiusEnabled, youtubeEnabled, vm::setSource)
         HomeContent(
             state = state,
@@ -113,26 +112,22 @@ fun HomeScreen(showSearch: Boolean) {
             mediaGranted = mediaGranted,
             onRequestMedia = { permissionLauncher.launch(mediaPermissions()) },
             onRetry = { vm.load(); localVm.refresh() },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).fadeTopEdge(),
         )
     }
 }
 
 @Composable
 private fun HomeHero() {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-        shape = RoundedCornerShape(26.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-    ) {
+    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(58.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
                 Icon(Icons.Rounded.GraphicEq, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(30.dp))
             }
             Column(Modifier.padding(start = 14.dp)) {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(2.dp))
-                Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = .78f))
+                Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .78f))
             }
         }
     }
@@ -142,7 +137,7 @@ private fun HomeHero() {
 private fun SourceFilterBar(selected: SourceType?, audiusEnabled: Boolean, youtubeEnabled: Boolean, onSelect: (SourceType?) -> Unit) {
     if (!audiusEnabled && !youtubeEnabled) return
     LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(22.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f)),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).glassSurface(RoundedCornerShape(22.dp)),
         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 7.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -231,7 +226,7 @@ private fun HomeContent(
 
 @Composable
 private fun PermissionCard(onRequest: () -> Unit) {
-    Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
+    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.permission_needed), style = MaterialTheme.typography.titleMedium)
@@ -245,7 +240,7 @@ private fun PermissionCard(onRequest: () -> Unit) {
 @Composable
 private fun LocalGroupCard(name: String, tracks: List<Track>, kind: MediaGroupKind, onClick: () -> Unit) {
     val sample = tracks.firstOrNull { !it.artworkUrl.isNullOrBlank() } ?: tracks.firstOrNull()
-    Card(Modifier.width(170.dp).clickable(onClick = onClick), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .68f))) {
+    GlassCard(Modifier.width(170.dp), onClick = onClick) {
         Column(Modifier.padding(12.dp)) {
             MediaGroupArtwork(sample, kind, Modifier.fillMaxWidth().height(108.dp), corner = 15.dp)
             Spacer(Modifier.height(9.dp))

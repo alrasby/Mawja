@@ -274,79 +274,86 @@ fun NowPlayingScreen(onClose: () -> Unit) {
             }
 
             Spacer(Modifier.height(20.dp))
-            if (track.isLive) {
+            Column(
+                Modifier.fillMaxWidth().glassSurface(RoundedCornerShape(28.dp), tint)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (track.isLive) {
+                    Row(
+                        Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(colors.primaryContainer)
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(Modifier.size(8.dp).clip(CircleShape).background(colors.primary))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.live), color = colors.onPrimaryContainer, style = MaterialTheme.typography.labelLarge)
+                    }
+                } else {
+                    val duration = state.durationMs.coerceAtLeast(1L).toFloat()
+                    Slider(
+                        value = if (dragging) dragValue else state.positionMs.toFloat().coerceIn(0f, duration),
+                        onValueChange = { dragging = true; dragValue = it },
+                        onValueChangeFinished = {
+                            player.seekTo(dragValue.toLong())
+                            dragging = false
+                        },
+                        valueRange = 0f..duration,
+                    )
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(formatTime(if (dragging) dragValue.toLong() else state.positionMs), color = colors.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
+                        Text(formatTime(state.durationMs), color = colors.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
                 Row(
-                    Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(colors.primaryContainer)
-                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(colors.primary))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.live), color = colors.onPrimaryContainer, style = MaterialTheme.typography.labelLarge)
+                    if (!track.isLive) {
+                        IconButton(onClick = player::toggleShuffle) {
+                            Icon(
+                                Icons.Rounded.Shuffle,
+                                contentDescription = stringResource(R.string.shuffle),
+                                tint = if (state.shuffle) colors.primary else colors.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    IconButton(onClick = player::previous, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Rounded.SkipPrevious, contentDescription = stringResource(R.string.previous), tint = colors.onBackground, modifier = Modifier.size(36.dp))
+                    }
+                    FilledIconButton(onClick = player::toggle, modifier = Modifier.size(60.dp)) {
+                        if (state.isBuffering) {
+                            CircularProgressIndicator(Modifier.size(32.dp), color = colors.onPrimary, strokeWidth = 3.dp)
+                        } else {
+                            Icon(
+                                if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                                contentDescription = stringResource(if (state.isPlaying) R.string.pause else R.string.play),
+                                modifier = Modifier.size(40.dp),
+                            )
+                        }
+                    }
+                    IconButton(onClick = player::next, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Rounded.SkipNext, contentDescription = stringResource(R.string.next), tint = colors.onBackground, modifier = Modifier.size(36.dp))
+                    }
+                    if (!track.isLive) {
+                        IconButton(onClick = player::cycleRepeat) {
+                            Icon(
+                                if (state.repeatMode == Player.REPEAT_MODE_ONE) Icons.Rounded.RepeatOne else Icons.Rounded.Repeat,
+                                contentDescription = stringResource(R.string.repeat),
+                                tint = if (state.repeatMode != Player.REPEAT_MODE_OFF) colors.primary else colors.onSurfaceVariant,
+                            )
+                        }
+                    }
+                    IconButton(onClick = player::stop) {
+                        Icon(Icons.Rounded.Stop, contentDescription = stringResource(R.string.stop), tint = colors.onSurfaceVariant)
+                    }
                 }
-            } else {
-                val duration = state.durationMs.coerceAtLeast(1L).toFloat()
-                Slider(
-                    value = if (dragging) dragValue else state.positionMs.toFloat().coerceIn(0f, duration),
-                    onValueChange = { dragging = true; dragValue = it },
-                    onValueChangeFinished = {
-                        player.seekTo(dragValue.toLong())
-                        dragging = false
-                    },
-                    valueRange = 0f..duration,
-                )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(formatTime(if (dragging) dragValue.toLong() else state.positionMs), color = colors.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
-                    Text(formatTime(state.durationMs), color = colors.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
-                }
-            }
 
-            Spacer(Modifier.height(16.dp))
-            Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!track.isLive) {
-                    IconButton(onClick = player::toggleShuffle) {
-                        Icon(
-                            Icons.Rounded.Shuffle,
-                            contentDescription = stringResource(R.string.shuffle),
-                            tint = if (state.shuffle) colors.primary else colors.onSurfaceVariant,
-                        )
-                    }
-                }
-                IconButton(onClick = player::previous, modifier = Modifier.size(56.dp)) {
-                    Icon(Icons.Rounded.SkipPrevious, contentDescription = stringResource(R.string.previous), tint = colors.onBackground, modifier = Modifier.size(36.dp))
-                }
-                FilledIconButton(onClick = player::toggle, modifier = Modifier.size(76.dp)) {
-                    if (state.isBuffering) {
-                        CircularProgressIndicator(Modifier.size(32.dp), color = colors.onPrimary, strokeWidth = 3.dp)
-                    } else {
-                        Icon(
-                            if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                            contentDescription = stringResource(if (state.isPlaying) R.string.pause else R.string.play),
-                            modifier = Modifier.size(40.dp),
-                        )
-                    }
-                }
-                IconButton(onClick = player::next, modifier = Modifier.size(56.dp)) {
-                    Icon(Icons.Rounded.SkipNext, contentDescription = stringResource(R.string.next), tint = colors.onBackground, modifier = Modifier.size(36.dp))
-                }
-                if (!track.isLive) {
-                    IconButton(onClick = player::cycleRepeat) {
-                        Icon(
-                            if (state.repeatMode == Player.REPEAT_MODE_ONE) Icons.Rounded.RepeatOne else Icons.Rounded.Repeat,
-                            contentDescription = stringResource(R.string.repeat),
-                            tint = if (state.repeatMode != Player.REPEAT_MODE_OFF) colors.primary else colors.onSurfaceVariant,
-                        )
-                    }
-                }
-                IconButton(onClick = player::stop) {
-                    Icon(Icons.Rounded.Stop, contentDescription = stringResource(R.string.stop), tint = colors.onSurfaceVariant)
-                }
             }
 
             if (state.error != null) {

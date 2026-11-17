@@ -10,6 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -45,3 +49,16 @@ internal fun GlassCard(
         content = content,
     )
 }
+
+
+// Fade only the opening edge of scrolling content, leaving the filters crisp.
+internal fun Modifier.fadeTopEdge(): Modifier =
+    graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithCache {
+            val fadeHeight = 14.dp.toPx()
+            val mask = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), endY = fadeHeight)
+            onDrawWithContent {
+                drawContent()
+                drawRect(mask, size = androidx.compose.ui.geometry.Size(size.width, fadeHeight), blendMode = BlendMode.DstIn)
+            }
+        }
