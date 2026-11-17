@@ -45,7 +45,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -88,6 +89,8 @@ fun MawjaRoot() {
         var showPlayer by remember { mutableStateOf(false) }
         var showSearch by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
+        var footerHeightPx by remember { mutableIntStateOf(0) }
+        val footerClearance = with(LocalDensity.current) { footerHeightPx.toDp() } + 13.dp
 
         // Paint the selected tab first. The screen swap is scheduled for the
         // next frame so a heavy screen cannot delay the footer's pressed state.
@@ -107,11 +110,9 @@ fun MawjaRoot() {
                     onSettings = { showSettings = true; showSearch = false },
                 )
                 Box(
-                    Modifier.fillMaxWidth()
-                        .weight(1f)
-                        .clipToBounds(),
+                    Modifier.fillMaxWidth().weight(1f),
                 ) {
-                    CompositionLocalProvider(LocalFooterBottomPadding provides 13.dp) {
+                    CompositionLocalProvider(LocalFooterBottomPadding provides footerClearance) {
                         when {
                             showSettings -> SettingsScreen()
                             showSearch -> SearchScreen(contentTab)
@@ -122,27 +123,30 @@ fun MawjaRoot() {
                         }
                     }
                 }
-                Column(Modifier.fillMaxWidth().navigationBarsPadding()) {
-                    MiniPlayer(onOpen = { showPlayer = true })
-                    Box(Modifier.fillMaxWidth().height(FooterExpandedHeight + FooterVerticalPadding * 2)) {
-                        MawjaFloatingBar(
-                            modifier = Modifier.align(Alignment.BottomCenter),
-                            selected = selectedTab,
-                            onSelect = { index ->
-                                if (showSettings && index == 0) {
-                                    showSettings = false
-                                    showSearch = false
-                                    selectedTab = 0
-                                    contentTab = 0
-                                } else if (selectedTab != index) {
-                                    selectedTab = index
-                                    showSettings = false
-                                    showSearch = false
-                                }
-                            },
-                        )
-                    }
-                }
+            }
+
+            // Clear the last item through scroll padding while keeping the viewport under the glass.
+            Column(
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+                    .onSizeChanged { footerHeightPx = it.height }
+                    .navigationBarsPadding(),
+            ) {
+                MiniPlayer(onOpen = { showPlayer = true })
+                MawjaFloatingBar(
+                    selected = selectedTab,
+                    onSelect = { index ->
+                        if (showSettings && index == 0) {
+                            showSettings = false
+                            showSearch = false
+                            selectedTab = 0
+                            contentTab = 0
+                        } else if (selectedTab != index) {
+                            selectedTab = index
+                            showSettings = false
+                            showSearch = false
+                        }
+                    },
+                )
             }
 
             AnimatedVisibility(
@@ -166,7 +170,7 @@ private val FooterExpandedHeight = 68.dp
 private val FooterVerticalPadding = 8.dp
 
 @Composable
-private fun MawjaFloatingBar(modifier: Modifier = Modifier, selected: Int, onSelect: (Int) -> Unit) {
+private fun MawjaFloatingBar(selected: Int, onSelect: (Int) -> Unit) {
     val colors = MaterialTheme.colorScheme
     val glassShape = RoundedCornerShape(38.dp)
     val glassBrush = Brush.linearGradient(
@@ -184,7 +188,7 @@ private fun MawjaFloatingBar(modifier: Modifier = Modifier, selected: Int, onSel
         ),
     )
     Row(
-        modifier
+        Modifier
             .fillMaxWidth()
             .padding(horizontal = 18.dp, vertical = FooterVerticalPadding)
             .height(FooterExpandedHeight)
