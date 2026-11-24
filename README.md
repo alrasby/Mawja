@@ -49,11 +49,9 @@
 
 يتطلب موجة أندرويد 8.0 أو أحدث. يتطلب راديو الإنترنت والمصادر الإلكترونية اتصالًا بالإنترنت، وتعتمد إتاحة المحتوى على المصدر والمنطقة. يتطلب الوصول إلى ملفات الجهاز منح أذونات الوسائط المناسبة.
 
-افتح تشغيل البناء الناجح في GitHub Actions ثم نزّل الملف من Artifacts وفك ضغطه. ملف APK مخصص للتثبيت، وملف AAB مخصص للرفع إلى Google Play Console. تنزيل ملفات البناء قد يتطلب تسجيل الدخول إلى GitHub.
+**حمّل التطبيق وتابع التحديثات عبر [قناة موجة على Telegram — @MawjaPlayer](https://t.me/MawjaPlayer).**
 
 دعم السيارة الحالي يشغّل الصوت عبر Android Auto. البحث الموثّق بالتردد ونوع الموجة مدرج ضمن خطة إصدار ميزات قادم.
-
-[قناة موجة على Telegram](https://t.me/MawjaPlayer)
 
 ## English
 
@@ -79,11 +77,9 @@ The gallery above contains actual captures from app testing. Some interface deta
 
 Mawja requires Android 8.0 or later. Internet radio and online sources require a network connection, and content availability depends on the provider and region. Local media access requires the relevant device permissions.
 
-Open a successful GitHub Actions run, download its artifact, and extract the ZIP. Use the APK for installation and the AAB for Google Play Console uploads. GitHub may require you to sign in to download build artifacts.
+**Download the app and follow updates on [Mawja’s Telegram channel — @MawjaPlayer](https://t.me/MawjaPlayer).**
 
 Current car support provides audio playback through Android Auto. Verified frequency and radio-band search is planned for a future feature release.
-
-[Mawja on Telegram](https://t.me/MawjaPlayer)
 
 ---
 
