@@ -9,8 +9,7 @@
 <p align="center">
   <a href="#العربية">العربية</a> ·
   <a href="#english">English</a> ·
-  <a href="doc/ROADMAP.md">خطة الإصدارات · Roadmap</a> ·
-  <a href="https://github.com/alrasby/Mawja/actions/workflows/build.yml">التنزيلات والبناء · Builds</a>
+  <a href="https://t.me/MawjaPlayer">Telegram · قناة موجة</a>
 </p>
 
 ## العربية
@@ -54,7 +53,7 @@
 
 دعم السيارة الحالي يشغّل الصوت عبر Android Auto. البحث الموثّق بالتردد ونوع الموجة مدرج ضمن خطة إصدار ميزات قادم.
 
-[البناء والتنزيلات](https://github.com/alrasby/Mawja/actions/workflows/build.yml) · [خطة الإصدارات](doc/ROADMAP.md) · [الإبلاغ عن مشكلة](https://github.com/alrasby/Mawja/issues)
+[قناة موجة على Telegram](https://t.me/MawjaPlayer)
 
 ## English
 
@@ -84,7 +83,7 @@ Open a successful GitHub Actions run, download its artifact, and extract the ZIP
 
 Current car support provides audio playback through Android Auto. Verified frequency and radio-band search is planned for a future feature release.
 
-[Builds and downloads](https://github.com/alrasby/Mawja/actions/workflows/build.yml) · [Release roadmap](doc/ROADMAP.md) · [Report an issue](https://github.com/alrasby/Mawja/issues)
+[Mawja on Telegram](https://t.me/MawjaPlayer)
 
 ---
 
