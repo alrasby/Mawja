@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -62,10 +63,11 @@ fun RadioScreen() {
         if (granted && isLocal) readRadioLocation(context)?.let { vm.setLocalLocation(it.latitude, it.longitude) }
     }
     val locale = context.resources.configuration.locales[0]
+    val countryCollator = remember(locale) { java.text.Collator.getInstance(locale) }
     val countryOptions = countries.map { item ->
         item.iso_3166_1 to (countryFlag(item.iso_3166_1) + " " +
             Locale("", item.iso_3166_1).getDisplayCountry(locale).ifBlank { item.name })
-    }.sortedBy { it.second.lowercase(locale) }
+    }.sortedWith { first, second -> countryCollator.compare(first.second.substringAfter(' '), second.second.substringAfter(' ')) }
     val allCountries = stringResource(R.string.radio_all_countries)
     val countryLabel = countryOptions.firstOrNull { it.first == country }?.second
         ?: if (isLocal && locationCountry != null) Locale("", locationCountry!!).getDisplayCountry(locale)
@@ -129,13 +131,14 @@ private fun RadioOptionDialog(
     selected: String?, onSelect: (String?) -> Unit, onDismiss: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    val maxHeight = LocalConfiguration.current.screenHeightDp.dp * .85f
     Dialog(onDismissRequest = onDismiss) {
-        GlassCard(Modifier.fillMaxWidth(), opaque = true) {
+        GlassCard(Modifier.fillMaxWidth().heightIn(max = maxHeight), opaque = true) {
             Column(Modifier.padding(16.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge)
                 OutlinedTextField(query, { query = it }, singleLine = true,
                     placeholder = { Text(stringResource(R.string.search)) }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                LazyColumn(Modifier.weight(1f, fill = false)) {
                     item {
                         TextButton(onClick = { onSelect(null) }) { Text(allLabel) }
                     }
