@@ -151,5 +151,5 @@ dependencies {
     implementation("androidx.palette:palette-ktx:1.0.0")
 
     // YouTube extraction (GPLv3 library: this makes the app GPLv3 too)
-    implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.26.5")
+    implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.27.1")
 }

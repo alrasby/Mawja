@@ -73,9 +73,7 @@ object YouTubeSource {
     private data class SearchSpec(val filter: String, val video: Boolean)
 
     private val clients = listOf(
-        InnertubeClient("IOS", "20.10.4", IOS_UA),
         InnertubeClient("ANDROID_VR", "1.60.19", ANDROID_VR_UA),
-        InnertubeClient("IOS", "20.10.4", IOS_BROWSER_UA),
     )
     private val searchSpecs = listOf(
         SearchSpec(YoutubeSearchQueryHandlerFactory.MUSIC_SONGS, video = false),
@@ -284,8 +282,8 @@ object YouTubeSource {
         urlCache[key]?.let { return it }
         val failures = mutableListOf<Throwable>()
         val resolvers = listOf<(String, Boolean) -> String>(
-            { value, video -> resolveViaInnertube(value, video, activeRegion) },
             { value, video -> resolveViaNewPipe(value, video) },
+            { value, video -> resolveViaInnertube(value, video, activeRegion) },
             { value, video -> resolveViaPiped(value, video) },
         )
         for (resolver in resolvers) {
