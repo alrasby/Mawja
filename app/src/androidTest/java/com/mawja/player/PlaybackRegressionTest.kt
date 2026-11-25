@@ -7,6 +7,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mawja.player.playback.PlaybackService
@@ -24,6 +25,9 @@ class PlaybackRegressionTest {
     private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
 
     @Test(timeout = 90000) fun localPlaybackSeekPauseAndRapidAudioSettingsRemainResponsive() {
+        // Android 15+ rejects audio focus for background-only instrumentation.
+        // Match the real user flow: open the app before starting playback.
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
         val context = ApplicationProvider.getApplicationContext<Context>()
         val file = File(context.cacheDir, "playback-regression.wav")
         val samples = 16000 * 12
@@ -52,7 +56,9 @@ class PlaybackRegressionTest {
                 main { ready.set(controller.playbackState == Player.STATE_READY && controller.isPlaying) }
                 Thread.sleep(100)
             }
-            assertTrue("Playback never became ready", ready.get())
+            val details = AtomicReference("")
+            main { details.set("state=${controller.playbackState}, playing=${controller.isPlaying}, requested=${controller.playWhenReady}, suppression=${controller.playbackSuppressionReason}, error=${controller.playerError?.errorCodeName}: ${controller.playerError?.cause}") }
+            assertTrue("Playback never became ready: ${details.get()}", ready.get())
             main { assertNull(controller.playerError); assertTrue(controller.duration >= 11000); controller.seekTo(4000) }
             Thread.sleep(300)
             main { assertTrue(controller.currentPosition >= 3500); controller.pause(); assertFalse(controller.playWhenReady) }
@@ -70,6 +76,7 @@ class PlaybackRegressionTest {
         } finally {
             main { prefs.setEqualizerPreset(oldPreset); prefs.setBatterySaver(oldSaver); controller.stop(); controller.clearMediaItems(); controller.release() }
             file.delete()
+            scenario.close()
         }
     }
 }
