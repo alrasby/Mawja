@@ -126,4 +126,10 @@
     <string name="radio_all_languages">All languages</string>
     <string name="radio_language">Station language</string>
     <string name="radio_choose_location">Choose a country or use your location to find local stations.</string>
+    <string name="youtube_auto_content">Automatic</string>
+    <string name="youtube_content_language">YouTube content language</string>
+    <string name="youtube_interest">YouTube discovery interest</string>
+    <string name="youtube_podcasts">Podcasts</string>
+    <string name="youtube_country_unknown">Choose a country</string>
+    <string name="youtube_effective_region">Content region: %1$s · Language: %2$s</string>
 </resources>

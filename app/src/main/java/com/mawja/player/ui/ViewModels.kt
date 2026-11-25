@@ -169,17 +169,18 @@ class OnlineVm(private val c: AppContainer) : ViewModel() {
         val selected = selectedSource.value
         val audiusEnabled = c.preferences.audiusEnabled.value
         val youtubeEnabled = c.preferences.youtubeEnabled.value
-        val youtubeCountry = c.preferences.youtubeCountry.value
-        val cacheKey = buildCacheKey(q, selected, audiusEnabled, youtubeEnabled, youtubeCountry)
-        val now = System.currentTimeMillis()
-        cache[cacheKey]?.takeIf { now - it.createdAt < CACHE_TTL_MS }?.let {
-            state.value = it.state
-            return
-        }
-        cache.remove(cacheKey)
         job = viewModelScope.launch {
             state.value = HomeState(loading = true)
             try {
+                val region = c.youtubeData.resolveRegion()
+                val preferenceKey = listOf(region.countryCode, region.language, c.preferences.youtubeTopic.value).joinToString("|")
+                val cacheKey = buildCacheKey(q, selected, audiusEnabled, youtubeEnabled, preferenceKey)
+                val now = System.currentTimeMillis()
+                cache[cacheKey]?.takeIf { now - it.createdAt < CACHE_TTL_MS }?.let {
+                    state.value = it.state
+                    return@launch
+                }
+                cache.remove(cacheKey)
                 val audiusJob = async<List<Track>> {
                     if (audiusEnabled && (selected == null || selected == SourceType.AUDIUS)) {
                         withTimeoutOrNull(12_000L) {
@@ -193,8 +194,8 @@ class OnlineVm(private val c: AppContainer) : ViewModel() {
                             runCatching {
                                 val searchQuery = q.ifBlank { "new music" }
                                 val localDiscovery = q.isBlank()
-                                if (c.youtubeData.isConfigured) c.youtubeData.search(searchQuery, localDiscovery)
-                                else YouTubeSource.search(searchQuery, localDiscovery)
+                                if (c.youtubeData.isConfigured) c.youtubeData.search(searchQuery, localDiscovery, region)
+                                else YouTubeSource.search(searchQuery, localDiscovery, region)
                             }.getOrDefault(emptyList())
                         }.orEmpty()
                     } else emptyList()
@@ -219,7 +220,7 @@ class OnlineVm(private val c: AppContainer) : ViewModel() {
     }
 
     private fun buildCacheKey(query: String, selected: SourceType?, audiusEnabled: Boolean, youtubeEnabled: Boolean, youtubeCountry: String): String =
-        listOf("geo-ar-v5-strict", selected?.name ?: "ALL", query.lowercase(), audiusEnabled, youtubeEnabled, youtubeCountry).joinToString("|")
+        listOf("global-youtube-v1", selected?.name ?: "ALL", query.lowercase(), audiusEnabled, youtubeEnabled, youtubeCountry).joinToString("|")
 }
 
 class LocalVm(private val c: AppContainer) : ViewModel() {

@@ -34,6 +34,12 @@ class PreferencesStore(context: Context) {
     val fileDisplayMode: StateFlow<FileDisplayMode> = _fileDisplayMode.asStateFlow()
     private val _youtubeCountry = MutableStateFlow(prefs.getString(KEY_YOUTUBE_COUNTRY, "").orEmpty())
     val youtubeCountry: StateFlow<String> = _youtubeCountry.asStateFlow()
+    private val _youtubeLanguage = MutableStateFlow(prefs.getString(KEY_YOUTUBE_LANGUAGE, "").orEmpty())
+    val youtubeLanguage: StateFlow<String> = _youtubeLanguage.asStateFlow()
+    private val _youtubeTopic = MutableStateFlow(prefs.getString(KEY_YOUTUBE_TOPIC, "music").orEmpty())
+    val youtubeTopic: StateFlow<String> = _youtubeTopic.asStateFlow()
+    fun setYoutubeLanguage(value: String) { prefs.edit().putString(KEY_YOUTUBE_LANGUAGE, value).apply(); _youtubeLanguage.value = value }
+    fun setYoutubeTopic(value: String) { prefs.edit().putString(KEY_YOUTUBE_TOPIC, value).apply(); _youtubeTopic.value = value }
     val locationPromptHandled: Boolean
         get() = prefs.getBoolean(KEY_LOCATION_PROMPT_HANDLED, false)
 
@@ -95,6 +101,8 @@ class PreferencesStore(context: Context) {
         const val KEY_AUDIUS_ENABLED = "audius_enabled"
         const val KEY_YOUTUBE_ENABLED = "youtube_enabled"
         const val KEY_FILE_DISPLAY_MODE = "file_display_mode"
+        const val KEY_YOUTUBE_LANGUAGE = "youtube_language"
+        const val KEY_YOUTUBE_TOPIC = "youtube_topic"
         const val KEY_YOUTUBE_COUNTRY = "youtube_country"
         const val KEY_LOCATION_PROMPT_HANDLED = "location_prompt_handled"
         const val KEY_LAST_LAT = "last_location_lat"

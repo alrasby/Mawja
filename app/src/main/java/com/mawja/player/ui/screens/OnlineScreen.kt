@@ -50,6 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mawja.player.R
@@ -90,6 +92,8 @@ fun HomeScreen() {
     val localState by localVm.state.collectAsStateWithLifecycle()
     val audiusEnabled by container.preferences.audiusEnabled.collectAsStateWithLifecycle()
     val youtubeEnabled by container.preferences.youtubeEnabled.collectAsStateWithLifecycle()
+    val youtubeLanguage by container.preferences.youtubeLanguage.collectAsStateWithLifecycle()
+    val youtubeTopic by container.preferences.youtubeTopic.collectAsStateWithLifecycle()
     val youtubeCountry by container.preferences.youtubeCountry.collectAsStateWithLifecycle()
     var mediaGranted by remember { mutableStateOf(mediaPermissions().any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) }
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -97,7 +101,8 @@ fun HomeScreen() {
         if (mediaGranted) localVm.refresh()
     }
 
-    LaunchedEffect(audiusEnabled, youtubeEnabled, youtubeCountry) { vm.load() }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.load() }
+    LaunchedEffect(audiusEnabled, youtubeEnabled, youtubeCountry, youtubeLanguage, youtubeTopic) { vm.load() }
     LaunchedEffect(selected, audiusEnabled, youtubeEnabled) {
         if ((selected == SourceType.AUDIUS && !audiusEnabled) || (selected == SourceType.YOUTUBE && !youtubeEnabled)) vm.setSource(null)
     }

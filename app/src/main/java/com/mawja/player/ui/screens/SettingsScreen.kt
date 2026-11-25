@@ -1,6 +1,14 @@
 package com.mawja.player.ui.screens
 
 import android.app.Activity
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.background
+import com.mawja.player.data.youtube.RegionResolver
+import com.mawja.player.data.youtube.YouTubeRegion
+import java.util.Locale
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -84,28 +92,6 @@ private val languages = listOf(
     LanguageOption("id", "Bahasa Indonesia"),
 )
 
-private val youtubeCountries = listOf(
-    LanguageOption("", "Auto • GPS / Network / SIM"),
-    LanguageOption("OM", "Oman • عُمان"),
-    LanguageOption("SA", "Saudi Arabia • السعودية"),
-    LanguageOption("AE", "United Arab Emirates • الإمارات"),
-    LanguageOption("KW", "Kuwait • الكويت"),
-    LanguageOption("QA", "Qatar • قطر"),
-    LanguageOption("BH", "Bahrain • البحرين"),
-    LanguageOption("YE", "Yemen • اليمن"),
-    LanguageOption("EG", "Egypt • مصر"),
-    LanguageOption("JO", "Jordan • الأردن"),
-    LanguageOption("IQ", "Iraq • العراق"),
-    LanguageOption("LB", "Lebanon • لبنان"),
-    LanguageOption("PS", "Palestine • فلسطين"),
-    LanguageOption("SY", "Syria • سوريا"),
-    LanguageOption("MA", "Morocco • المغرب"),
-    LanguageOption("DZ", "Algeria • الجزائر"),
-    LanguageOption("TN", "Tunisia • تونس"),
-    LanguageOption("LY", "Libya • ليبيا"),
-    LanguageOption("SD", "Sudan • السودان"),
-)
-
 @Composable
 fun SettingsScreen() {
     val container = LocalContainer.current
@@ -119,12 +105,37 @@ fun SettingsScreen() {
     val audiusEnabled by container.preferences.audiusEnabled.collectAsStateWithLifecycle()
     val youtubeEnabled by container.preferences.youtubeEnabled.collectAsStateWithLifecycle()
     val fileDisplayMode by container.preferences.fileDisplayMode.collectAsStateWithLifecycle()
+    val youtubeLanguage by container.preferences.youtubeLanguage.collectAsStateWithLifecycle()
+    val youtubeTopic by container.preferences.youtubeTopic.collectAsStateWithLifecycle()
     val youtubeCountry by container.preferences.youtubeCountry.collectAsStateWithLifecycle()
     val player by container.player.state.collectAsStateWithLifecycle()
     val footerBottomPadding = LocalFooterBottomPadding.current
     val uriHandler = LocalUriHandler.current
     var showLanguages by remember { mutableStateOf(false) }
     var showYoutubeCountries by remember { mutableStateOf(false) }
+    var showYoutubeLanguages by remember { mutableStateOf(false) }
+    var showYoutubeTopics by remember { mutableStateOf(false) }
+    var locationRefresh by remember { mutableStateOf(0) }
+    var resolvedRegion by remember { mutableStateOf<YouTubeRegion?>(null) }
+    val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { locationRefresh++ }
+    val locale = context.resources.configuration.locales[0]
+    val autoLabel = stringResource(R.string.youtube_auto_content)
+    val youtubeCountries = listOf(LanguageOption("", autoLabel)) + remember(locale) {
+        Locale.getISOCountries().map { code -> LanguageOption(code, Locale("", code).getDisplayCountry(locale)) }.sortedBy { it.label }
+    }
+    val youtubeLanguages = listOf(LanguageOption("", autoLabel)) + remember(locale) {
+        Locale.getISOLanguages().map { code -> LanguageOption(code, Locale(code).getDisplayLanguage(locale)) }
+            .filter { it.label.isNotBlank() }.sortedBy { it.label }
+    }
+    val youtubeTopics = listOf(
+        LanguageOption("music", stringResource(R.string.music)),
+        LanguageOption("quran", stringResource(R.string.filter_quran)),
+        LanguageOption("podcasts", stringResource(R.string.youtube_podcasts)),
+    )
+    LaunchedEffect(youtubeCountry, youtubeLanguage, language, locationRefresh) {
+        resolvedRegion = RegionResolver.resolve(context)
+    }
+
     var folders by remember { mutableStateOf<List<MediaFolder>>(emptyList()) }
 
     LaunchedEffect(Unit) {
@@ -152,6 +163,32 @@ fun SettingsScreen() {
                 ?: stringResource(R.string.youtube_country_auto),
             onClick = { showYoutubeCountries = true },
         )
+        SettingCard(
+            icon = Icons.Rounded.Language,
+            title = stringResource(R.string.youtube_content_language),
+            value = youtubeLanguages.firstOrNull { it.code == youtubeLanguage }?.label ?: autoLabel,
+            onClick = { showYoutubeLanguages = true },
+        )
+        SettingCard(
+            icon = Icons.Rounded.Language,
+            title = stringResource(R.string.youtube_interest),
+            value = youtubeTopics.firstOrNull { it.code == youtubeTopic }?.label.orEmpty(),
+            onClick = { showYoutubeTopics = true },
+        )
+        resolvedRegion?.let { region ->
+            val countryName = region.countryCode.takeIf { it.isNotEmpty() }?.let { Locale("", it).getDisplayCountry(locale) }
+                ?: stringResource(R.string.youtube_country_unknown)
+            Text(
+                stringResource(R.string.youtube_effective_region, countryName, Locale.forLanguageTag(region.language).getDisplayLanguage(locale)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (youtubeCountry.isEmpty()) {
+            TextButton(onClick = { locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) }) {
+                Text(stringResource(R.string.radio_use_location))
+            }
+        }
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -321,6 +358,17 @@ fun SettingsScreen() {
             onDismiss = { showYoutubeCountries = false },
         )
     }
+    if (showYoutubeLanguages) {
+        ChoiceDialog(stringResource(R.string.youtube_content_language), youtubeLanguages, youtubeLanguage,
+            { container.preferences.setYoutubeLanguage(it.code); showYoutubeLanguages = false },
+            { showYoutubeLanguages = false })
+    }
+    if (showYoutubeTopics) {
+        ChoiceDialog(stringResource(R.string.youtube_interest), youtubeTopics, youtubeTopic,
+            { container.preferences.setYoutubeTopic(it.code); showYoutubeTopics = false },
+            { showYoutubeTopics = false })
+    }
+
 }
 
 @Composable
@@ -404,12 +452,16 @@ private fun EqualizerChip(container: AppContainer, label: Int, preset: String, s
 
 @Composable
 private fun ChoiceDialog(title: String, options: List<LanguageOption>, selected: String, onSelect: (LanguageOption) -> Unit, onDismiss: () -> Unit) {
+    var search by remember { mutableStateOf("") }
     Dialog(onDismissRequest = onDismiss) {
-        GlassCard(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))) {
             Column(Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
                 Text(title, style = MaterialTheme.typography.headlineSmall)
-                LazyColumn(Modifier.padding(top = 12.dp).heightIn(max = 440.dp).selectableGroup()) {
-                    items(options, key = { it.code }) { option ->
+                OutlinedTextField(search, { search = it }, singleLine = true,
+                    placeholder = { Text(stringResource(R.string.search)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp))
+                LazyColumn(Modifier.padding(top = 8.dp).heightIn(max = 340.dp).selectableGroup()) {
+                    items(options.filter { it.label.contains(search, true) || it.code.contains(search, true) }, key = { it.code }) { option ->
                         val checked = option.code == selected
                         Row(
                             Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))

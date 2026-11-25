@@ -126,4 +126,10 @@
     <string name="radio_all_languages">كل اللغات</string>
     <string name="radio_language">لغة المحطات</string>
     <string name="radio_choose_location">اختر دولة أو استخدم موقعك لعرض المحطات المحلية.</string>
+    <string name="youtube_auto_content">تلقائي</string>
+    <string name="youtube_content_language">لغة محتوى YouTube</string>
+    <string name="youtube_interest">اهتمام اكتشاف YouTube</string>
+    <string name="youtube_podcasts">بودكاست</string>
+    <string name="youtube_country_unknown">اختر دولة</string>
+    <string name="youtube_effective_region">بلد المحتوى: %1$s · اللغة: %2$s</string>
 </resources>

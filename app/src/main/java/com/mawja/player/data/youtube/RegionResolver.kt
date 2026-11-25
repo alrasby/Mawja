@@ -25,42 +25,34 @@ data class YouTubeRegion(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val locality: String? = null,
-) {
-    val arabicGulf: Boolean
-        get() = countryCode in setOf("OM", "SA", "AE", "KW", "QA", "BH")
-}
-
-/** Uses a fresh network/GPS fix first, then carrier/SIM/locale fallbacks. */
+)
+/** Resolve the country independently from the user's preferred content language. */
 object RegionResolver {
-    @Volatile private var cached: Pair<Long, YouTubeRegion>? = null
-    private const val CACHE_TTL_MS = 10 * 60 * 1000L
+    private data class CachedRegion(val key: String, val time: Long, val value: YouTubeRegion)
+    @Volatile private var cached: CachedRegion? = null
 
     suspend fun resolve(context: Context): YouTubeRegion = withContext(Dispatchers.IO) {
-        val manualCountry = context.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE)
-            .getString(PreferencesStore.KEY_YOUTUBE_COUNTRY, "")
-            .orEmpty()
-            .uppercase(Locale.ROOT)
-        if (manualCountry in ARABIC_COUNTRIES) {
-            return@withContext YouTubeRegion(manualCountry, "ar")
-        }
-        val now = System.currentTimeMillis()
-        cached?.takeIf { now - it.first < CACHE_TTL_MS }?.second?.let { return@withContext it }
+        val prefs = context.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE)
+        val manual = normalizeYouTubeCountry(prefs.getString(PreferencesStore.KEY_YOUTUBE_COUNTRY, "").orEmpty())
+        val language = contentLanguage(
+            prefs.getString(PreferencesStore.KEY_YOUTUBE_LANGUAGE, "").orEmpty(),
+            prefs.getString(PreferencesStore.KEY_LANGUAGE, "").orEmpty(),
+            Locale.getDefault().toLanguageTag(),
+        )
+        if (manual.isNotEmpty()) return@withContext YouTubeRegion(manual, language)
+        val telephony = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+        val network = runCatching { telephony?.networkCountryIso }.getOrNull().orEmpty()
+        val sim = runCatching { telephony?.simCountryIso }.getOrNull().orEmpty()
+        val permission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+        val key = listOf(language, network, sim, Locale.getDefault().toLanguageTag(), permission).joinToString("|")
+        val now = android.os.SystemClock.elapsedRealtime()
+        cached?.takeIf { it.key == key && now - it.time < 60_000L }?.let { return@withContext it.value }
         val location = currentLocation(context)
         val address = location?.let { reverseGeocode(context, it) }
-        val telephony = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
-        val carrierCountry = telephony?.networkCountryIso?.uppercase(Locale.ROOT).orEmpty()
-        val simCountry = telephony?.simCountryIso?.uppercase(Locale.ROOT).orEmpty()
-        val localeCountry = Locale.getDefault().country.uppercase(Locale.ROOT)
-        val country = sequenceOf(address?.countryCode, carrierCountry, simCountry, localeCountry, "OM")
-            .mapNotNull { it?.trim()?.takeIf { value -> value.length == 2 && value.all(Char::isLetter) } }
-            .firstOrNull() ?: "OM"
-        val language = if (country in setOf("OM", "SA", "AE", "KW", "QA", "BH")) {
-            "ar"
-        } else {
-            Locale.getDefault().language.lowercase(Locale.ROOT).takeIf { it.length == 2 } ?: "ar"
-        }
+        val country = sequenceOf(address?.countryCode.orEmpty(), network, sim, Locale.getDefault().country)
+            .map(::normalizeYouTubeCountry).firstOrNull { it.isNotEmpty() }.orEmpty()
         val resolved = YouTubeRegion(country, language, location?.latitude, location?.longitude, address?.locality)
-        cached = now to resolved
+        cached = CachedRegion(key, now, resolved)
         resolved
     }
 
@@ -71,7 +63,7 @@ object RegionResolver {
         val manager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return null
         val known = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
             .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }
-            .filter { System.currentTimeMillis() - it.time < 6 * 60 * 60 * 1000L }
+            .filter { System.currentTimeMillis() - it.time in 0L..21_600_000L }
             .maxByOrNull { it.time }
         if (known != null) return known
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -105,8 +97,4 @@ object RegionResolver {
 
     private data class AddressParts(val countryCode: String?, val locality: String?)
 
-    private val ARABIC_COUNTRIES = setOf(
-        "OM", "SA", "AE", "KW", "QA", "BH", "YE", "JO", "LB", "SY", "IQ", "PS",
-        "EG", "SD", "LY", "TN", "DZ", "MA", "MR", "SO", "DJ", "KM",
-    )
 }

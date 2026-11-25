@@ -36,7 +36,7 @@ android {
         applicationId = "com.mawja.player"
         minSdk = 26
         targetSdk = 37
-        versionCode = 36
+        versionCode = 37
         versionName = "1.0.0"
         buildConfigField("String", "AUDIUS_API_KEY", "\"$audiusKey\"")
         buildConfigField("String", "YOUTUBE_DATA_API_KEY", "\"$youtubeDataApiKey\"")

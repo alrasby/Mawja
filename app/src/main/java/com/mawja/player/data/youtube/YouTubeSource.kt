@@ -2,6 +2,7 @@ package com.mawja.player.data.youtube
 
 import android.net.Uri
 import android.content.Context
+import com.mawja.player.data.PreferencesStore
 import com.mawja.player.data.SourceType
 import com.mawja.player.data.Track
 import com.mawja.player.data.youtubeThumbnailUrl
@@ -88,7 +89,7 @@ object YouTubeSource {
     private lateinit var client: OkHttpClient
     private lateinit var pipedClient: OkHttpClient
     private lateinit var appContext: Context
-    @Volatile private var activeRegion = YouTubeRegion("OM", "ar")
+    @Volatile private var activeRegion = YouTubeRegion("", Locale.getDefault().language)
 
     fun init(httpClient: OkHttpClient, context: Context) {
         client = httpClient
@@ -98,54 +99,32 @@ object YouTubeSource {
             .readTimeout(6, TimeUnit.SECONDS)
             .callTimeout(8, TimeUnit.SECONDS)
             .build()
-        NewPipe.init(OkHttpDownloader(httpClient), Localization("ar", "OM"), ContentCountry("OM"))
+        NewPipe.init(OkHttpDownloader(httpClient), Localization(Locale.getDefault().language, normalizeYouTubeCountry(Locale.getDefault().country)), ContentCountry(normalizeYouTubeCountry(Locale.getDefault().country)))
     }
 
     /**
      * Searches songs and music videos, walks two result pages for each filter,
      * removes duplicates, then ranks title/uploader matches before returning them.
      */
-    suspend fun search(query: String, localDiscovery: Boolean = false): List<Track> = withContext(Dispatchers.IO) {
+    suspend fun search(query: String, localDiscovery: Boolean = false, resolvedRegion: YouTubeRegion? = null): List<Track> = withContext(Dispatchers.IO) {
         val clean = query.trim().take(120)
         if (clean.isBlank()) return@withContext emptyList()
-        val region = RegionResolver.resolve(appContext)
+        val region = resolvedRegion ?: RegionResolver.resolve(appContext)
         activeRegion = region
         NewPipe.init(OkHttpDownloader(client), Localization(region.language, region.countryCode), ContentCountry(region.countryCode))
-        val effectiveQuery = if (localDiscovery) {
-            if (region.arabicGulf) {
-                listOf("أغاني خليجية عربية عمانية", region.locality).filterNotNull().joinToString(" ")
-            } else {
-                listOf("local music", region.locality, region.countryCode).filterNotNull().joinToString(" ")
-            }
-        } else clean
-        val newPipeResults = searchSpecs.flatMap { spec ->
+        val topic = appContext.getSharedPreferences(PreferencesStore.PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(PreferencesStore.KEY_YOUTUBE_TOPIC, "music").orEmpty()
+        val effectiveQuery = if (localDiscovery) discoveryQuery(region, topic) else clean
+        val filters = if (localDiscovery && topic != "music") {
+            listOf(SearchSpec(YoutubeSearchQueryHandlerFactory.VIDEOS, video = true))
+        } else searchSpecs
+        val newPipeResults = filters.flatMap { spec ->
             runCatching { searchFilter(effectiveQuery, spec, region) }.getOrDefault(emptyList())
         }
         val innertubeResults = runCatching { searchViaInnertube(effectiveQuery, region) }.getOrDefault(emptyList())
         (newPipeResults + innertubeResults)
             .distinctBy { it.id }
-            .filter { !localDiscovery || !region.arabicGulf || hasArabicOrGulfText(it) }
-            .sortedWith(
-                compareByDescending<Track> { regionalScore(it, region) }
-                    .thenByDescending { relevanceScore(it, effectiveQuery) }
-                    .thenByDescending { it.durationMs },
-            )
             .take(MAX_SEARCH_RESULTS)
-    }
-
-    private fun regionalScore(track: Track, region: YouTubeRegion): Int {
-        val text = "${track.title} ${track.subtitle}"
-        val arabic = text.count { it in '\u0600'..'\u06FF' }
-        val gulf = listOf("خليج", "عمان", "عماني", "السعودية", "الإمارات", "قطر", "الكويت", "البحرين")
-            .count { text.contains(it, ignoreCase = true) }
-        return if (region.arabicGulf) arabic * 3 + gulf * 20 else arabic
-    }
-
-    private fun hasArabicOrGulfText(track: Track): Boolean {
-        val text = "${track.title} ${track.subtitle}"
-        return text.any { it in '\u0600'..'\u06FF' } ||
-            listOf("Gulf", "Oman", "Saudi", "Emirati", "Qatar", "Kuwait", "Bahrain")
-                .any { text.contains(it, ignoreCase = true) }
     }
 
     /** YouTube's JSON search endpoint is more resilient than HTML extraction when its layout changes. */
