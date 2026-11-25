@@ -34,7 +34,7 @@ class MawjaApp : Application(), ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
         .memoryCache { MemoryCache.Builder(this).maxSizePercent(0.10).build() }
-        .diskCache { DiskCache.Builder().directory(cacheDir.resolve("mawja_image_cache")).maxSizePercent(0.03).build() }
+        .diskCache { DiskCache.Builder().directory(cacheDir.resolve("mawja_image_cache")).maxSizeBytes(64L * 1024 * 1024).build() }
         .respectCacheHeaders(false)
         .components { add(VideoFrameDecoder.Factory()) }
         .build()
@@ -57,6 +57,7 @@ class AppContainer(app: Application) {
         .followSslRedirects(true)
         .build()
 
+    val podcasts = com.mawja.player.data.PodcastRepository(app, http)
     val library = LibraryStore(app)
     val preferences = PreferencesStore(app)
     val radio = RadioRepository(app, http)

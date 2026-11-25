@@ -79,6 +79,7 @@ internal fun SearchScreen(tab: Int) {
                 SourceType.LOCAL -> (localTracks ?: container.local.load().also { localTracks = it }).filter { track ->
                     track.folder !in hiddenFolders && listOf(track.title, track.artist, track.album, track.folder).any { it.contains(term, ignoreCase = true) }
                 }
+                SourceType.PODCAST -> container.podcasts.episodes.value.filter { it.title.contains(term, true) }
                 SourceType.RADIO -> container.radio.search(term)
                 SourceType.AUDIUS -> container.audius.search(term)
                 SourceType.YOUTUBE -> if (container.youtubeData.isConfigured) container.youtubeData.search(term)

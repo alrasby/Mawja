@@ -132,4 +132,14 @@
     <string name="youtube_podcasts">بودكاست</string>
     <string name="youtube_country_unknown">اختر دولة</string>
     <string name="youtube_effective_region">بلد المحتوى: %1$s · اللغة: %2$s</string>
+    <string name="discover_more">اكتشف · الراديو والبودكاست والأونلاين</string>
+    <string name="discover_back">العودة للرئيسية</string>
+    <string name="discover_radio">الراديو</string>
+    <string name="discover_online">أونلاين</string>
+    <string name="podcasts">البودكاست</string>
+    <string name="podcast_help">أضف رابط RSS الرسمي للبودكاست. تُشغّل الحلقات عند الطلب دون تنزيل تلقائي.</string>
+    <string name="podcast_subscribe">اشتراك</string>
+    <string name="podcast_refresh">تحديث</string>
+    <string name="podcast_error">تعذر تحميل بعض الخلاصات. تحقق من رابط RSS أو الاتصال. تبقى الحلقات المخزنة متاحة.</string>
+    <string name="podcast_empty">أضف رابط RSS لعرض أحدث حلقاته.</string>
 </resources>

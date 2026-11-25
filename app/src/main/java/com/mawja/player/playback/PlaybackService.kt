@@ -394,9 +394,14 @@ class PlaybackService : MediaLibraryService() {
         parentId == ROOT -> listOf(
             browseItem(RADIO, "Radio", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),
             browseItem(ONLINE, "Online", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
+            browseItem("podcasts", getString(R.string.podcasts), MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
             browseItem(DEVICE, "Device", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
             browseItem(LIBRARY, "Library", MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS),
         )
+        parentId == "podcasts" -> {
+            appContainer.podcasts.refresh()
+            appContainer.podcasts.episodes.value.map(::playableItem)
+        }
         parentId == RADIO -> listOf(
             browseItem(RADIO_LOCAL, "Local", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),
             browseItem(RADIO_WORLD, "World", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),

@@ -132,4 +132,14 @@
     <string name="youtube_podcasts">Podcasts</string>
     <string name="youtube_country_unknown">Choose a country</string>
     <string name="youtube_effective_region">Content region: %1$s · Language: %2$s</string>
+    <string name="discover_more">Discover · Radio, podcasts and online</string>
+    <string name="discover_back">Back to home</string>
+    <string name="discover_radio">Radio</string>
+    <string name="discover_online">Online</string>
+    <string name="podcasts">Podcasts</string>
+    <string name="podcast_help">Subscribe using the official podcast RSS feed. Episodes stream on demand; no automatic downloads.</string>
+    <string name="podcast_subscribe">Subscribe</string>
+    <string name="podcast_refresh">Refresh</string>
+    <string name="podcast_error">Some feeds could not be loaded. Check the RSS address or connection. Cached episodes remain available.</string>
+    <string name="podcast_empty">Add an RSS feed to discover its latest episodes.</string>
 </resources>

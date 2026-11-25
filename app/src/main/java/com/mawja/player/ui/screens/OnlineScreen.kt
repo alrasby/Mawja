@@ -81,7 +81,9 @@ internal fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33
 } else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(allowDiscover: Boolean = true) {
+    var discover by remember { mutableStateOf(false) }
+    if (discover) { DiscoverScreen { discover = false }; return }
     val context = LocalContext.current
     val container = LocalContainer.current
     val vm: OnlineVm = viewModel(factory = VmFactory(container))
@@ -108,6 +110,7 @@ fun HomeScreen() {
     }
 
     Column(Modifier.fillMaxSize()) {
+        if (allowDiscover) androidx.compose.material3.TextButton(onClick = { discover = true }) { Text(stringResource(R.string.discover_more)) }
         HomeHero()
         SourceFilterBar(selected, audiusEnabled, youtubeEnabled, vm::setSource)
         HomeContent(

@@ -84,6 +84,7 @@ val LocalContainer = staticCompositionLocalOf<AppContainer> { error("AppContaine
 enum class MediaGroupKind { TRACK, FOLDER, ALBUM, ARTIST, VIDEO }
 
 fun sourceIcon(source: SourceType): ImageVector = when (source) {
+    SourceType.PODCAST -> Icons.Rounded.GraphicEq
     SourceType.RADIO -> Icons.Rounded.Radio
     SourceType.LOCAL -> Icons.Rounded.MusicNote
     SourceType.AUDIUS -> Icons.Rounded.GraphicEq

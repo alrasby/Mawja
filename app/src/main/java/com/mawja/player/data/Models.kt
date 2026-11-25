@@ -2,7 +2,7 @@ package com.mawja.player.data
 
 import kotlinx.serialization.Serializable
 
-enum class SourceType { RADIO, LOCAL, AUDIUS, YOUTUBE }
+enum class SourceType { RADIO, LOCAL, AUDIUS, YOUTUBE, PODCAST }
 
 /**
  * Returns YouTube's stable thumbnail endpoint. Optional variants such as
