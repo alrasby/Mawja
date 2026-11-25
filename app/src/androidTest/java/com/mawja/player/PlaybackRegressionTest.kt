@@ -1,0 +1,75 @@
+package com.mawja.player
+
+import android.content.ComponentName
+import android.content.Context
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.mawja.player.playback.PlaybackService
+import org.junit.Assert.*
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.DataOutputStream
+import java.io.File
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
+
+@RunWith(AndroidJUnit4::class)
+class PlaybackRegressionTest {
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
+
+    @Test(timeout = 90000) fun localPlaybackSeekPauseAndRapidAudioSettingsRemainResponsive() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val file = File(context.cacheDir, "playback-regression.wav")
+        val samples = 16000 * 12
+        DataOutputStream(file.outputStream()).use { out ->
+            fun int(value: Int) = out.writeInt(Integer.reverseBytes(value))
+            fun short(value: Int) = out.writeShort(java.lang.Short.reverseBytes(value.toShort()).toInt())
+            out.writeBytes("RIFF"); int(36 + samples * 2); out.writeBytes("WAVEfmt "); int(16)
+            short(1); short(1); int(16000); int(32000); short(2); short(16)
+            out.writeBytes("data"); int(samples * 2)
+            repeat(samples) { short((kotlin.math.sin(it * 2.0 * Math.PI * 440 / 16000) * 5000).toInt()) }
+        }
+        val future = AtomicReference<com.google.common.util.concurrent.ListenableFuture<MediaController>>()
+        main { future.set(MediaController.Builder(context, SessionToken(context, ComponentName(context, PlaybackService::class.java))).buildAsync()) }
+        val controller = future.get().get(15, TimeUnit.SECONDS)
+        val prefs = (context.applicationContext as MawjaApp).container.preferences
+        val oldPreset = prefs.equalizerPreset.value
+        val oldSaver = prefs.batterySaver.value
+        try {
+            main {
+                controller.setMediaItem(MediaItem.Builder().setMediaId("local:regression").setUri(android.net.Uri.fromFile(file)).build())
+                controller.prepare(); controller.play()
+            }
+            val ready = AtomicReference(false)
+            val deadline = System.currentTimeMillis() + 15000
+            while (!ready.get() && System.currentTimeMillis() < deadline) {
+                main { ready.set(controller.playbackState == Player.STATE_READY && controller.isPlaying) }
+                Thread.sleep(100)
+            }
+            assertTrue("Playback never became ready", ready.get())
+            main { assertNull(controller.playerError); assertTrue(controller.duration >= 11000); controller.seekTo(4000) }
+            Thread.sleep(300)
+            main { assertTrue(controller.currentPosition >= 3500); controller.pause(); assertFalse(controller.playWhenReady) }
+            repeat(8) { i ->
+                main {
+                    prefs.setEqualizerPreset(listOf("flat", "bass", "vocal", "treble")[i % 4])
+                    prefs.setBatterySaver(i % 2 == 0)
+                    controller.volume = (i + 1) / 8f
+                }
+                Thread.sleep(40)
+            }
+            main { controller.play() }
+            Thread.sleep(500)
+            main { assertTrue(controller.isPlaying); assertNull(controller.playerError); assertEquals("treble", prefs.equalizerPreset.value) }
+        } finally {
+            main { prefs.setEqualizerPreset(oldPreset); prefs.setBatterySaver(oldSaver); controller.stop(); controller.clearMediaItems(); controller.release() }
+            file.delete()
+        }
+    }
+}

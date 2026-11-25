@@ -5,6 +5,11 @@ import android.Manifest
 import android.app.SearchManager
 import android.content.pm.PackageManager
 import android.media.audiofx.Equalizer
+import java.util.concurrent.Executors
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
+import androidx.media3.common.PlaybackException
 import android.net.Uri
 import android.os.Bundle
 import android.location.LocationManager
@@ -70,7 +75,16 @@ import java.util.Locale
 @SuppressLint("UnsafeOptInUsageError")
 class PlaybackService : MediaLibraryService() {
     private var session: MediaLibrarySession? = null
+    // All AudioEffect binder/native calls, including release, belong to this serial worker.
     private var equalizer: Equalizer? = null
+    private val effectDispatcher = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "MawjaAudioEffects").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
+    private val effectScope = CoroutineScope(SupervisorJob() + effectDispatcher)
+    private val audioSessionIds = kotlinx.coroutines.flow.MutableStateFlow(0)
+    private var installedAudioSessionId = 0
+    @Volatile private var effectsClosing = false
+    private var retriedYoutubeId: String? = null
     private lateinit var redirectClient: OkHttpClient
     private val autoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val autoTracks = Collections.synchronizedMap(
@@ -146,34 +160,56 @@ class PlaybackService : MediaLibraryService() {
                 session?.setMediaButtonPreferences(if (seekable) localSeekButtons() else emptyList())
             }
 
+            override fun onMediaItemTransition(item: MediaItem?, reason: Int) {
+                if (item?.mediaId != retriedYoutubeId) retriedYoutubeId = null
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                val item = player.currentMediaItem
+                val httpError = generateSequence<Throwable>(error) { it.cause }
+                    .filterIsInstance<androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException>().firstOrNull()
+                PlaybackDiagnostics.record("player source=${item?.mediaId?.substringBefore(':')} code=${error.errorCodeName} http=${httpError?.responseCode}")
+                if (item?.mediaId?.startsWith("yt:") == true && retriedYoutubeId != item.mediaId && httpError?.responseCode in listOf(401, 403, 410)) {
+                    retriedYoutubeId = item.mediaId
+                    YouTubeSource.invalidateStream(item.mediaId.removePrefix("yt:"))
+                    player.prepare()
+                }
+            }
+
             override fun onAudioSessionIdChanged(audioSessionId: Int) {
-                installEqualizer(audioSessionId)
+                audioSessionIds.value = audioSessionId
             }
         })
-        installEqualizer(player.audioSessionId)
+        audioSessionIds.value = player.audioSessionId
         session = MediaLibrarySession.Builder(this, player, LibraryCallback()).build()
         autoScope.launch(Dispatchers.Main.immediate) {
             preferences.batterySaver.collect { enabled ->
                 player.setWakeMode(if (enabled) C.WAKE_MODE_NONE else C.WAKE_MODE_NETWORK)
             }
         }
-        autoScope.launch(Dispatchers.Main.immediate) {
-            preferences.equalizerPreset.collect(::applyEqualizerPreset)
+        effectScope.launch {
+            combine(audioSessionIds, preferences.equalizerPreset) { id, preset -> id to preset }
+                .conflate().collect { (id, preset) ->
+                    if (!effectsClosing) {
+                        if (id != installedAudioSessionId) installEqualizer(id)
+                        applyEqualizerPreset(preset)
+                    }
+                }
         }
     }
 
     private fun installEqualizer(audioSessionId: Int) {
+        check(Thread.currentThread().name == "MawjaAudioEffects")
+        runCatching { equalizer?.release() }
+        equalizer = null
+        installedAudioSessionId = audioSessionId
         if (audioSessionId <= 0) return
-        runCatching {
-            val previous = equalizer
-            equalizer = null
-            previous?.release()
-            equalizer = Equalizer(0, audioSessionId)
-            applyEqualizerPreset(appContainer.preferences.equalizerPreset.value)
-        }
+        runCatching { equalizer = Equalizer(0, audioSessionId) }
+            .onFailure { PlaybackDiagnostics.record("equalizer unavailable: ${it.javaClass.simpleName}") }
     }
 
     private fun applyEqualizerPreset(preset: String) {
+        check(Thread.currentThread().name == "MawjaAudioEffects")
         val eq = equalizer ?: return
         runCatching {
             if (!eq.enabled) eq.enabled = true
@@ -675,8 +711,11 @@ class PlaybackService : MediaLibraryService() {
     override fun onDestroy() {
         autoScope.cancel()
         autoTracks.clear()
-        equalizer?.release()
-        equalizer = null
+        effectsClosing = true
+        effectScope.launch {
+            try { runCatching { equalizer?.release() }; equalizer = null }
+            finally { effectScope.cancel(); effectDispatcher.close() }
+        }
         session?.run {
             player.release()
             release()

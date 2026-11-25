@@ -1,6 +1,10 @@
 package com.mawja.player.ui.screens
 
 import android.app.Activity
+import android.content.Intent
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import com.mawja.player.playback.PlaybackDiagnostics
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,6 +105,8 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
     BackHandler { if (section != null) section = null else onBack() }
     val container = LocalContainer.current
     val context = LocalContext.current
+    val diagnosticScope = rememberCoroutineScope()
+    var diagnosticBusy by remember { mutableStateOf(false) }
     val theme by container.preferences.theme.collectAsStateWithLifecycle()
     val language by container.preferences.language.collectAsStateWithLifecycle()
     val batterySaver by container.preferences.batterySaver.collectAsStateWithLifecycle()
@@ -342,8 +348,8 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text(stringResource(R.string.volume), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 14.dp))
-                    Text("${(player.volume * 100).toInt()}%", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f).padding(start = 8.dp))
+                    Text(stringResource(R.string.volume), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).padding(start = 14.dp))
+                    Text("${(player.volume * 100).toInt()}%", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                 }
                 Slider(value = player.volume, onValueChange = container.player::setVolume, valueRange = 0f..1f, modifier = Modifier.fillMaxWidth())
                 Text(stringResource(R.string.equalizer), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
@@ -358,6 +364,20 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
                 }
             }
         }
+        TextButton(enabled = !diagnosticBusy, onClick = {
+            diagnosticScope.launch {
+                diagnosticBusy = true
+                try {
+                    val report = withContext(Dispatchers.IO) { PlaybackDiagnostics.report(context.applicationContext) }
+                    context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, "Mawja playback diagnostics")
+                        putExtra(Intent.EXTRA_TEXT, report)
+                    }, context.getString(R.string.playback_diagnostics)))
+                } finally { diagnosticBusy = false }
+            }
+        }) { Text(stringResource(R.string.playback_diagnostics)) }
+
 
                 }
             }

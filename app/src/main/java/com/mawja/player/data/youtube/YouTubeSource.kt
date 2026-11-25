@@ -88,12 +88,14 @@ object YouTubeSource {
     private val idRegex = Regex("(?:[?&]v=|youtu\\.be/)([A-Za-z0-9_-]{11})")
     private lateinit var client: OkHttpClient
     private lateinit var pipedClient: OkHttpClient
+    private lateinit var streamProbe: StreamProbe
     private lateinit var appContext: Context
     @Volatile private var activeRegion = YouTubeRegion("", Locale.getDefault().language)
 
     fun init(httpClient: OkHttpClient, context: Context) {
         client = httpClient
         appContext = context.applicationContext
+        streamProbe = StreamProbe(httpClient.newBuilder().connectTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS).callTimeout(8, TimeUnit.SECONDS).build())
         pipedClient = httpClient.newBuilder()
             .connectTimeout(5, TimeUnit.SECONDS)
             .readTimeout(6, TimeUnit.SECONDS)
@@ -291,7 +293,8 @@ object YouTubeSource {
                 val url = resolver(id, preferVideo)
                 urlCache[key] = url
                 return url
-            } catch (error: Throwable) {
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
                 failures += error
             }
         }
@@ -356,6 +359,7 @@ object YouTubeSource {
                             .maxByOrNull { it.score }
                     }
                     if (best != null) {
+                        streamProbe.check(best.url, candidate.userAgent)
                         userAgentCache[best.url] = candidate.userAgent
                         return best.url
                     }
@@ -396,6 +400,7 @@ object YouTubeSource {
                     .thenByDescending { it.averageBitrate },
             )
             .firstOrNull() ?: throw IOException("No YouTube audio stream found")
+        streamProbe.check(best.content, userAgentFor(best.content))
         userAgentCache[best.content] = userAgentFor(best.content)
         return best.content
     }
@@ -428,15 +433,22 @@ object YouTubeSource {
                     .mapNotNull { it["url"]?.jsonPrimitive?.contentOrNull }
                 val selected = if (preferVideo) video.firstOrNull() else audio.firstOrNull()
                 if (!selected.isNullOrBlank()) {
+                    streamProbe.check(selected, WEB_UA)
                     userAgentCache[selected] = WEB_UA
                     return selected
                 }
                 throw IOException("Piped returned no playable stream")
-            } catch (error: Throwable) {
+            } catch (error: Exception) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
                 lastError = error
             }
         }
         throw IOException("No Piped instance returned a playable stream", lastError)
+    }
+
+    fun invalidateStream(id: String) {
+        urlCache.remove("$id:audio")
+        urlCache.remove("$id:video")
     }
 
     fun userAgentFor(streamUrl: String): String {

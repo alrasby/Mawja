@@ -149,4 +149,5 @@
     <string name="refine_device_desc">طريقة العرض وظهور المجلدات</string>
     <string name="refine_online_desc">المصادر والدولة واللغة والاهتمامات</string>
     <string name="refine_playback_desc">توفير البطارية والصوت والمعادل</string>
+    <string name="playback_diagnostics">مشاركة تشخيص التشغيل</string>
 </resources>

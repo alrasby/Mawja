@@ -149,4 +149,5 @@
     <string name="refine_device_desc">Layout and folder visibility</string>
     <string name="refine_online_desc">Sources, country, language and interests</string>
     <string name="refine_playback_desc">Battery saver, volume and equalizer</string>
+    <string name="playback_diagnostics">Share playback diagnostics</string>
 </resources>
