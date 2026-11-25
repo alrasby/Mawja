@@ -44,7 +44,7 @@ object PodcastParser {
             }
             override fun endElement(uri: String?, local: String, q: String) {
                 val value = text.toString().trim()
-                if (local == "title") { if (item) title = value else if (show.isEmpty()) show = value }
+                if (local == "title") { if (item) title = value.take(512) else if (show.isEmpty()) show = value.take(512) }
                 if (item && local == "duration") duration = value.split(':').fold(0L) { acc, part -> (acc * 60 + (part.toLongOrNull() ?: 0)).coerceAtMost(604800) } * 1000
                 if (local == "item" || local == "entry") {
                     if (url.isNotEmpty() && result.size < 200) result += Track(

@@ -400,7 +400,17 @@ class PlaybackService : MediaLibraryService() {
         )
         parentId == "podcasts" -> {
             appContainer.podcasts.restore()
-            appContainer.podcasts.episodes.value.map(::playableItem)
+            appContainer.podcasts.subscriptions.value.map { feed ->
+                browseItem("podcast-feed:" + com.mawja.player.data.digest(feed),
+                    appContainer.podcasts.episodes.value.firstOrNull { it.folder == feed }?.album?.ifBlank { feed } ?: feed,
+                    MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+            }
+        }
+        parentId.startsWith("podcast-feed:") -> {
+            appContainer.podcasts.restore()
+            appContainer.podcasts.episodes.value.filter {
+                "podcast-feed:" + com.mawja.player.data.digest(it.folder) == parentId
+            }.take(200).map(::playableItem)
         }
         parentId == RADIO -> listOf(
             browseItem(RADIO_LOCAL, "Local", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),
@@ -597,6 +607,13 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
+        if (id.startsWith("podcast-feed:")) {
+            val feed = appContainer.podcasts.subscriptions.value.firstOrNull {
+                "podcast-feed:" + com.mawja.player.data.digest(it) == id
+            } ?: return null
+            return browseItem(id, appContainer.podcasts.episodes.value.firstOrNull { it.folder == feed }?.album?.ifBlank { feed } ?: feed,
+                MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+        }
         if (id.startsWith("world:")) {
             return browseItem(
                 id,

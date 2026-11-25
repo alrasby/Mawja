@@ -20,3 +20,11 @@ adb shell dumpsys meminfo "$package" > runtime-report/memory-background.txt
 adb shell dumpsys batterystats "$package" > runtime-report/batterystats-emulator.txt
 adb logcat -d -b crash > runtime-report/crashes.txt
 if grep -q 'FATAL EXCEPTION' runtime-report/crashes.txt; then exit 1; fi
+
+adb shell run-as "$package" du -k cache > runtime-report/cache-size.txt
+for snapshot in runtime-report/memory-*.txt; do
+  echo "$snapshot"
+  grep -E 'TOTAL PSS|TOTAL RSS|TOTAL SWAP|Native Heap|Dalvik Heap' "$snapshot" || true
+done
+cat runtime-report/startup.txt
+cat runtime-report/cache-size.txt

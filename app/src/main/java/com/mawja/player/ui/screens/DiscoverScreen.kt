@@ -26,6 +26,8 @@ fun DiscoverScreen(onBack: () -> Unit) {
     var busy by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     var category by remember { mutableIntStateOf(0) }
+    var selectedFeed by remember { mutableStateOf<String?>(null) }
+    val visibleEpisodes = episodes.filter { selectedFeed == null || it.folder == selectedFeed }
     val footer = LocalFooterBottomPadding.current
     LaunchedEffect(Unit) {
         container.podcasts.restore()
@@ -70,13 +72,14 @@ fun DiscoverScreen(onBack: () -> Unit) {
             }
             items(feeds, key = { "feed:$it" }) { feed ->
                 GlassCard(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                    Text(episodes.firstOrNull { it.folder == feed }?.album?.ifBlank { feed } ?: feed)
-                    TextButton(enabled = !busy, onClick = { scope.launch { container.podcasts.remove(feed) } }) { Text(stringResource(R.string.remove)) }
+                    FilterChip(selected = selectedFeed == feed, onClick = { selectedFeed = if (selectedFeed == feed) null else feed },
+                        label = { Text(episodes.firstOrNull { it.folder == feed }?.album?.ifBlank { feed } ?: feed) })
+                    TextButton(enabled = !busy, onClick = { scope.launch { container.podcasts.remove(feed); if (selectedFeed == feed) selectedFeed = null } }) { Text(stringResource(R.string.remove)) }
                 }
             }
             if (episodes.isEmpty() && !busy) item { HintText(stringResource(R.string.podcast_empty)) }
-            items(episodes, key = { it.id }) { track ->
-                TrackCard(track = track, onClick = { container.play(episodes, episodes.indexOf(track)) }, fixedWidth = false, modifier = Modifier.fillMaxWidth())
+            items(visibleEpisodes, key = { it.id }) { track ->
+                TrackCard(track = track, onClick = { container.play(visibleEpisodes, visibleEpisodes.indexOf(track)) }, fixedWidth = false, modifier = Modifier.fillMaxWidth())
             }
         }
     }

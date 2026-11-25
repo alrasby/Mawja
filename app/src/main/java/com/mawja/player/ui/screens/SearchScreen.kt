@@ -50,6 +50,7 @@ internal fun SearchScreen(tab: Int) {
     val sources = buildList {
         add(SourceType.LOCAL to R.string.tab_device)
         add(SourceType.RADIO to R.string.tab_radio)
+        add(SourceType.PODCAST to R.string.podcasts)
         if (youtubeEnabled) add(SourceType.YOUTUBE to R.string.source_youtube)
         if (audiusEnabled) add(SourceType.AUDIUS to R.string.source_audius)
     }
@@ -79,7 +80,10 @@ internal fun SearchScreen(tab: Int) {
                 SourceType.LOCAL -> (localTracks ?: container.local.load().also { localTracks = it }).filter { track ->
                     track.folder !in hiddenFolders && listOf(track.title, track.artist, track.album, track.folder).any { it.contains(term, ignoreCase = true) }
                 }
-                SourceType.PODCAST -> container.podcasts.episodes.value.filter { it.title.contains(term, true) }
+                SourceType.PODCAST -> {
+                    container.podcasts.restore()
+                    container.podcasts.episodes.value.filter { it.title.contains(term, true) || it.artist.contains(term, true) }
+                }
                 SourceType.RADIO -> container.radio.search(term)
                 SourceType.AUDIUS -> container.audius.search(term)
                 SourceType.YOUTUBE -> if (container.youtubeData.isConfigured) container.youtubeData.search(term)
