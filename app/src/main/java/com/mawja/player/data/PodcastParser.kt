@@ -22,7 +22,7 @@ object PodcastParser {
             var depth = 0
             fun safe(value: String?): String = try {
                 val uri = URI(feedUrl).resolve(value.orEmpty())
-                if (uri.scheme in listOf("https", "http") && uri.host != null && uri.userInfo == null) uri.toString() else ""
+                if (uri.scheme == "https" && uri.host != null && uri.userInfo == null) uri.toString() else ""
             } catch (_: Exception) { "" }
             override fun resolveEntity(publicId: String?, systemId: String?) = org.xml.sax.InputSource(java.io.StringReader(""))
             override fun startElement(uri: String?, local: String, q: String, attrs: Attributes) {

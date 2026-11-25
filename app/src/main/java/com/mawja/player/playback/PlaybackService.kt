@@ -399,7 +399,7 @@ class PlaybackService : MediaLibraryService() {
             browseItem(LIBRARY, "Library", MediaMetadata.MEDIA_TYPE_FOLDER_PLAYLISTS),
         )
         parentId == "podcasts" -> {
-            appContainer.podcasts.refresh()
+            appContainer.podcasts.restore()
             appContainer.podcasts.episodes.value.map(::playableItem)
         }
         parentId == RADIO -> listOf(

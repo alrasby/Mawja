@@ -450,12 +450,38 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         return "global_v1_${filter.id}_${countryCode ?: "all"}_$languageKey"
     }
 
-    private fun cacheFile(id: String) = File(context.filesDir, "radio_$id.json")
-    private fun saveCache(id: String, tracks: List<Track>) { runCatching { cacheFile(id).writeText(json.encodeToString(trackList, tracks)) } }
-    private fun loadCache(id: String): List<Track>? = runCatching {
-        val f = cacheFile(id)
-        if (f.isFile) json.decodeFromString(trackList, f.readText()).filter { isPlayableRadioUrl(it.streamUrl.orEmpty()) } else null
-    }.getOrNull()?.takeIf { it.isNotEmpty() }
+    private val cacheLock = Any()
+    private val cacheDirectory = File(context.cacheDir, "radio_metadata").apply { mkdirs() }
+    private fun cacheFile(id: String) = File(cacheDirectory, com.mawja.player.data.digest(id) + ".json")
+    private fun saveCache(id: String, tracks: List<Track>) = synchronized(cacheLock) {
+        runCatching {
+            val atomic = android.util.AtomicFile(cacheFile(id))
+            val output = atomic.startWrite()
+            try {
+                output.write(json.encodeToString(trackList, tracks.take(1000)).toByteArray())
+                atomic.finishWrite(output)
+            } catch (e: Exception) { atomic.failWrite(output); throw e }
+            var size = 0L
+            cacheDirectory.listFiles()?.filter { it.isFile }?.sortedByDescending { it.lastModified() }?.forEachIndexed { index, file ->
+                size += file.length()
+                if (index >= 64 || size > 16L * 1024 * 1024) file.delete()
+            }
+            // Previous releases stored expendable metadata in persistent files without limits.
+            context.filesDir.listFiles()?.filter { it.name.startsWith("radio_") && it.name.endsWith(".json") }?.forEach { it.delete() }
+        }
+        Unit
+    }
+    private fun loadCache(id: String): List<Track>? = synchronized(cacheLock) {
+        runCatching {
+            val f = cacheFile(id)
+            if (f.isFile && f.length() <= 4L * 1024 * 1024 &&
+                System.currentTimeMillis() - f.lastModified() in 0..7L * 24 * 60 * 60 * 1000) {
+                json.decodeFromString(trackList, android.util.AtomicFile(f).readFully().decodeToString())
+                    .filter { isPlayableRadioUrl(it.streamUrl.orEmpty()) }.take(1000)
+            } else null
+        }.getOrNull()?.takeIf { it.isNotEmpty() }
+    }
+
 }
 
 /** Conservative news-only classification. Mixed-format stations remain in country listings. */

@@ -16,7 +16,8 @@ import java.io.File
 import java.security.MessageDigest
 
 /** User subscriptions are durable; feed responses are expendable, bounded and expire after one hour. */
-class PodcastRepository(context: Context, private val http: OkHttpClient) {
+class PodcastRepository(context: Context, http: OkHttpClient) {
+    private val http = http.newBuilder().callTimeout(12, java.util.concurrent.TimeUnit.SECONDS).build()
     private val prefs = context.getSharedPreferences("podcasts", Context.MODE_PRIVATE)
     private val directory = File(context.cacheDir, "rss").apply { mkdirs() }
     private val mutex = Mutex()
@@ -25,6 +26,12 @@ class PodcastRepository(context: Context, private val http: OkHttpClient) {
     val subscriptions = _subscriptions.asStateFlow()
     private val _episodes = MutableStateFlow<List<Track>>(emptyList())
     val episodes = _episodes.asStateFlow()
+
+    suspend fun restore() = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            if (_episodes.value.isEmpty()) _episodes.value = _subscriptions.value.flatMap { cached(it) }.distinctBy { it.id }.take(1500)
+        }
+    }
 
     suspend fun subscribe(url: String) = withContext(Dispatchers.IO) {
         val normalized = java.net.URI(url.trim()).normalize().toString()

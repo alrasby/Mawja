@@ -28,6 +28,7 @@ fun DiscoverScreen(onBack: () -> Unit) {
     var category by remember { mutableIntStateOf(0) }
     val footer = LocalFooterBottomPadding.current
     LaunchedEffect(Unit) {
+        container.podcasts.restore()
         busy = true
         try { failed = container.podcasts.refresh() > 0 } finally { busy = false }
     }
