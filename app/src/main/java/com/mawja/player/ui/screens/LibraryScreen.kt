@@ -37,9 +37,7 @@ import com.mawja.player.ui.TrackRow
 import kotlinx.coroutines.launch
 
 @Composable
-fun LibraryScreen() {
-    var podcasts by remember { mutableStateOf(false) }
-    if (podcasts) { DiscoverScreen { podcasts = false }; return }
+fun LibraryScreen(onPodcasts: () -> Unit = {}) {
     val container = LocalContainer.current
     val library = container.library
     val player by container.player.state.collectAsStateWithLifecycle()
@@ -74,7 +72,7 @@ fun LibraryScreen() {
     }
 
     LazyColumn(Modifier.fillMaxWidth(), contentPadding = PaddingValues(bottom = footerBottomPadding)) {
-        item { TextButton(onClick = { podcasts = true }) { Text(stringResource(R.string.podcasts)) } }
+        item { TextButton(onClick = onPodcasts) { Text(stringResource(R.string.podcasts)) } }
         item { SectionTitle(stringResource(R.string.favorites)) }
         if (favorites.isEmpty()) item { HintText(stringResource(R.string.favorites_empty)) }
         itemsIndexed(favorites, key = { _, t -> "fav:" + t.id }) { i, t -> TrackItem(t, favorites, i, false) }

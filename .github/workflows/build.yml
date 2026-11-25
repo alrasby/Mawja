@@ -116,6 +116,7 @@ jobs:
           disable-animations: true
           script: |
             adb install runtime-apk/*.apk
+            python3 scripts/ui-refinement-smoke.py
             bash scripts/profile-runtime.sh
       - uses: actions/upload-artifact@v4
         if: always()

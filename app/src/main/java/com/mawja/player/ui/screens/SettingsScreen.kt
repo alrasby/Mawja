@@ -46,6 +46,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.key
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -93,7 +96,9 @@ private val languages = listOf(
 )
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onBack: () -> Unit = {}) {
+    var section by rememberSaveable { mutableStateOf<String?>(null) }
+    BackHandler { if (section != null) section = null else onBack() }
     val container = LocalContainer.current
     val context = LocalContext.current
     val theme by container.preferences.theme.collectAsStateWithLifecycle()
@@ -132,23 +137,51 @@ fun SettingsScreen() {
         LanguageOption("quran", stringResource(R.string.filter_quran)),
         LanguageOption("podcasts", stringResource(R.string.youtube_podcasts)),
     )
-    LaunchedEffect(youtubeCountry, youtubeLanguage, language, locationRefresh) {
+    LaunchedEffect(section, youtubeCountry, youtubeLanguage, language, locationRefresh) {
+        if (section != "online") return@LaunchedEffect
         resolvedRegion = RegionResolver.resolve(context)
     }
 
     var folders by remember { mutableStateOf<List<MediaFolder>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(section) {
+        if (section != "device") return@LaunchedEffect
         folders = withContext(Dispatchers.IO) {
             container.local.folders()
         }
     }
 
     Column(
-        Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)
+        Modifier.verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
             .padding(top = 8.dp, bottom = footerBottomPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        if (section == null) {
+            SectionTitle(stringResource(R.string.settings))
+            SettingCard(Icons.Rounded.SettingsSuggest, stringResource(R.string.settings_appearance), stringResource(R.string.refine_appearance_desc), { section = "appearance" })
+            SettingCard(Icons.Rounded.Folder, stringResource(R.string.tab_device), stringResource(R.string.refine_device_desc), { section = "device" })
+            SettingCard(Icons.Rounded.Language, stringResource(R.string.settings_online_sources), stringResource(R.string.refine_online_desc), { section = "online" })
+            SettingCard(Icons.Rounded.BatterySaver, stringResource(R.string.settings_playback), stringResource(R.string.refine_playback_desc), { section = "playback" })
+        GlassCard(
+            Modifier.fillMaxWidth(),
+            onClick = { uriHandler.openUri("https://nabdhserv.net") },
+        ) {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Made with ", style = MaterialTheme.typography.labelMedium)
+                    Text("♥", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
+                    Text(" By NabdhServ.Net", style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+        } else {
+            TextButton(onClick = { section = null }) { Text(stringResource(R.string.refine_back_settings)) }
+            when (section) {
+                "appearance" -> {
         SectionTitle(stringResource(R.string.settings_appearance))
         SettingCard(
             icon = Icons.Rounded.Language,
@@ -156,39 +189,6 @@ fun SettingsScreen() {
             value = languages.firstOrNull { it.code == language }?.label ?: "English",
             onClick = { showLanguages = true },
         )
-        SettingCard(
-            icon = Icons.Rounded.Language,
-            title = stringResource(R.string.youtube_country),
-            value = youtubeCountries.firstOrNull { it.code == youtubeCountry }?.label
-                ?: stringResource(R.string.youtube_country_auto),
-            onClick = { showYoutubeCountries = true },
-        )
-        SettingCard(
-            icon = Icons.Rounded.Language,
-            title = stringResource(R.string.youtube_content_language),
-            value = youtubeLanguages.firstOrNull { it.code == youtubeLanguage }?.label ?: autoLabel,
-            onClick = { showYoutubeLanguages = true },
-        )
-        SettingCard(
-            icon = Icons.Rounded.Language,
-            title = stringResource(R.string.youtube_interest),
-            value = youtubeTopics.firstOrNull { it.code == youtubeTopic }?.label.orEmpty(),
-            onClick = { showYoutubeTopics = true },
-        )
-        resolvedRegion?.let { region ->
-            val countryName = region.countryCode.takeIf { it.isNotEmpty() }?.let { Locale("", it).getDisplayCountry(locale) }
-                ?: stringResource(R.string.youtube_country_unknown)
-            Text(
-                stringResource(R.string.youtube_effective_region, countryName, Locale.forLanguageTag(region.language).getDisplayLanguage(locale)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (youtubeCountry.isEmpty()) {
-            TextButton(onClick = { locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) }) {
-                Text(stringResource(R.string.radio_use_location))
-            }
-        }
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -221,6 +221,10 @@ fun SettingsScreen() {
                 }
             }
         }
+
+                }
+                "device" -> {
+                    SectionTitle(stringResource(R.string.tab_device))
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -272,6 +276,9 @@ fun SettingsScreen() {
             }
         }
 
+
+                }
+                "online" -> {
         SectionTitle(stringResource(R.string.settings_online_sources))
         GlassCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -281,6 +288,42 @@ fun SettingsScreen() {
             }
         }
 
+        SettingCard(
+            icon = Icons.Rounded.Language,
+            title = stringResource(R.string.youtube_country),
+            value = youtubeCountries.firstOrNull { it.code == youtubeCountry }?.label
+                ?: stringResource(R.string.youtube_country_auto),
+            onClick = { showYoutubeCountries = true },
+        )
+        SettingCard(
+            icon = Icons.Rounded.Language,
+            title = stringResource(R.string.youtube_content_language),
+            value = youtubeLanguages.firstOrNull { it.code == youtubeLanguage }?.label ?: autoLabel,
+            onClick = { showYoutubeLanguages = true },
+        )
+        SettingCard(
+            icon = Icons.Rounded.Language,
+            title = stringResource(R.string.youtube_interest),
+            value = youtubeTopics.firstOrNull { it.code == youtubeTopic }?.label.orEmpty(),
+            onClick = { showYoutubeTopics = true },
+        )
+        resolvedRegion?.let { region ->
+            val countryName = region.countryCode.takeIf { it.isNotEmpty() }?.let { Locale("", it).getDisplayCountry(locale) }
+                ?: stringResource(R.string.youtube_country_unknown)
+            Text(
+                stringResource(R.string.youtube_effective_region, countryName, Locale.forLanguageTag(region.language).getDisplayLanguage(locale)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (youtubeCountry.isEmpty()) {
+            TextButton(onClick = { locationLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION) }) {
+                Text(stringResource(R.string.radio_use_location))
+            }
+        }
+
+                }
+                "playback" -> {
         SectionTitle(stringResource(R.string.settings_playback))
         GlassCard(Modifier.fillMaxWidth()) {
             LeftSwitchRow(
@@ -315,19 +358,7 @@ fun SettingsScreen() {
                 }
             }
         }
-        GlassCard(
-            Modifier.fillMaxWidth(),
-            onClick = { uriHandler.openUri("https://nabdhserv.net") },
-        ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Made with ", style = MaterialTheme.typography.labelMedium)
-                    Text("♥", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
-                    Text(" By NabdhServ.Net", style = MaterialTheme.typography.labelMedium)
+
                 }
             }
         }

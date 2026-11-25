@@ -142,4 +142,11 @@
     <string name="podcast_refresh">تحديث</string>
     <string name="podcast_error">تعذر تحميل بعض الخلاصات. تحقق من رابط RSS أو الاتصال. تبقى الحلقات المخزنة متاحة.</string>
     <string name="podcast_empty">أضف رابط RSS لعرض أحدث حلقاته.</string>
+    <string name="refine_discover_title">اكتشف</string>
+    <string name="refine_remove_subscription">إزالة الاشتراك المحدد</string>
+    <string name="refine_back_settings">العودة للإعدادات</string>
+    <string name="refine_appearance_desc">الثيم ولغة التطبيق</string>
+    <string name="refine_device_desc">طريقة العرض وظهور المجلدات</string>
+    <string name="refine_online_desc">المصادر والدولة واللغة والاهتمامات</string>
+    <string name="refine_playback_desc">توفير البطارية والصوت والمعادل</string>
 </resources>

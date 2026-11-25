@@ -81,9 +81,7 @@ internal fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33
 } else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
 @Composable
-fun HomeScreen(allowDiscover: Boolean = true) {
-    var discover by remember { mutableStateOf(false) }
-    if (discover) { DiscoverScreen { discover = false }; return }
+fun HomeScreen(onDiscover: () -> Unit = {}) {
     val context = LocalContext.current
     val container = LocalContainer.current
     val vm: OnlineVm = viewModel(factory = VmFactory(container))
@@ -110,8 +108,7 @@ fun HomeScreen(allowDiscover: Boolean = true) {
     }
 
     Column(Modifier.fillMaxSize()) {
-        if (allowDiscover) androidx.compose.material3.TextButton(onClick = { discover = true }) { Text(stringResource(R.string.discover_more)) }
-        HomeHero()
+        HomeHero(onDiscover)
         SourceFilterBar(selected, audiusEnabled, youtubeEnabled, vm::setSource)
         HomeContent(
             state = state,
@@ -126,8 +123,8 @@ fun HomeScreen(allowDiscover: Boolean = true) {
 }
 
 @Composable
-private fun HomeHero() {
-    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
+private fun HomeHero(onDiscover: () -> Unit) {
+    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), onClick = onDiscover) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(58.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
                 Icon(Icons.Rounded.GraphicEq, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(30.dp))
@@ -136,6 +133,7 @@ private fun HomeHero() {
                 Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(2.dp))
                 Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .78f))
+                Text(stringResource(R.string.discover_more), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
             }
         }
     }
@@ -186,9 +184,11 @@ private fun HomeContent(
     val hasLocal = localItems.isNotEmpty()
 
     when {
-        state.loading && localState.loading && state.sections.isEmpty() && !hasLocal -> Box(modifier, Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
+        state.loading && state.sections.isEmpty() && !hasLocal -> Box(modifier, Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
         else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = footerBottomPadding)) {
             if (!mediaGranted) item { PermissionCard(onRequestMedia) }
+            if (state.error != null) item { MessageState(stringResource(R.string.error_generic), stringResource(R.string.retry), onRetry) }
+            else if (state.loading) item { androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) }
             state.sections.forEachIndexed { sectionIndex, section ->
                 item(key = "online-title:$sectionIndex:${section.titleRes}") { SectionHeader(stringResource(section.titleRes)) }
                 section.items.chunked(2).forEachIndexed { rowIndex, row ->
@@ -225,7 +225,7 @@ private fun HomeContent(
                     item { LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) { items(folderGroups, key = { it.first }) { (name, tracks) -> LocalGroupCard(name, tracks, MediaGroupKind.FOLDER) { container.play(tracks, 0) } } } }
                 }
             }
-            if (state.sections.isEmpty() && !hasLocal && mediaGranted && !state.loading) {
+            if (state.sections.isEmpty() && !hasLocal && mediaGranted && !state.loading && state.error == null) {
                 item { MessageState(if (query.isBlank()) stringResource(R.string.empty_home) else stringResource(R.string.empty_music), stringResource(R.string.retry), onRetry) }
             }
         }

@@ -38,7 +38,7 @@ import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import org.schabi.newpipe.extractor.stream.VideoStream
 import java.io.IOException
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
+import com.mawja.player.data.BoundedTtlCache
 import java.util.concurrent.TimeUnit
 
 /** YouTube search plus fresh audio/video stream resolution through Innertube and NewPipe. */
@@ -83,8 +83,8 @@ object YouTubeSource {
         SearchSpec(YoutubeSearchQueryHandlerFactory.VIDEOS, video = true),
     )
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
-    private val urlCache = ConcurrentHashMap<String, Pair<String, Long>>()
-    private val userAgentCache = ConcurrentHashMap<String, String>()
+    private val urlCache = BoundedTtlCache<String, String>(64, URL_TTL_MS)
+    private val userAgentCache = BoundedTtlCache<String, String>(128, 10 * 60_000L)
     private val idRegex = Regex("(?:[?&]v=|youtu\\.be/)([A-Za-z0-9_-]{11})")
     private lateinit var client: OkHttpClient
     private lateinit var pipedClient: OkHttpClient
@@ -279,8 +279,7 @@ object YouTubeSource {
     fun resolveStreamUrl(watchUrl: String, preferVideo: Boolean): String {
         val id = idRegex.find(watchUrl)?.groupValues?.get(1) ?: throw IOException("Bad YouTube URL")
         val key = "$id:${if (preferVideo) "video" else "audio"}"
-        val now = System.currentTimeMillis()
-        urlCache[key]?.let { (url, createdAt) -> if (now - createdAt < URL_TTL_MS) return url }
+        urlCache[key]?.let { return it }
         val failures = mutableListOf<Throwable>()
         val resolvers = listOf<(String, Boolean) -> String>(
             { value, video -> resolveViaInnertube(value, video, activeRegion) },
@@ -290,7 +289,7 @@ object YouTubeSource {
         for (resolver in resolvers) {
             try {
                 val url = resolver(id, preferVideo)
-                urlCache[key] = url to now
+                urlCache[key] = url
                 return url
             } catch (error: Throwable) {
                 failures += error

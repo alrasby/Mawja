@@ -142,4 +142,11 @@
     <string name="podcast_refresh">Refresh</string>
     <string name="podcast_error">Some feeds could not be loaded. Check the RSS address or connection. Cached episodes remain available.</string>
     <string name="podcast_empty">Add an RSS feed to discover its latest episodes.</string>
+    <string name="refine_discover_title">Discover</string>
+    <string name="refine_remove_subscription">Remove selected subscription</string>
+    <string name="refine_back_settings">Back to settings</string>
+    <string name="refine_appearance_desc">Theme and app language</string>
+    <string name="refine_device_desc">Layout and folder visibility</string>
+    <string name="refine_online_desc">Sources, country, language and interests</string>
+    <string name="refine_playback_desc">Battery saver, volume and equalizer</string>
 </resources>

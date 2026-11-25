@@ -39,6 +39,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import com.mawja.player.ui.screens.DiscoverScreen
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.setValue
@@ -83,12 +86,14 @@ fun MawjaRoot() {
     val container = LocalContainer.current
     val themeMode by container.preferences.theme.collectAsStateWithLifecycle()
     MawjaTheme(themeMode) {
-        // Do not restore transient navigation state when a new Activity session starts.
-        var selectedTab by remember { mutableIntStateOf(0) }
-        var contentTab by remember { mutableIntStateOf(0) }
-        var showPlayer by remember { mutableStateOf(false) }
-        var showSearch by remember { mutableStateOf(false) }
-        var showSettings by remember { mutableStateOf(false) }
+        // Restore navigation on configuration changes; each destination owns its saved scroll/form state.
+        var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+        var contentTab by remember { mutableIntStateOf(selectedTab) }
+        var showPlayer by rememberSaveable { mutableStateOf(false) }
+        var showSearch by rememberSaveable { mutableStateOf(false) }
+        var showSettings by rememberSaveable { mutableStateOf(false) }
+        var showDiscover by rememberSaveable { mutableStateOf(false) }
+        val destinationState = rememberSaveableStateHolder()
         var footerHeightPx by remember { mutableIntStateOf(0) }
         val footerClearance = with(LocalDensity.current) { footerHeightPx.toDp() } + 6.dp
 
@@ -106,20 +111,33 @@ fun MawjaRoot() {
         ) {
             Column(Modifier.fillMaxSize()) {
                 MawjaHeader(
-                    onSearch = { showSettings = false; showSearch = !showSearch },
-                    onSettings = { showSettings = true; showSearch = false },
+                    onSearch = { showDiscover = false; showSettings = false; showSearch = !showSearch },
+                    onSettings = { showDiscover = false; showSettings = true; showSearch = false },
                 )
                 Box(
                     Modifier.fillMaxWidth().weight(1f),
                 ) {
                     CompositionLocalProvider(LocalFooterBottomPadding provides footerClearance) {
-                        when {
-                            showSettings -> SettingsScreen()
-                            showSearch -> SearchScreen(contentTab)
-                            contentTab == 0 -> HomeScreen()
-                            contentTab == 1 -> RadioScreen()
-                            contentTab == 2 -> LocalScreen()
-                            else -> LibraryScreen()
+                        val destination = when {
+                            showSettings -> "settings"
+                            showSearch -> "search"
+                            showDiscover -> "discover"
+                            else -> "tab:$contentTab"
+                        }
+                        destinationState.SaveableStateProvider(destination) {
+                            when {
+                                showSettings -> SettingsScreen(onBack = { showSettings = false })
+                                showSearch -> SearchScreen(contentTab)
+                                showDiscover -> DiscoverScreen(
+                                    onBack = { showDiscover = false },
+                                    onRadio = { showDiscover = false; selectedTab = 1; contentTab = 1 },
+                                    onOnline = { showDiscover = false; selectedTab = 0; contentTab = 0 },
+                                )
+                                contentTab == 0 -> HomeScreen(onDiscover = { showDiscover = true })
+                                contentTab == 1 -> RadioScreen()
+                                contentTab == 2 -> LocalScreen()
+                                else -> LibraryScreen(onPodcasts = { showDiscover = true })
+                            }
                         }
                     }
                 }
@@ -135,16 +153,10 @@ fun MawjaRoot() {
                 MawjaFloatingBar(
                     selected = selectedTab,
                     onSelect = { index ->
-                        if (showSettings && index == 0) {
-                            showSettings = false
-                            showSearch = false
-                            selectedTab = 0
-                            contentTab = 0
-                        } else if (selectedTab != index) {
-                            selectedTab = index
-                            showSettings = false
-                            showSearch = false
-                        }
+                        selectedTab = index
+                        showDiscover = false
+                        showSettings = false
+                        showSearch = false
                     },
                 )
             }
@@ -156,12 +168,9 @@ fun MawjaRoot() {
             ) {
                 NowPlayingScreen(onClose = { showPlayer = false })
             }
+            BackHandler(enabled = showDiscover && !showPlayer && !showSearch && !showSettings) { showDiscover = false }
             BackHandler(enabled = showSearch && !showPlayer) { showSearch = false }
             BackHandler(enabled = showPlayer) { showPlayer = false }
-            BackHandler(enabled = showSettings && !showPlayer) {
-                showSettings = false
-                showSearch = false
-            }
         }
     }
 }
