@@ -2,6 +2,8 @@ package com.mawja.player.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -66,5 +68,9 @@ fun MawjaTheme(themeMode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () 
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    MaterialTheme(colorScheme = if (dark) MawjaDarkColors else MawjaLightColors, content = content)
+    val colors = if (dark) MawjaDarkColors else MawjaLightColors
+    MaterialTheme(colorScheme = colors) {
+        // MaterialTheme does not supply a default content color without a Surface.
+        CompositionLocalProvider(LocalContentColor provides colors.onSurface, content = content)
+    }
 }

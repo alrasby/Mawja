@@ -226,7 +226,7 @@ private fun LocalContent(vm: LocalVm, onRequestAccess: (() -> Unit)?) {
             state.loading && state.items.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
             mediaItems.isEmpty() -> MessageState(if (media == DeviceMedia.VIDEO) stringResource(R.string.empty_videos) else stringResource(R.string.empty_music), stringResource(R.string.retry), vm::refresh)
             activeGroup == null -> {
-                LazyColumn(Modifier.fillMaxSize().fadeTopEdge(), contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                LazyColumn(Modifier.fillMaxSize().fadeTopEdge(), contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     item { SectionTitle(groupingTitle) }
                     if (fileDisplayMode == FileDisplayMode.GRID) {
                         val groupRows = groups.keys.toList().chunked(2)

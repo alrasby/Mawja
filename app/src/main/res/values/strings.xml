@@ -125,7 +125,7 @@
     <string name="radio_use_location">Use my location</string>
     <string name="radio_all_languages">All languages</string>
     <string name="radio_language">Station language</string>
-    <string name="radio_choose_location">Choose a country or use your location to find local stations.</string>
+    <string name="radio_choose_location">Enable location to find nearby radio stations. Browse countries in World.</string>
     <string name="youtube_auto_content">Automatic</string>
     <string name="youtube_content_language">YouTube content language</string>
     <string name="youtube_interest">YouTube discovery interest</string>

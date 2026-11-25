@@ -185,7 +185,7 @@ private fun HomeContent(
 
     when {
         state.loading && state.sections.isEmpty() && !hasLocal -> Box(modifier, Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
-        else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = footerBottomPadding)) {
+        else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             if (!mediaGranted) item { PermissionCard(onRequestMedia) }
             if (state.error != null) item { MessageState(stringResource(R.string.error_generic), stringResource(R.string.retry), onRetry) }
             else if (state.loading) item { androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) }

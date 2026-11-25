@@ -46,6 +46,11 @@ try:
         find(control)
         snapshot("settings-" + section.replace(" ", "-").lower())
         if section == "Appearance":
+            find("Dark", tap=True)
+            snapshot("appearance-dark")
+            find("Language", tap=True)
+            snapshot("language-dialog-dark")
+            find("Close", tap=True)
             adb("shell", "settings", "put", "system", "accelerometer_rotation", "0")
             adb("shell", "settings", "put", "system", "user_rotation", "1")
             time.sleep(2)
@@ -66,6 +71,15 @@ try:
     find("Cancel", tap=True)
     back()
     find("Settings")
-    (OUT / "ui-smoke.txt").write_text("PASS: four settings pages, back navigation, rotation restoration, discovery and RSS dialog. No subscribed episode playback tested.\n")
+    find("Radio", tap=True)
+    find("Local", tap=True)
+    find("Use my location")
+    assert not any(node.get("text") == "All countries" for node in nodes()), "Local unexpectedly contains a country picker"
+    snapshot("radio-local-location-only")
+    find("World", tap=True)
+    find("All countries", tap=True)
+    snapshot("radio-world-country-dialog-dark")
+    find("Close", tap=True)
+    (OUT / "ui-smoke.txt").write_text("PASS: four settings pages, dark appearance/language dialog, back navigation, rotation restoration, discovery/RSS, location-only Local and World country picker. No subscribed episode playback tested.\n")
 finally:
     snapshot("ui-final")

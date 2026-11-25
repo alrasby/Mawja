@@ -41,6 +41,7 @@ fun RadioScreen() {
     val vm: RadioVm = viewModel(factory = VmFactory(container))
     val state by vm.state.collectAsStateWithLifecycle()
     val filter by vm.filter.collectAsStateWithLifecycle()
+    val isLocal = filter.id == RadioFilters.local.id
     val countries by vm.worldCountries.collectAsStateWithLifecycle()
     val languages by vm.languages.collectAsStateWithLifecycle()
     val country by vm.country.collectAsStateWithLifecycle()
@@ -57,16 +58,15 @@ fun RadioScreen() {
         granted = hasLocation()
         locationRequest++
     }
-    LaunchedEffect(granted, locationRequest) {
-        if (granted) readRadioLocation(context)?.let { vm.setLocalLocation(it.latitude, it.longitude) }
+    LaunchedEffect(granted, locationRequest, isLocal) {
+        if (granted && isLocal) readRadioLocation(context)?.let { vm.setLocalLocation(it.latitude, it.longitude) }
     }
     val locale = context.resources.configuration.locales[0]
     val countryOptions = countries.map { item ->
         item.iso_3166_1 to (countryFlag(item.iso_3166_1) + " " +
             Locale("", item.iso_3166_1).getDisplayCountry(locale).ifBlank { item.name })
     }.sortedBy { it.second.lowercase(locale) }
-    val isLocal = filter.id == RadioFilters.local.id
-    val allCountries = stringResource(if (isLocal) R.string.radio_use_location else R.string.radio_all_countries)
+    val allCountries = stringResource(R.string.radio_all_countries)
     val countryLabel = countryOptions.firstOrNull { it.first == country }?.second
         ?: if (isLocal && locationCountry != null) Locale("", locationCountry!!).getDisplayCountry(locale)
         else allCountries
@@ -78,33 +78,37 @@ fun RadioScreen() {
                     label = { Text(item.labelRes?.let { stringResource(it) } ?: item.id) })
             }
         }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { picker = "country" }, modifier = Modifier.weight(1f)) {
-                Text(countryLabel, maxLines = 2)
+        if (isLocal) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = {
+                    if (granted) locationRequest++ else launcher.launch(permissions)
+                }) { Text(stringResource(R.string.radio_use_location)) }
+                if (granted && locationCountry != null) Text(
+                    Locale("", locationCountry!!).getDisplayCountry(locale),
+                    style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            if (!isLocal) {
+        } else {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { picker = "country" }, modifier = Modifier.weight(1f)) { Text(countryLabel, maxLines = 2) }
                 OutlinedButton(onClick = { picker = "language" }, modifier = Modifier.weight(1f)) {
-                    Text(language?.let { value -> languages.firstOrNull { it.name == value }?.name ?: value }
-                        ?: stringResource(R.string.radio_all_languages), maxLines = 2)
+                    Text(language ?: stringResource(R.string.radio_all_languages), maxLines = 2)
                 }
             }
         }
-        if (isLocal) {
-            TextButton(onClick = {
-                vm.selectCountry(null)
-                if (granted) locationRequest++ else launcher.launch(permissions)
-            }, modifier = Modifier.padding(horizontal = 16.dp)) { Text(stringResource(R.string.radio_use_location)) }
-        }
         when {
-            isLocal && country == null && locationCountry == null ->
-                MessageState(stringResource(R.string.radio_choose_location), stringResource(R.string.choose_world_country)) { picker = "country" }
+            isLocal && (!granted || locationCountry == null) ->
+                MessageState(stringResource(R.string.radio_choose_location), stringResource(R.string.radio_use_location)) {
+                    if (granted) locationRequest++ else launcher.launch(permissions)
+                }
             else -> RadioCardGrid(
                 state = state, emptyText = stringResource(R.string.empty_stations), onRetry = vm::load,
                 modifier = Modifier.weight(1f).fadeTopEdge(), displayMode = displayMode,
             )
         }
     }
-    if (picker != null) {
+    if (picker != null && !isLocal) {
         val isCountryPicker = picker == "country"
         val choices = if (isCountryPicker) countryOptions else languages.map { it.name to it.name }
         RadioOptionDialog(
@@ -128,7 +132,7 @@ private fun RadioOptionDialog(
 ) {
     var query by remember { mutableStateOf("") }
     Dialog(onDismissRequest = onDismiss) {
-        GlassCard(Modifier.fillMaxWidth()) {
+        GlassCard(Modifier.fillMaxWidth(), opaque = true) {
             Column(Modifier.padding(16.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge)
                 OutlinedTextField(query, { query = it }, singleLine = true,

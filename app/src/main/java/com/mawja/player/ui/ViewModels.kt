@@ -67,7 +67,7 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
 
     private fun restoreSelection() {
         val id = filter.value.id
-        country.value = c.preferences.radioOption("country_$id").ifBlank { null }
+        country.value = if (id == RadioFilters.local.id) null else c.preferences.radioOption("country_$id").ifBlank { null }
         val defaultLanguage = if (id == RadioFilters.news.id) {
             val code = c.preferences.language.value.substringBefore('-')
             java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.ENGLISH).lowercase(java.util.Locale.ROOT)
@@ -81,6 +81,7 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
         load()
     }
     fun selectCountry(value: String?) {
+        if (filter.value.id == RadioFilters.local.id) return
         country.value = value
         c.preferences.setRadioOption("country_${filter.value.id}", value.orEmpty())
         load()
@@ -104,13 +105,13 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
     fun load() {
         job?.cancel()
         val f = filter.value
-        val chosenCountry = country.value ?: if (f.id == RadioFilters.local.id) locationCountry.value else null
+        val chosenCountry = com.mawja.player.data.radio.radioBrowseCountry(f.id == RadioFilters.local.id, country.value, locationCountry.value)
         if (f.id == RadioFilters.local.id && chosenCountry == null) {
             state.value = ListState()
             return
         }
-        val chosenLanguage = language.value
-        val coordinates = localLocation?.takeIf { f.id == RadioFilters.local.id && country.value == null }
+        val chosenLanguage = language.value.takeUnless { f.id == RadioFilters.local.id }
+        val coordinates = localLocation?.takeIf { f.id == RadioFilters.local.id }
         job = viewModelScope.launch {
             state.value = ListState(loading = true)
             state.value = try {
