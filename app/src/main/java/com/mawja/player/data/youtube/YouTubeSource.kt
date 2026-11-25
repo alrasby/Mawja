@@ -295,6 +295,7 @@ object YouTubeSource {
                 return url
             } catch (error: Exception) {
                 if (error is kotlinx.coroutines.CancellationException) throw error
+                com.mawja.player.playback.PlaybackDiagnostics.record("YouTube resolver failure=${error.javaClass.simpleName}; http=" + Regex("HTTP ([0-9]{3})").find(error.message.orEmpty())?.groupValues?.get(1))
                 failures += error
             }
         }

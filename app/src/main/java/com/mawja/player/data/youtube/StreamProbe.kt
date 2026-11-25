@@ -17,7 +17,7 @@ internal class StreamProbe(private val client: OkHttpClient) {
                 throw IOException("Stream probe rejected non-media content")
             }
             val source = response.body?.source() ?: throw IOException("Empty media body")
-            if (!source.request(1) || source.buffer.getByte(0) == '<'.code.toByte()) throw IOException("Empty or document response")
+            if (!source.request(1) || source.buffer[0L] == '<'.code.toByte()) throw IOException("Empty or document response")
         }
     }
 }
