@@ -176,6 +176,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         f.id == RadioFilters.local.id && latitude != null && longitude != null -> fetchNearby(latitude, longitude, countryCode)
         f.id == RadioFilters.local.id -> emptyList()
         f.id == RadioFilters.oman.id -> fetchOman()
+        f.id == RadioFilters.news.id -> (reviewedNewsStreams() + fetchGeneric(f)).distinctBy { it.streamUrl }
         f.id == RadioFilters.world.id && !countryCode.isNullOrBlank() -> fetchCountry(countryCode)
         f.id == RadioFilters.world.id -> emptyList()
         else -> fetchGeneric(f)
@@ -317,11 +318,18 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             RadioFilters.gulf.id -> (oman + arabic).distinctBy { it.streamUrl }
             RadioFilters.arab.id -> arabic
             RadioFilters.quran.id -> quran + officialOmanStations().last()
-            RadioFilters.news.id -> arabic.filter { it.title.contains("Arabiya", ignoreCase = true) }
+            RadioFilters.news.id -> reviewedNewsStreams() + arabic.filter { it.title.contains("Arabiya", ignoreCase = true) }
             RadioFilters.world.id -> if (countryCode == "OM") oman else emptyList()
             else -> emptyList()
         }
     }
+
+    private fun reviewedNewsStreams(): List<Track> = listOf(
+        direct("radio:official-asharq-radio", "راديو الشرق مع Bloomberg", "Arabic • News",
+            "https://live-radio.asharq.com/asharq.m3u8"),
+        direct("radio:official-mcd", "مونت كارلو الدولية", "Arabic • News",
+            "https://montecarlodoualiya128k.ice.infomaniak.ch/mc-doualiya.mp3"),
+    )
 
     private fun direct(id: String, title: String, subtitle: String, stream: String) = Track(
         id = id,
@@ -436,7 +444,9 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 /** Conservative news-only classification. Mixed-format stations remain in country listings. */
 internal fun isNewsStation(name: String, rawTags: String): Boolean {
     val stationName = name.trim().lowercase(Locale.ROOT)
-    val reviewedService = stationName in setOf("al arabiya fm", "al araby", "bbc arabic", "bbc arabic radio") ||
+    val reviewedService = stationName in setOf("al arabiya fm", "al araby", "bbc arabic", "bbc arabic radio",
+        "mc doualiya", "monte carlo doualiya", "monte carlo doualiya radio",
+        "مونت كارلو الدولية", "مونتي كارلو الدولية", "radio sawa", "sawa radio", "إذاعة سوا") ||
         (stationName.contains("replay news") && stationName.contains("العربية"))
     val tags = rawTags.split(',').map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
     val newsTags = setOf("news", "news talk", "news/talk", "world news", "international news", "أخبار", "اخبار")

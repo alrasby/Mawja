@@ -14,6 +14,8 @@ class RadioClassificationTest {
     }
 
     @Test fun acceptsReviewedNewsFeeds() {
+        assertTrue(isNewsStation("MC doualiya", "news"))
+        assertTrue(isNewsStation("Radio Sawa", "news,talk"))
         assertTrue(isNewsStation("Al Arabiya FM", "news"))
         assertTrue(isNewsStation("Al araby", "news,news talk,world news"))
         assertTrue(isNewsStation("BBC Arabic ", "news"))
