@@ -12,7 +12,7 @@
 - API 35 emulator smoke script exercises all settings pages, back navigation, settings restoration after rotation, discovery and RSS add dialog. Screenshots and results are uploaded in the runtime-profile artifact.
 
 ## Verification
-Pending CI on the implementation commit. No claim of visual approval or real-car playback. Podcast playback needs an actual subscription/network and is outside the empty-library navigation smoke scenario.
+Verified code commit `9305da10c624cf277c2c26096c9a969621a101ae`: [CI run 45622604721](https://github.com/alrasby/Mawja/actions/runs/45622604721) passed unit tests, Debug build and API 35 emulator UI smoke + runtime profiling. The smoke script reached completion after checking all four settings pages, back navigation, settings restoration after rotation, discovery and RSS dialog. Screenshots and raw output are in [the runtime artifact](https://github.com/alrasby/Mawja/actions/runs/45622604721/artifacts/15027400661). There was no manual visual review, real-car test or subscribed podcast playback in this run.
 
 ## Resume
-Preserve the theme/glass identity and floating footer. Next step: inspect CI unit/build and emulator smoke results; repair any failure before delivering. Persistent per-episode resume and podcast directory discovery remain separate features.
+Preserve the theme/glass identity and floating footer. Build and emulator UI smoke succeeded. Next step: user verification in light/dark themes, Arabic RTL, with an actual RSS subscription and Android Auto. Persistent per-episode resume and podcast directory discovery remain separate features.
