@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -110,7 +111,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         latitude: Double? = null,
         longitude: Double? = null,
         countryCode: String? = null,
-    ): List<Track> = if (filter.id == RadioFilters.local.id) {
+    ): List<Track> = withContext(Dispatchers.IO) { if (filter.id == RadioFilters.local.id) {
         if (countryCode.isNullOrBlank()) emptyList()
         else {
             val key = "local_$countryCode"
@@ -137,6 +138,8 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         throw e
     } catch (e: Exception) {
         loadCache(cacheKey(filter, countryCode)) ?: fallbackStations(filter, countryCode)
+    }
+
     }
 
     suspend fun search(query: String): List<Track> = withContext(Dispatchers.IO) {
@@ -187,7 +190,9 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             "reverse" to "false",
             "limit" to "1000",
         ),
-    ).distinctBy { it.stationuuid }.mapNotNull { it.toTrack() }
+    ).filter { it.countrycode.equals(countryCode, ignoreCase = true) }
+        .distinctBy { it.stationuuid }.mapNotNull { it.toTrack() }
+        .distinctBy { it.streamUrl }
 
     private fun fetchNearby(latitude: Double, longitude: Double, countryCode: String?): List<Track> {
         // Local is country-scoped, not radius-scoped: the position determines
@@ -213,7 +218,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             }
             .sortedWith(compareBy<Pair<Double, Track>> { it.first }.thenBy { it.second.title.lowercase(Locale.ROOT) })
             .map { it.second }
-            .distinctBy { it.streamUrl?.lowercase()?.trimEnd('/') }
+            .distinctBy { it.streamUrl }
             .toList()
     }
 
@@ -241,7 +246,8 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             f.countryCodes.map { cc -> async { runCatching { fetch(base + mapOf("countrycode" to cc, "limit" to "60")) }.getOrDefault(emptyList()) } }
                 .awaitAll().flatten()
         }
-        stations.distinctBy { it.stationuuid }
+        stations.filter { f.id != RadioFilters.news.id || isNewsStation(it.name, it.tags) }
+            .distinctBy { it.stationuuid }
             .sortedByDescending { it.clickcount }
             .mapNotNull { it.toTrack() }
     }
@@ -268,7 +274,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             .distinctBy { it.url_resolved.ifBlank { it.url }.lowercase().trimEnd('/') }
             .sortedWith(compareBy<RadioStation> { it.seedRank() }.thenByDescending { it.clickcount })
             .mapNotNull { it.toTrack() }
-        (officialOmanStations() + directory).distinctBy { it.streamUrl?.lowercase()?.trimEnd('/') }
+        (officialOmanStations() + directory).distinctBy { it.streamUrl }
     }
 
     /** These are the two official Oman Ministry/Ayn endpoints currently published in the directory. */
@@ -352,7 +358,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun RadioStation.toTrack(): Track? {
         val stream = url_resolved.ifBlank { url }.trim()
-        if (stream.isBlank() || stationuuid.isBlank() || ssl_error != 0) return null
+        if (stationuuid.isBlank() || lastcheckok != 1 || ssl_error != 0 || !isPlayableRadioUrl(stream)) return null
         val quality = codec.takeIf { it.isNotBlank() }?.uppercase()?.let { c -> if (bitrate > 0) "$c ${bitrate}k" else c }
         return Track(
             id = "radio:$stationuuid",
@@ -413,12 +419,37 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     }
 
     private fun cacheKey(filter: RadioFilter, countryCode: String?): String =
-        if (filter.id == RadioFilters.world.id && !countryCode.isNullOrBlank()) "world_$countryCode" else filter.id
+        when {
+            filter.id == RadioFilters.news.id -> "news_v2"
+            filter.id == RadioFilters.world.id && !countryCode.isNullOrBlank() -> "world_$countryCode"
+            else -> filter.id
+        }
 
     private fun cacheFile(id: String) = File(context.filesDir, "radio_$id.json")
     private fun saveCache(id: String, tracks: List<Track>) { runCatching { cacheFile(id).writeText(json.encodeToString(trackList, tracks)) } }
     private fun loadCache(id: String): List<Track>? = runCatching {
         val f = cacheFile(id)
-        if (f.isFile) json.decodeFromString(trackList, f.readText()) else null
+        if (f.isFile) json.decodeFromString(trackList, f.readText()).filter { isPlayableRadioUrl(it.streamUrl.orEmpty()) } else null
     }.getOrNull()?.takeIf { it.isNotEmpty() }
+}
+
+/** Conservative news-only classification. Mixed-format stations remain in country listings. */
+internal fun isNewsStation(name: String, rawTags: String): Boolean {
+    val stationName = name.trim().lowercase(Locale.ROOT)
+    val reviewedService = stationName in setOf("al arabiya fm", "al araby", "bbc arabic", "bbc arabic radio") ||
+        (stationName.contains("replay news") && stationName.contains("العربية"))
+    val tags = rawTags.split(',').map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
+    val newsTags = setOf("news", "news talk", "news/talk", "world news", "international news", "أخبار", "اخبار")
+    val supportingTags = setOf(
+        "talk", "politics", "political", "current affairs", "information", "international",
+        "arabic", "arabic news", "english", "french", "arabic talk",
+    )
+    return reviewedService && tags.any { it in newsTags } && tags.all { it in newsTags || it in supportingTags }
+}
+
+internal fun isPlayableRadioUrl(value: String): Boolean {
+    val url = value.toHttpUrlOrNull() ?: return false
+    if (url.username.isNotEmpty() || url.password.isNotEmpty()) return false
+    return url.isHttps || listOf("internet-radio.com", "sharp-stream.com", "mosaiquefm.net")
+        .any { url.host == it || url.host.endsWith(".$it") }
 }

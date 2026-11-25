@@ -46,7 +46,7 @@ jobs:
 
       - name: Build Debug APK
         if: env.BUILD_RELEASE != 'true'
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew testDebugUnitTest assembleDebug --stacktrace
 
       - name: Build signed release APK and AAB
         if: env.BUILD_RELEASE == 'true'
