@@ -36,3 +36,7 @@
 - https://www.replaynews.net/index.php?lang=ar
 - https://www.alarabiya.net/ar/fm
 - https://docs.radio-browser.info/
+
+## إعادة التحقق والاختبارات
+
+في إعادة طلب GET بمهلة 10 ثوانٍ، أعاد كل من العربية FM وإذاعة عُمان الإنجليزية HTTP 200 وقائمة HLS صحيحة. أعادت الوصال وMerge HTTP 200 وبيانات audio/mpeg. لم يُثبت هذا الاختبار فك مقاطع HLS التابعة للعربية أو إذاعة عُمان الإنجليزية. نجح testDebugUnitTest وبناء assembleDebug في GitHub Actions رقم 45560719199 عند الالتزام 9e76dfc1cb3f666c4f2b021f483f8aadf935da45. الاختبارات الثلاثة تغطي استبعاد التصنيفات المختلطة وقبول الخدمات المراجعة وسياسة الروابط.
