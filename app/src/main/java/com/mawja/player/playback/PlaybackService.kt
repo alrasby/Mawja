@@ -40,6 +40,8 @@ import com.mawja.player.MawjaApp
 import com.mawja.player.R
 import com.mawja.player.data.SourceType
 import com.mawja.player.data.Track
+import com.mawja.player.data.forCarAudio
+import com.mawja.player.data.CAR_LOCAL_VIDEO_AUDIO_PREFIX
 import com.mawja.player.data.radio.RadioFilters
 import com.mawja.player.data.youtube.YouTubeSource
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +115,8 @@ class PlaybackService : MediaLibraryService() {
             .setMediaSourceFactory(object : MediaSource.Factory by mediaSources {
                 override fun createMediaSource(mediaItem: MediaItem): MediaSource {
                     val source = mediaSources.createMediaSource(mediaItem)
-                    return if (mediaItem.mediaId.startsWith(VIDEO_AUDIO_PREFIX)) {
+                    return if (mediaItem.mediaId.startsWith(VIDEO_AUDIO_PREFIX) ||
+                        (mediaItem.mediaId.startsWith("yt:") && mediaItem.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC)) {
                         FilteringMediaSource(source, C.TRACK_TYPE_AUDIO)
                     } else source
                 }
@@ -383,7 +386,7 @@ class PlaybackService : MediaLibraryService() {
                     val uri = item.requestMetadata.mediaUri ?: item.localConfiguration?.uri
                     uri?.let { item.buildUpon().setUri(it).build() }
                 } else {
-                    autoTracks[item.mediaId]?.takeIf { !it.isVideo && it.playbackUri != null }?.toMediaItem()
+                    autoTracks[item.mediaId]?.forCarAudio()?.takeIf { !it.isVideo && it.playbackUri != null }?.toMediaItem()
                 }
             }.toMutableList()
             return Futures.immediateFuture(playable)
@@ -545,14 +548,10 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun playableItem(original: Track): MediaItem {
+        val audio = original.forCarAudio()
         val track = if (original.isVideo && original.source == SourceType.LOCAL) {
-            original.copy(
-                id = if (original.id.startsWith(VIDEO_AUDIO_PREFIX)) original.id else VIDEO_AUDIO_PREFIX + original.id,
-                subtitle = getString(R.string.auto_video_audio),
-                artworkUrl = null,
-                isVideo = false,
-            )
-        } else original
+            audio.copy(subtitle = getString(R.string.auto_video_audio))
+        } else audio
         autoTracks[track.id] = track
         return runCatching {
             val item = track.toMediaItem()
@@ -693,7 +692,7 @@ class PlaybackService : MediaLibraryService() {
     }
 
     companion object {
-        private const val VIDEO_AUDIO_PREFIX = "auto:video-audio:"
+        private const val VIDEO_AUDIO_PREFIX = CAR_LOCAL_VIDEO_AUDIO_PREFIX
         private const val ANDROID_AUTO_PACKAGE = "com.google.android.projection.gearhead"
         private const val TAG = "MawjaAuto"
         private const val ROOT = "root"
