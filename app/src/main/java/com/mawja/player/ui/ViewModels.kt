@@ -68,10 +68,7 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
     private fun restoreSelection() {
         val id = filter.value.id
         country.value = if (id == RadioFilters.local.id) null else c.preferences.radioOption("country_$id").ifBlank { null }
-        val defaultLanguage = if (id == RadioFilters.news.id) {
-            val code = c.preferences.language.value.substringBefore('-')
-            java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.ENGLISH).lowercase(java.util.Locale.ROOT)
-        } else ""
+        val defaultLanguage = com.mawja.player.data.radio.radioDefaultLanguage(id, c.preferences.language.value)
         language.value = c.preferences.radioOption("language_$id", defaultLanguage).ifBlank { null }
     }
 

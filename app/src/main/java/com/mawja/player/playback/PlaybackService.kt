@@ -48,6 +48,8 @@ import com.mawja.player.data.Track
 import com.mawja.player.data.forCarAudio
 import com.mawja.player.data.CAR_LOCAL_VIDEO_AUDIO_PREFIX
 import com.mawja.player.data.radio.RadioFilters
+import com.mawja.player.data.radio.RadioFilter
+import com.mawja.player.data.radio.CarRadioBrowse
 import com.mawja.player.data.youtube.YouTubeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
@@ -451,11 +453,9 @@ class PlaybackService : MediaLibraryService() {
                 "podcast-feed:" + com.mawja.player.data.digest(it.folder) == parentId
             }.take(200).map(::playableItem)
         }
-        parentId == RADIO -> listOf(
-            browseItem(RADIO_LOCAL, "Local", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),
-            browseItem(RADIO_WORLD, "World", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS),
-            browseItem(RADIO_NEWS, "News", MediaMetadata.MEDIA_TYPE_FOLDER_NEWS),
-        )
+        parentId == RADIO -> RadioFilters.all.map { filter ->
+            radioCategoryItem(filter)
+        }
         parentId == RADIO_LOCAL -> localRadioItems()
         parentId == ONLINE -> listOf(
             browseItem(ONLINE_AUDIO, "Audius", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED),
@@ -478,7 +478,9 @@ class PlaybackService : MediaLibraryService() {
         parentId == RADIO_WORLD -> appContainer.radio.countries().map {
             browseItem("world:${it.iso_3166_1}", "${it.name} (${it.stationcount})", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
         }
-        parentId == RADIO_NEWS -> appContainer.radio.stations(RadioFilters.news).map(::playableItem)
+        parentId.startsWith("radio:") -> CarRadioBrowse.category(parentId)?.let { filter ->
+            carRadioStations(filter).map(::playableItem)
+        }.orEmpty()
         parentId == ONLINE_AUDIO -> appContainer.audius.trending().map(::playableItem)
         parentId == ONLINE_YOUTUBE -> if (appContainer.youtubeData.isConfigured) {
             appContainer.youtubeData.search("new music", localDiscovery = true).map(::playableItem)
@@ -487,11 +489,24 @@ class PlaybackService : MediaLibraryService() {
         }
         parentId.startsWith("world:") -> {
             val country = parentId.removePrefix("world:").uppercase(Locale.ROOT)
-            val stations = appContainer.radio.stations(RadioFilters.world, countryCode = country)
+            val stations = carRadioStations(RadioFilters.world, countryOverride = country)
             Log.d(TAG, "Android Auto radio country=$country stations=${stations.size}")
             stations.map(::playableItem)
         }
         else -> emptyList()
+    }
+
+    private fun radioCategoryItem(filter: RadioFilter): MediaItem = browseItem(
+        CarRadioBrowse.id(filter),
+        getString(requireNotNull(filter.labelRes)),
+        if (filter.id == RadioFilters.news.id) MediaMetadata.MEDIA_TYPE_FOLDER_NEWS
+        else MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS,
+    )
+
+    private suspend fun carRadioStations(filter: RadioFilter, countryOverride: String? = null): List<Track> {
+        val preferences = appContainer.preferences
+        val (country, language) = CarRadioBrowse.selection(filter, preferences.language.value, preferences::radioOption)
+        return appContainer.radio.stations(filter, countryCode = countryOverride ?: country, language = language)
     }
 
     private suspend fun localRadioItems(): List<MediaItem> {
@@ -628,9 +643,9 @@ class PlaybackService : MediaLibraryService() {
     private fun staticItem(id: String): MediaItem? = when (id) {
         ROOT -> browseItem(ROOT, "Mawja", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
         RADIO -> browseItem(RADIO, "Radio", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
-        RADIO_LOCAL -> browseItem(RADIO_LOCAL, "Local", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
-        RADIO_WORLD -> browseItem(RADIO_WORLD, "World", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
-        RADIO_NEWS -> browseItem(RADIO_NEWS, "News", MediaMetadata.MEDIA_TYPE_FOLDER_NEWS)
+        RADIO_LOCAL -> radioCategoryItem(RadioFilters.local)
+        RADIO_WORLD -> radioCategoryItem(RadioFilters.world)
+        RADIO_NEWS -> radioCategoryItem(RadioFilters.news)
         ONLINE -> browseItem(ONLINE, "Online", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
         ONLINE_AUDIO -> browseItem(ONLINE_AUDIO, "Audius", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
         ONLINE_YOUTUBE -> browseItem(ONLINE_YOUTUBE, "YouTube", MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
@@ -642,6 +657,7 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
+        CarRadioBrowse.category(id)?.let { return radioCategoryItem(it) }
         if (id.startsWith("podcast-feed:")) {
             val feed = appContainer.podcasts.subscriptions.value.firstOrNull {
                 "podcast-feed:" + com.mawja.player.data.digest(it) == id

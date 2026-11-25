@@ -52,8 +52,7 @@ object RadioFilters {
     val world = RadioFilter("world", labelRes = R.string.filter_world)
     val quran = RadioFilter("quran", tag = "quran", labelRes = R.string.filter_quran)
     val news = RadioFilter("news", tag = "news", labelRes = R.string.filter_news)
-    // Quran remains available to the media-session compatibility layer, but is
-    // intentionally not exposed as a button in the visual Radio screen.
+    // Shared phone/car taxonomy; add new categories here so both surfaces stay aligned.
     val music = RadioFilter("music", tag = "music", labelRes = R.string.music)
     val sports = RadioFilter("sports", tag = "sports", labelRes = R.string.radio_sports)
     val talk = RadioFilter("talk", tag = "talk", labelRes = R.string.radio_talk)

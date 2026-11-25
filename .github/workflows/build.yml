@@ -131,10 +131,10 @@ jobs:
             adb install runtime-test-apk/*.apk
             mkdir -p runtime-report
             adb logcat -c
-            adb shell am instrument -w -r -e class com.mawja.player.PlaybackRegressionTest,com.mawja.player.ThemeRegressionTest com.mawja.player.test/androidx.test.runner.AndroidJUnitRunner | tee runtime-report/runtime-instrumentation.txt
+            adb shell am instrument -w -r -e class com.mawja.player.PlaybackRegressionTest,com.mawja.player.ThemeRegressionTest,com.mawja.player.CarRadioBrowserTest com.mawja.player.test/androidx.test.runner.AndroidJUnitRunner | tee runtime-report/runtime-instrumentation.txt
             adb logcat -d > runtime-report/playback-logcat.txt
             ! grep -E 'FAILURES|INSTRUMENTATION_FAILED|shortMsg=' runtime-report/runtime-instrumentation.txt
-            grep -q 'OK (2 tests)' runtime-report/runtime-instrumentation.txt
+            grep -q 'OK (3 tests)' runtime-report/runtime-instrumentation.txt
 
             adb exec-out run-as com.mawja.player cat files/theme-dark.png > runtime-report/theme-dark.png
             adb exec-out run-as com.mawja.player cat files/theme-light.png > runtime-report/theme-light.png
