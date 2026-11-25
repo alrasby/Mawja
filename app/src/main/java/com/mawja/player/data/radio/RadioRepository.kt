@@ -326,7 +326,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun reviewedNewsStreams(): List<Track> = listOf(
         direct("radio:official-asharq-radio", "راديو الشرق مع Bloomberg", "Arabic • News",
-            "https://live-radio.asharq.com/asharq.m3u8"),
+            "https://live-radio.asharq.com/asharq_stereo.m3u8"),
         direct("radio:official-mcd", "مونت كارلو الدولية", "Arabic • News",
             "https://montecarlodoualiya128k.ice.infomaniak.ch/mc-doualiya.mp3"),
     )
