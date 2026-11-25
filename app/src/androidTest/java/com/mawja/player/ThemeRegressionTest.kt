@@ -44,6 +44,11 @@ class ThemeRegressionTest {
                     }
                 }
                 instrumentation.waitForIdleSync()
+                scenario.onActivity { activity ->
+                    val controller = androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView)
+                    assertEquals(mode != ThemeMode.DARK, controller.isAppearanceLightStatusBars)
+                    assertEquals(mode != ThemeMode.DARK, controller.isAppearanceLightNavigationBars)
+                }
                 assertNotNull(expected.get())
                 assertEquals(expected.get(), inherited.get())
                 assertEquals(expected.get(), dialog.get())

@@ -99,9 +99,7 @@ fun RadioScreen() {
         }
         when {
             isLocal && (!granted || locationCountry == null) ->
-                MessageState(stringResource(R.string.radio_choose_location), stringResource(R.string.radio_use_location)) {
-                    if (granted) locationRequest++ else launcher.launch(permissions)
-                }
+                MessageState(stringResource(R.string.radio_choose_location))
             else -> RadioCardGrid(
                 state = state, emptyText = stringResource(R.string.empty_stations), onRetry = vm::load,
                 modifier = Modifier.weight(1f).fadeTopEdge(), displayMode = displayMode,

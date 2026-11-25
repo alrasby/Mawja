@@ -7,6 +7,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.graphics.Color
 import com.mawja.player.data.ThemeMode
 
@@ -67,6 +71,16 @@ fun MawjaTheme(themeMode: ThemeMode = ThemeMode.SYSTEM, content: @Composable () 
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
+    }
+    val activity = LocalContext.current as? android.app.Activity
+    val view = LocalView.current
+    SideEffect {
+        activity?.let {
+            WindowCompat.getInsetsController(it.window, view).apply {
+                isAppearanceLightStatusBars = !dark
+                isAppearanceLightNavigationBars = !dark
+            }
+        }
     }
     val colors = if (dark) MawjaDarkColors else MawjaLightColors
     MaterialTheme(colorScheme = colors) {
