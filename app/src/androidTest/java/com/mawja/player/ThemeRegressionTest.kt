@@ -43,7 +43,14 @@ class ThemeRegressionTest {
                         }
                     }
                 }
-                instrumentation.waitForIdleSync()
+                // setContent schedules composition on a frame; main-looper idle alone
+                // can happen before Compose applies its SideEffects/dialog content.
+                val deadline = android.os.SystemClock.uptimeMillis() + 5000
+                while ((expected.get() == null || inherited.get() == null || dialog.get() == null) &&
+                    android.os.SystemClock.uptimeMillis() < deadline) {
+                    instrumentation.waitForIdleSync()
+                    Thread.sleep(30)
+                }
                 scenario.onActivity { activity ->
                     val controller = androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView)
                     assertEquals(mode != ThemeMode.DARK, controller.isAppearanceLightStatusBars)
