@@ -37,6 +37,9 @@ class PreferencesStore(context: Context) {
     val locationPromptHandled: Boolean
         get() = prefs.getBoolean(KEY_LOCATION_PROMPT_HANDLED, false)
 
+    fun radioOption(key: String, default: String = ""): String = prefs.getString("radio_option_$key", default).orEmpty()
+    fun setRadioOption(key: String, value: String) { prefs.edit().putString("radio_option_$key", value).apply() }
+
     fun setTheme(value: ThemeMode) { prefs.edit().putString(KEY_THEME, value.name).apply(); _theme.value = value }
     fun setLanguage(value: String) { prefs.edit().putString(KEY_LANGUAGE, value).apply(); _language.value = value }
     fun setBatterySaver(value: Boolean) { prefs.edit().putBoolean(KEY_BATTERY_SAVER, value).apply(); _batterySaver.value = value }

@@ -118,4 +118,12 @@
     <string name="auto_video_audio">Video audio</string>
     <string name="auto_rewind">Back 10 seconds</string>
     <string name="auto_forward">Forward 10 seconds</string>
+    <string name="radio_sports">Sports</string>
+    <string name="radio_talk">Talk</string>
+    <string name="radio_culture">Culture</string>
+    <string name="radio_all_countries">All countries</string>
+    <string name="radio_use_location">Use my location</string>
+    <string name="radio_all_languages">All languages</string>
+    <string name="radio_language">Station language</string>
+    <string name="radio_choose_location">Choose a country or use your location to find local stations.</string>
 </resources>

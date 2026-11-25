@@ -7,9 +7,12 @@ import org.junit.Test
 class RadioClassificationTest {
     @Test fun rejectsMixedAndUnreviewedStations() {
         assertFalse(isNewsStation("Al Wisal", "arabic,music,news,talk"))
-        assertFalse(isNewsStation("Qatar Radio", "news,talk"))
+        assertTrue(isNewsStation("Qatar Radio", "news,talk"))
         assertFalse(isNewsStation("Coran", "coran,news,religion"))
-        assertFalse(isNewsStation("Unknown broadcaster", "news"))
+        assertTrue(isNewsStation("France Info", "news,information,french"))
+        assertTrue(isNewsStation("BBC World Service", "world news,english"))
+        assertTrue(isNewsStation("Deutschlandfunk", "news,talk,german"))
+        assertFalse(isNewsStation("Music FM", "news,arabic music"))
         assertFalse(isNewsStation("Al Arabiya FM", "news,music"))
     }
 

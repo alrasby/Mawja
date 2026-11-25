@@ -8,59 +8,31 @@ import android.os.Build
 import android.os.CancellationSignal
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mawja.player.R
-import com.mawja.player.data.FileDisplayMode
-import com.mawja.player.data.radio.RadioFilter
 import com.mawja.player.data.radio.RadioFilters
-import com.mawja.player.ui.glassSurface
-import com.mawja.player.ui.fadeTopEdge
-import com.mawja.player.ui.LocalContainer
-import com.mawja.player.ui.MessageState
-import com.mawja.player.ui.RadioVm
-import com.mawja.player.ui.RadioCardGrid
-import com.mawja.player.ui.VmFactory
+import com.mawja.player.ui.*
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
-
-@Composable
-private fun RadioFilter.label(): String = labelRes?.let { stringResource(it) }
-    ?: countryCodes.firstOrNull()?.let { Locale.Builder().setRegion(it).build().getDisplayCountry(Locale.getDefault()) }
-    ?: id
+import kotlin.coroutines.resume
 
 @Composable
 fun RadioScreen() {
@@ -69,128 +41,138 @@ fun RadioScreen() {
     val vm: RadioVm = viewModel(factory = VmFactory(container))
     val state by vm.state.collectAsStateWithLifecycle()
     val filter by vm.filter.collectAsStateWithLifecycle()
-    val query by vm.query.collectAsStateWithLifecycle()
-    val localReady by vm.localReady.collectAsStateWithLifecycle()
-    val worldCountries by vm.worldCountries.collectAsStateWithLifecycle()
-    val worldCountry by vm.worldCountry.collectAsStateWithLifecycle()
+    val countries by vm.worldCountries.collectAsStateWithLifecycle()
+    val languages by vm.languages.collectAsStateWithLifecycle()
+    val country by vm.country.collectAsStateWithLifecycle()
+    val language by vm.language.collectAsStateWithLifecycle()
+    val locationCountry by vm.locationCountry.collectAsStateWithLifecycle()
     val displayMode by container.preferences.fileDisplayMode.collectAsStateWithLifecycle()
-    val locationPermissions = if (Build.VERSION.SDK_INT >= 31) {
-        arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
-    } else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-    var hasPermission by remember { mutableStateOf(locationPermissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) }
-    var locationPromptHandled by remember { mutableStateOf(container.preferences.locationPromptHandled) }
-    var worldMenuOpen by remember { mutableStateOf(false) }
-    val locationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        hasPermission = result.values.any { it }
-        if (hasPermission) readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
+    val permissions = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
+    fun hasLocation() = permissions.any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
+    var granted by remember { mutableStateOf(hasLocation()) }
+    var locationRequest by remember { mutableIntStateOf(0) }
+    var picker by remember { mutableStateOf<String?>(null) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { granted = hasLocation() }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        granted = hasLocation()
+        locationRequest++
     }
-
-    // Auto-load local stations whenever permission is granted and Local filter is active
-    LaunchedEffect(hasPermission, filter.id) {
-        if (hasPermission && filter.id == RadioFilters.local.id) {
-            readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
-        }
+    LaunchedEffect(granted, locationRequest) {
+        if (granted) readRadioLocation(context)?.let { vm.setLocalLocation(it.latitude, it.longitude) }
     }
+    val locale = context.resources.configuration.locales[0]
+    val countryOptions = countries.map { item ->
+        item.iso_3166_1 to (countryFlag(item.iso_3166_1) + " " +
+            Locale("", item.iso_3166_1).getDisplayCountry(locale).ifBlank { item.name })
+    }.sortedBy { it.second.lowercase(locale) }
+    val isLocal = filter.id == RadioFilters.local.id
+    val allCountries = stringResource(if (isLocal) R.string.radio_use_location else R.string.radio_all_countries)
+    val countryLabel = countryOptions.firstOrNull { it.first == country }?.second
+        ?: if (isLocal && locationCountry != null) Locale("", locationCountry!!).getDisplayCountry(locale)
+        else allCountries
 
     Column(Modifier.fillMaxSize()) {
-        if (query.isBlank()) {
-            LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(RadioFilters.all, key = { it.id }) { f ->
-                    FilterChip(
-                        selected = f.id == filter.id,
-                        onClick = {
-                            vm.select(f)
-                            if (f.id == RadioFilters.local.id) {
-                                if (hasPermission) readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) }
-                                else if (!locationPromptHandled) {
-                                    container.preferences.markLocationPromptHandled()
-                                    locationPromptHandled = true
-                                    locationLauncher.launch(locationPermissions)
-                                }
-                            }
-                        },
-                        label = { Text(f.label()) },
-                    )
+        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(RadioFilters.all, key = { it.id }) { item ->
+                FilterChip(filter.id == item.id, onClick = { vm.select(item) },
+                    label = { Text(item.labelRes?.let { stringResource(it) } ?: item.id) })
+            }
+        }
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { picker = "country" }, modifier = Modifier.weight(1f)) {
+                Text(countryLabel, maxLines = 2)
+            }
+            if (!isLocal) {
+                OutlinedButton(onClick = { picker = "language" }, modifier = Modifier.weight(1f)) {
+                    Text(language?.let { value -> languages.firstOrNull { it.name == value }?.name ?: value }
+                        ?: stringResource(R.string.radio_all_languages), maxLines = 2)
                 }
             }
-            Spacer(Modifier.height(6.dp))
-            if (filter.id == RadioFilters.world.id) {
-                Box(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    OutlinedButton(
-                        onClick = { worldMenuOpen = true },
-                        enabled = worldCountries.isNotEmpty(),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Icon(Icons.Rounded.Public, contentDescription = null)
-                        Text(
-                            worldCountries.firstOrNull { it.iso_3166_1 == worldCountry }?.name
-                                ?: stringResource(R.string.choose_world_country),
-                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-                        )
-                        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+        }
+        if (isLocal) {
+            TextButton(onClick = {
+                vm.selectCountry(null)
+                if (granted) locationRequest++ else launcher.launch(permissions)
+            }, modifier = Modifier.padding(horizontal = 16.dp)) { Text(stringResource(R.string.radio_use_location)) }
+        }
+        when {
+            isLocal && country == null && locationCountry == null ->
+                MessageState(stringResource(R.string.radio_choose_location), stringResource(R.string.choose_world_country)) { picker = "country" }
+            else -> RadioCardGrid(
+                state = state, emptyText = stringResource(R.string.empty_stations), onRetry = vm::load,
+                modifier = Modifier.weight(1f).fadeTopEdge(), displayMode = displayMode,
+            )
+        }
+    }
+    if (picker != null) {
+        val isCountryPicker = picker == "country"
+        val choices = if (isCountryPicker) countryOptions else languages.map { it.name to it.name }
+        RadioOptionDialog(
+            title = stringResource(if (isCountryPicker) R.string.choose_world_country else R.string.radio_language),
+            allLabel = if (isCountryPicker) allCountries else stringResource(R.string.radio_all_languages),
+            choices = choices,
+            selected = if (isCountryPicker) country else language,
+            onSelect = { value ->
+                if (isCountryPicker) vm.selectCountry(value) else vm.selectLanguage(value)
+                picker = null
+            },
+            onDismiss = { picker = null },
+        )
+    }
+}
+
+@Composable
+private fun RadioOptionDialog(
+    title: String, allLabel: String, choices: List<Pair<String, String>>,
+    selected: String?, onSelect: (String?) -> Unit, onDismiss: () -> Unit,
+) {
+    var query by remember { mutableStateOf("") }
+    Dialog(onDismissRequest = onDismiss) {
+        GlassCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge)
+                OutlinedTextField(query, { query = it }, singleLine = true,
+                    placeholder = { Text(stringResource(R.string.search)) }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
+                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                    item {
+                        TextButton(onClick = { onSelect(null) }) { Text(allLabel) }
                     }
-                    DropdownMenu(
-                        expanded = worldMenuOpen,
-                        onDismissRequest = { worldMenuOpen = false },
-                        modifier = Modifier.heightIn(max = 560.dp).glassSurface(androidx.compose.foundation.shape.RoundedCornerShape(20.dp)),
-                    ) {
-                        worldCountries.filter { it.name.isNotBlank() }.forEach { country ->
-                            DropdownMenuItem(
-                                text = { Text(country.name) },
-                                onClick = { worldMenuOpen = false; vm.selectWorldCountry(country.iso_3166_1) },
-                            )
+                    items(choices.filter { it.first.contains(query, true) || it.second.contains(query, true) }, key = { it.first }) { (value, label) ->
+                        Row(Modifier.fillMaxWidth().clickable { onSelect(value) }.padding(vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(selected == value, onClick = null)
+                            Text(label, modifier = Modifier.padding(start = 10.dp))
                         }
                     }
                 }
-                Spacer(Modifier.height(6.dp))
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.close)) }
             }
-        }
-        when {
-            filter.id == RadioFilters.local.id && !localReady && !locationPromptHandled -> MessageState(stringResource(R.string.local_radio_location_needed), stringResource(R.string.allow_location)) {
-                if (hasPermission) readLocation(context) { lat, lon -> vm.setLocalLocation(lat, lon) } else {
-                    container.preferences.markLocationPromptHandled()
-                    locationPromptHandled = true
-                    locationLauncher.launch(locationPermissions)
-                }
-            }
-            filter.id == RadioFilters.local.id && !localReady -> RadioCardGrid(
-                state = state,
-                displayMode = displayMode,
-                emptyText = stringResource(R.string.empty_stations),
-                onRetry = vm::load,
-                modifier = Modifier.weight(1f).fadeTopEdge(),
-            )
-            filter.id == RadioFilters.world.id && worldCountry == null -> MessageState(stringResource(R.string.choose_world_country))
-            else -> RadioCardGrid(
-                state = state,
-                displayMode = displayMode,
-                emptyText = stringResource(R.string.empty_stations),
-                onRetry = vm::load,
-                modifier = Modifier.weight(1f).fadeTopEdge(),
-            )
         }
     }
 }
 
-private fun readLocation(context: Context, onLocation: (Double, Double) -> Unit) {
-    val coarseGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    val fineGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    if (!coarseGranted && !fineGranted) return
-    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    runCatching {
-        val last = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER).asSequence()
-            .mapNotNull { provider -> runCatching { manager.getLastKnownLocation(provider) }.getOrNull() }
-            .maxByOrNull { it.time }
-        if (last != null) onLocation(last.latitude, last.longitude)
-        else if (Build.VERSION.SDK_INT >= 30) {
-            val delivered = AtomicBoolean(false)
-            listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
-                .filter { provider -> runCatching { manager.isProviderEnabled(provider) }.getOrDefault(false) }
-                .forEach { provider ->
-                    manager.getCurrentLocation(provider, CancellationSignal(), context.mainExecutor) { location ->
-                        if (location != null && delivered.compareAndSet(false, true)) onLocation(location.latitude, location.longitude)
-                    }
+private suspend fun readRadioLocation(context: Context): android.location.Location? {
+    val manager = context.getSystemService(LocationManager::class.java) ?: return null
+    val known = listOf(LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER)
+        .mapNotNull { runCatching { manager.getLastKnownLocation(it) }.getOrNull() }
+        .filter { System.currentTimeMillis() - it.time in 0L..21_600_000L }.maxByOrNull { it.time }
+    if (known != null) return known
+    if (Build.VERSION.SDK_INT < 30) return null
+    return withTimeoutOrNull(5_000L) {
+        suspendCancellableCoroutine { continuation ->
+            val signal = CancellationSignal()
+            continuation.invokeOnCancellation { signal.cancel() }
+            runCatching {
+                manager.getCurrentLocation(LocationManager.NETWORK_PROVIDER, signal, context.mainExecutor) {
+                    if (continuation.isActive) continuation.resume(it)
                 }
+            }.onFailure { if (continuation.isActive) continuation.resume(null) }
         }
     }
 }
+
+
+private fun countryFlag(code: String): String =
+    if (code.length == 2 && code.all { it.uppercaseChar() in 'A'..'Z' }) {
+        code.uppercase(Locale.ROOT).map { String(Character.toChars(0x1F1E6 + it.code - 'A'.code)) }.joinToString("")
+    } else ""

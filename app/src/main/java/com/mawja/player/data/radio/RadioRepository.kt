@@ -51,10 +51,14 @@ object RadioFilters {
     val arab = RadioFilter("arab", language = "arabic", labelRes = R.string.filter_arab)
     val world = RadioFilter("world", labelRes = R.string.filter_world)
     val quran = RadioFilter("quran", tag = "quran", labelRes = R.string.filter_quran)
-    val news = RadioFilter("news", tag = "news", language = "arabic", labelRes = R.string.filter_news)
+    val news = RadioFilter("news", tag = "news", labelRes = R.string.filter_news)
     // Quran remains available to the media-session compatibility layer, but is
     // intentionally not exposed as a button in the visual Radio screen.
-    val all: List<RadioFilter> = listOf(local, world, news)
+    val music = RadioFilter("music", tag = "music", labelRes = R.string.music)
+    val sports = RadioFilter("sports", tag = "sports", labelRes = R.string.radio_sports)
+    val talk = RadioFilter("talk", tag = "talk", labelRes = R.string.radio_talk)
+    val culture = RadioFilter("culture", tag = "culture", labelRes = R.string.radio_culture)
+    val all: List<RadioFilter> = listOf(local, world, news, music, sports, talk, culture, quran)
 }
 
 object OmanSeeds {
@@ -106,11 +110,20 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         "https://all.api.radio-browser.info",
     )
 
+    @Serializable
+    data class RadioLanguage(val name: String = "", val stationcount: Int = 0)
+
+    suspend fun languages(): List<RadioLanguage> = withContext(Dispatchers.IO) {
+        json.decodeFromString(ListSerializer(RadioLanguage.serializer()), fetchRaw("/json/languages", emptyMap()))
+            .filter { it.name.isNotBlank() && it.stationcount > 0 }.distinctBy { it.name }
+    }
+
     suspend fun stations(
         filter: RadioFilter,
         latitude: Double? = null,
         longitude: Double? = null,
         countryCode: String? = null,
+        language: String? = null,
     ): List<Track> = withContext(Dispatchers.IO) { if (filter.id == RadioFilters.local.id) {
         if (countryCode.isNullOrBlank()) emptyList()
         else {
@@ -130,14 +143,14 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             }
         }
     } else try {
-        val key = cacheKey(filter, countryCode)
-        val result = withContext(Dispatchers.IO) { fetchFilter(filter, latitude, longitude, countryCode) }
+        val key = cacheKey(filter, countryCode, language)
+        val result = withContext(Dispatchers.IO) { fetchFilter(filter.copy(language = language ?: filter.language), latitude, longitude, countryCode) }
         if (result.isNotEmpty()) saveCache(key, result)
-        result.ifEmpty { loadCache(key) ?: fallbackStations(filter, countryCode) }
+        result.ifEmpty { loadCache(key) ?: if (language == null) fallbackStations(filter, countryCode) else emptyList() }
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        loadCache(cacheKey(filter, countryCode)) ?: fallbackStations(filter, countryCode)
+        loadCache(cacheKey(filter, countryCode, language)) ?: if (language == null) fallbackStations(filter, countryCode) else emptyList()
     }
 
     }
@@ -176,10 +189,12 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         f.id == RadioFilters.local.id && latitude != null && longitude != null -> fetchNearby(latitude, longitude, countryCode)
         f.id == RadioFilters.local.id -> emptyList()
         f.id == RadioFilters.oman.id -> fetchOman()
-        f.id == RadioFilters.news.id -> (reviewedNewsStreams() + fetchGeneric(f)).distinctBy { it.streamUrl }
-        f.id == RadioFilters.world.id && !countryCode.isNullOrBlank() -> fetchCountry(countryCode)
-        f.id == RadioFilters.world.id -> emptyList()
-        else -> fetchGeneric(f)
+        f.id == RadioFilters.news.id -> (
+            (if (countryCode == null && f.language == "arabic") reviewedNewsStreams() else emptyList()) +
+                fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode)))
+            ).distinctBy { it.streamUrl }
+        f.id == RadioFilters.world.id -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode)))
+        else -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode).ifEmpty { f.countryCodes }))
     }
 
     private fun fetchCountry(countryCode: String): List<Track> = fetch(
@@ -247,7 +262,11 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             f.countryCodes.map { cc -> async { runCatching { fetch(base + mapOf("countrycode" to cc, "limit" to "60")) }.getOrDefault(emptyList()) } }
                 .awaitAll().flatten()
         }
-        stations.filter { f.id != RadioFilters.news.id || isNewsStation(it.name, it.tags) }
+        stations.filter { station ->
+            (f.countryCodes.isEmpty() || station.countrycode.uppercase(Locale.ROOT) in f.countryCodes) &&
+                (f.language == null || station.language.split(',').any { it.trim().equals(f.language, true) }) &&
+                (f.id != RadioFilters.news.id || isNewsStation(station.name, station.tags))
+        }
             .distinctBy { it.stationuuid }
             .sortedByDescending { it.clickcount }
             .mapNotNull { it.toTrack() }
@@ -318,7 +337,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             RadioFilters.gulf.id -> (oman + arabic).distinctBy { it.streamUrl }
             RadioFilters.arab.id -> arabic
             RadioFilters.quran.id -> quran + officialOmanStations().last()
-            RadioFilters.news.id -> reviewedNewsStreams() + arabic.filter { it.title.contains("Arabiya", ignoreCase = true) }
+            RadioFilters.news.id -> emptyList()
             RadioFilters.world.id -> if (countryCode == "OM") oman else emptyList()
             else -> emptyList()
         }
@@ -426,12 +445,10 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         }
     }
 
-    private fun cacheKey(filter: RadioFilter, countryCode: String?): String =
-        when {
-            filter.id == RadioFilters.news.id -> "news_v2"
-            filter.id == RadioFilters.world.id && !countryCode.isNullOrBlank() -> "world_$countryCode"
-            else -> filter.id
-        }
+    private fun cacheKey(filter: RadioFilter, countryCode: String?, language: String?): String {
+        val languageKey = (language ?: filter.language ?: "all").map { if (it.isLetterOrDigit()) it else '_' }.joinToString("")
+        return "global_v1_${filter.id}_${countryCode ?: "all"}_$languageKey"
+    }
 
     private fun cacheFile(id: String) = File(context.filesDir, "radio_$id.json")
     private fun saveCache(id: String, tracks: List<Track>) { runCatching { cacheFile(id).writeText(json.encodeToString(trackList, tracks)) } }
@@ -442,19 +459,13 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 }
 
 /** Conservative news-only classification. Mixed-format stations remain in country listings. */
-internal fun isNewsStation(name: String, rawTags: String): Boolean {
-    val stationName = name.trim().lowercase(Locale.ROOT)
-    val reviewedService = stationName in setOf("al arabiya fm", "al araby", "bbc arabic", "bbc arabic radio",
-        "mc doualiya", "monte carlo doualiya", "monte carlo doualiya radio",
-        "مونت كارلو الدولية", "مونتي كارلو الدولية", "radio sawa", "sawa radio", "إذاعة سوا") ||
-        (stationName.contains("replay news") && stationName.contains("العربية"))
+internal fun isNewsStation(@Suppress("UNUSED_PARAMETER") name: String, rawTags: String): Boolean {
     val tags = rawTags.split(',').map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
     val newsTags = setOf("news", "news talk", "news/talk", "world news", "international news", "أخبار", "اخبار")
-    val supportingTags = setOf(
-        "talk", "politics", "political", "current affairs", "information", "international",
-        "arabic", "arabic news", "english", "french", "arabic talk",
-    )
-    return reviewedService && tags.any { it in newsTags } && tags.all { it in newsTags || it in supportingTags }
+    val excluded = setOf("music", "pop", "rock", "dance", "quran", "coran", "religion", "religious", "variety", "general", "entertainment", "top40", "top 40", "sports", "sport")
+    return tags.any { it in newsTags } &&
+        tags.none { tag -> tag in excluded || tag.endsWith(" music") || tag.startsWith("music ") }
+
 }
 
 internal fun isPlayableRadioUrl(value: String): Boolean {

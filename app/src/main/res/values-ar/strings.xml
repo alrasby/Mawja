@@ -118,4 +118,12 @@
     <string name="auto_video_audio">صوت الفيديو</string>
     <string name="auto_rewind">رجوع ١٠ ثوانٍ</string>
     <string name="auto_forward">تقديم ١٠ ثوانٍ</string>
+    <string name="radio_sports">رياضة</string>
+    <string name="radio_talk">حوار</string>
+    <string name="radio_culture">ثقافة</string>
+    <string name="radio_all_countries">كل الدول</string>
+    <string name="radio_use_location">استخدام موقعي</string>
+    <string name="radio_all_languages">كل اللغات</string>
+    <string name="radio_language">لغة المحطات</string>
+    <string name="radio_choose_location">اختر دولة أو استخدم موقعك لعرض المحطات المحلية.</string>
 </resources>

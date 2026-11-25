@@ -40,66 +40,83 @@ class VmFactory(private val container: AppContainer) : ViewModelProvider.Factory
 
 class RadioVm(private val c: AppContainer) : ViewModel() {
     val filter = MutableStateFlow(RadioFilters.local)
-    val query = MutableStateFlow("")
-    val state = MutableStateFlow(ListState(loading = true))
-    val localReady = MutableStateFlow(false)
+    val state = MutableStateFlow(ListState())
     val worldCountries = MutableStateFlow<List<RadioCountry>>(emptyList())
-    val worldCountry = MutableStateFlow<String?>(null)
-    private var localLocation: Pair<Double, Double>? = null
-    private var localCountryCode: String? = null
+    val languages = MutableStateFlow<List<com.mawja.player.data.radio.RadioRepository.RadioLanguage>>(emptyList())
+    val country = MutableStateFlow<String?>(null)
+    val language = MutableStateFlow<String?>(null)
+    val locationCountry = MutableStateFlow(c.preferences.lastCountryCode())
+    private var localLocation = c.preferences.lastLocation()
     private var job: Job? = null
+    private var locationJob: Job? = null
 
     init {
-        // Restore last known location so local stations appear immediately on reopen
-        c.preferences.lastLocation()?.let { (lat, lon) ->
-            localLocation = lat to lon
-            localCountryCode = c.preferences.lastCountryCode()
-            localReady.value = true
+        restoreSelection()
+        viewModelScope.launch {
+            try { worldCountries.value = c.radio.countries() }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { }
         }
-        viewModelScope.launch { worldCountries.value = c.radio.countries() }
+        viewModelScope.launch {
+            try { languages.value = c.radio.languages() }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { }
+        }
         load()
+    }
+
+    private fun restoreSelection() {
+        val id = filter.value.id
+        country.value = c.preferences.radioOption("country_$id").ifBlank { null }
+        val defaultLanguage = if (id == RadioFilters.news.id) {
+            val code = c.preferences.language.value.substringBefore('-')
+            java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.ENGLISH).lowercase(java.util.Locale.ROOT)
+        } else ""
+        language.value = c.preferences.radioOption("language_$id", defaultLanguage).ifBlank { null }
     }
 
     fun select(f: RadioFilter) {
         filter.value = f
-        query.value = ""
-        if (f.id != RadioFilters.world.id) worldCountry.value = null
-        if (f.id == RadioFilters.local.id && localLocation == null) state.value = ListState()
-        else if (f.id == RadioFilters.world.id) state.value = ListState()
-        else load()
+        restoreSelection()
+        load()
     }
-    fun selectWorldCountry(countryCode: String) { worldCountry.value = countryCode; if (filter.value.id == RadioFilters.world.id) load() }
+    fun selectCountry(value: String?) {
+        country.value = value
+        c.preferences.setRadioOption("country_${filter.value.id}", value.orEmpty())
+        load()
+    }
+    fun selectLanguage(value: String?) {
+        language.value = value
+        c.preferences.setRadioOption("language_${filter.value.id}", value.orEmpty())
+        load()
+    }
     fun setLocalLocation(latitude: Double, longitude: Double) {
-        localLocation = latitude to longitude
-        localReady.value = true
-        viewModelScope.launch {
-            localCountryCode = c.radio.countryCodeFor(latitude, longitude)
-            c.preferences.saveLastLocation(latitude, longitude, localCountryCode)
-            if (filter.value.id == RadioFilters.local.id) load()
+        locationJob?.cancel()
+        locationJob = viewModelScope.launch {
+            val resolved = c.radio.countryCodeFor(latitude, longitude) ?: return@launch
+            localLocation = latitude to longitude
+            locationCountry.value = resolved
+            c.preferences.saveLastLocation(latitude, longitude, resolved)
+            if (filter.value.id == RadioFilters.local.id && country.value == null) load()
         }
     }
-    fun onQuery(q: String) { query.value = q; if (q.isBlank()) load() }
 
     fun load() {
         job?.cancel()
-        val q = query.value.trim()
         val f = filter.value
-        if (f.id == RadioFilters.local.id && localLocation == null) { state.value = ListState(); return }
-        if (f.id == RadioFilters.world.id && worldCountry.value.isNullOrBlank()) { state.value = ListState(); return }
+        val chosenCountry = country.value ?: if (f.id == RadioFilters.local.id) locationCountry.value else null
+        if (f.id == RadioFilters.local.id && chosenCountry == null) {
+            state.value = ListState()
+            return
+        }
+        val chosenLanguage = language.value
+        val coordinates = localLocation?.takeIf { f.id == RadioFilters.local.id && country.value == null }
         job = viewModelScope.launch {
             state.value = ListState(loading = true)
             state.value = try {
-                val localItems = c.radio.stations(
-                    f,
-                    localLocation?.first,
-                    localLocation?.second,
-                    if (f.id == RadioFilters.local.id) localCountryCode else worldCountry.value,
-                )
-                val items = if (q.isNotEmpty() && f.id != RadioFilters.local.id) c.radio.search(q) else if (q.isNotEmpty()) {
-                    localItems.filter { it.title.contains(q, true) || it.subtitle.contains(q, true) }
-                } else localItems
-                ListState(items = items)
-            } catch (e: CancellationException) { throw e } catch (e: Exception) { ListState(error = e.message ?: "error") }
+                ListState(items = c.radio.stations(f, coordinates?.first, coordinates?.second, chosenCountry, chosenLanguage))
+            } catch (e: CancellationException) { throw e }
+            catch (_: Exception) { ListState(error = "radio") }
         }
     }
 }
