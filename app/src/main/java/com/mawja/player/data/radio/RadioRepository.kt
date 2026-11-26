@@ -529,7 +529,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 internal fun isNewsStation(@Suppress("UNUSED_PARAMETER") name: String, rawTags: String): Boolean {
     val tags = rawTags.split(',').map { it.trim().lowercase(Locale.ROOT) }.filter { it.isNotEmpty() }
     val newsTags = setOf("news", "news talk", "news/talk", "world news", "international news", "أخبار", "اخبار")
-    val excluded = setOf("music", "pop", "rock", "dance", "quran", "coran", "religion", "religious", "variety", "general", "entertainment", "top40", "top 40", "sports", "sport")
+    val excluded = setOf("music", "pop", "rock", "dance", "quran", "coran", "religion", "religious", "variety", "general", "entertainment", "top40", "top 40", "sports", "sport", "قرآن", "قران", "القرآن الكريم", "دين", "ديني", "موسيقى", "أغاني", "اغاني", "رياضة", "رياضي")
     return tags.any { it in newsTags } &&
         tags.none { tag -> tag in excluded || tag.endsWith(" music") || tag.startsWith("music ") }
 

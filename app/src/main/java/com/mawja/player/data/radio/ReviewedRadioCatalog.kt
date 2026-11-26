@@ -89,5 +89,5 @@ internal fun matchesRadioCategory(filter: RadioFilter, name: String, rawTags: St
         else -> setOf(filter.tag)
     }
     return tags.any { it in aliases } &&
-        (filter.id != "music" || tags.none { it in setOf("quran", "coran", "religion", "religious", "القرآن الكريم") })
+        (filter.id != "music" || tags.none { it in setOf("quran", "coran", "religion", "religious", "islamic", "قرآن", "قران", "القرآن الكريم", "قرآن كريم", "دين", "ديني", "إسلامي", "اسلامي") })
 }

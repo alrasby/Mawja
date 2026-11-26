@@ -69,5 +69,8 @@ class ReviewedRadioCatalogTest {
         assertTrue(matchesRadioCategory(RadioFilters.music, "Jazz station", "jazz,english"))
         assertFalse(matchesRadioCategory(RadioFilters.music, "Quran", "music,quran,religion"))
         assertFalse(matchesRadioCategory(RadioFilters.news, "Mixed", "news,pop"))
+        assertFalse(matchesRadioCategory(RadioFilters.music, "قرآن", "music,قرآن"))
+        assertFalse(matchesRadioCategory(RadioFilters.news, "قرآن", "news,القرآن الكريم"))
+        assertFalse(matchesRadioCategory(RadioFilters.news, "أغاني", "news,أغاني"))
     }
 }
