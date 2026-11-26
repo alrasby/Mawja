@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -124,6 +125,12 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         }
     }
 
+    private val unavailableStreams by lazy {
+        context.assets.open("radio/unavailable-streams.json").bufferedReader().use {
+            json.decodeFromString(ListSerializer(String.serializer()), it.readText()).toSet()
+        }
+    }
+
     suspend fun stations(
         filter: RadioFilter, latitude: Double? = null, longitude: Double? = null,
         countryCode: String? = null, language: String? = null,
@@ -134,7 +141,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         // when the directory is offline or lacks language/category metadata.
         val curated = reviewed.filter { it.matches(filter, country, language) }.map { it.track() }
         val directory = directoryStations(filter, latitude, longitude, country, language)
-        (curated + directory).filterNot { isRetiredRadioEntry(it.title, it.streamUrl.orEmpty()) }
+        (curated + directory).filterNot { isRetiredRadioEntry(it.title, it.streamUrl.orEmpty()) || it.streamUrl in unavailableStreams }
             .distinctBy { it.streamUrl?.trimEnd('/') }
     }
 
@@ -176,14 +183,21 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     }
 
     suspend fun search(query: String): List<Track> = withContext(Dispatchers.IO) {
-        fetch(mapOf(
+        val curated = reviewed.filter { entry ->
+            (listOf(entry.name) + entry.aliases).any { it.contains(query.trim(), ignoreCase = true) }
+        }.map { it.track() }
+        val directory = runCatching { fetch(mapOf(
             "name" to query,
             "hidebroken" to "true",
             "lastcheckok" to "1",
             "order" to "clickcount",
             "reverse" to "true",
             "limit" to "100",
-        )).mapNotNull { it.toTrack() }
+        )).mapNotNull { it.toTrack() } }.getOrElse { e ->
+            if (e is CancellationException) throw e
+            emptyList()
+        }
+        (curated + directory).distinctBy { it.streamUrl }
     }
 
     suspend fun countries(): List<RadioCountry> = withContext(Dispatchers.IO) {
@@ -412,7 +426,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         if (isRetiredRadioEntry(name, url_resolved.ifBlank { url })) return null
         reviewedEntry()?.let { return it.track() }
         val stream = url_resolved.ifBlank { url }.trim()
-        if (stationuuid.isBlank() || lastcheckok != 1 || ssl_error != 0 || !isPlayableRadioUrl(stream)) return null
+        if (stream in unavailableStreams || stationuuid.isBlank() || lastcheckok != 1 || ssl_error != 0 || !isPlayableRadioUrl(stream)) return null
         val quality = codec.takeIf { it.isNotBlank() }?.uppercase()?.let { c -> if (bitrate > 0) "$c ${bitrate}k" else c }
         return Track(
             id = "radio:$stationuuid",

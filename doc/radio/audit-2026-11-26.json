@@ -1,0 +1,4816 @@
+{
+  "checkedAt": "2026-11-26",
+  "method": "Bounded HTTPS media samples; HLS playlist followed to actual segment; ffprobe audio codec inspection. Timeout/403/5xx do not prove permanent closure.",
+  "curatedCandidates": [
+    {
+      "id": "sky-ar",
+      "name": "سكاي نيوز عربية",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://radio.skynewsarabia.com/stream/radio/skynewsarabia",
+      "homepage": "https://www.skynewsarabia.com/radio",
+      "sourcePage": "https://api.skynewsarabia.com/rest/info.json",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aja-ar",
+      "name": "الجزيرة — البث الصوتي",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://live-hls-web-aja-gcp.thehlive.com/VOICE-AJA/index.m3u8",
+      "homepage": "https://www.aljazeera.net/audio/live",
+      "sourcePage": "https://www.aljazeera.net/audio/live",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "asharq-ar",
+      "name": "راديو الشرق مع Bloomberg",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://live-radio.asharq.com/asharq_stereo.m3u8",
+      "homepage": "https://asharq.com/radio/",
+      "sourcePage": "https://asharq.com/radio/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mcd-ar",
+      "name": "مونت كارلو الدولية",
+      "countryCode": "FR",
+      "city": "باريس",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://montecarlodoualiya128k.ice.infomaniak.ch/mc-doualiya.mp3",
+      "homepage": "https://www.mc-doualiya.com/",
+      "sourcePage": "https://www.mc-doualiya.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sawa-ar",
+      "name": "راديو سوا",
+      "countryCode": "US",
+      "city": "واشنطن",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://mbn-channel-03.akacast.akamaistream.net/7/29/233450/v1/ibb.akacast.akamaistream.net/mbn_channel_03",
+      "homepage": "https://www.radiosawa.com/",
+      "sourcePage": "https://www.radiosawa.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "arabiya-news",
+      "name": "العربية FM",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://fm.alarabiya.net/fm/myStream/playlist.m3u8",
+      "homepage": "https://www.alarabiya.net/alarabiya-fm",
+      "sourcePage": "https://www.alarabiya.net/alarabiya-fm",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "alaraby",
+      "name": "راديو العربي",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "news",
+        "talk"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/alarabyradiolive/alarabyradio_audio/icecast.audio",
+      "homepage": "https://www.alaraby.com/",
+      "sourcePage": "https://www.alaraby.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "abudhabi",
+      "name": "أبوظبي FM",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture",
+        "sports"
+      ],
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/abudhabi_fm/abudhabi_fm_hls_nd/index.m3u8",
+      "homepage": "https://www.admn.ae/ar/brand/4197610/",
+      "sourcePage": "https://www.admn.ae/ar/brand/4197610/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "emarat",
+      "name": "إمارات FM",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/emarat_fm/emarat_fm_hls_nd/index.m3u8",
+      "homepage": "https://www.admn.ae/ar/brand/4197611/",
+      "sourcePage": "https://www.admn.ae/ar/brand/4197611/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "arabiya99",
+      "name": "العربية 99 FM",
+      "countryCode": "AE",
+      "city": "دبي",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://stream.radiojar.com/s1mygd1frxquv",
+      "homepage": "https://www.alarabiya99.ae/",
+      "sourcePage": "https://www.alarabiya99.ae/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "khaleejiya",
+      "name": "الخليجية 100.9",
+      "countryCode": "AE",
+      "city": "دبي",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://stream.radiojar.com/5wpf9e4erxquv",
+      "homepage": "https://www.alkhaleejiya.ae/",
+      "sourcePage": "https://www.alkhaleejiya.ae/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sharjah-quran",
+      "name": "القرآن الكريم من الشارقة",
+      "countryCode": "AE",
+      "city": "الشارقة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/smcquranlive/quranradiolive/icecast.audio",
+      "homepage": "https://sba.net.ae/en/live/a1f57dbe16971827aaa5c5e4dda1ca68",
+      "sourcePage": "https://sba.net.ae/en/live/a1f57dbe16971827aaa5c5e4dda1ca68",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rabia",
+      "name": "الرابعة 107.8 FM",
+      "countryCode": "AE",
+      "city": "عجمان",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://s2.radio.co/s770fa24b6/listen",
+      "homepage": "https://www.alrabiafm.com/",
+      "sourcePage": "https://m.alrabiafm.com/pop-up-player",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "qatar",
+      "name": "إذاعة قطر",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/qmcqatarradiolive/qatarradio/playlist.m3u8",
+      "homepage": "https://qatarradio.qa/",
+      "sourcePage": "https://qatarradio.qa/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "qatar-quran",
+      "name": "القرآن الكريم — قطر",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/qmcquranradiolive/quranradio/playlist.m3u8",
+      "homepage": "https://quranradio.qa/",
+      "sourcePage": "https://quranradio.qa/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "qatar-quran2",
+      "name": "القرآن الكريم — قطر 2",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/qmcquranradio2live/quranradio2/playlist.m3u8",
+      "homepage": "https://quranradio.qa/",
+      "sourcePage": "https://quranradio.qa/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kuwait-general",
+      "name": "إذاعة الكويت — البرنامج العام",
+      "countryCode": "KW",
+      "city": "الكويت",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture"
+      ],
+      "streamUrl": "https://kwtkrdota.cdn.mangomolo.com/k1rdo/k1rdo.stream_aac/chunklist.m3u8",
+      "homepage": "https://51.com.kw/radio-live",
+      "sourcePage": "https://51.com.kw/radio-live",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/x-aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nogoum",
+      "name": "نجوم FM",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://audio.nrpstream.com/listen/nogoumfm/radio.mp3",
+      "homepage": "https://www.nogoumfm.net/",
+      "sourcePage": "https://www.nogoumfm.net/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mega",
+      "name": "ميجا FM",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://megafm927.radioca.st/stream",
+      "homepage": "https://megafm927.com/",
+      "sourcePage": "https://megafm927.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "nagham",
+      "name": "نغم FM",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://ahmsamir.radioca.st/stream",
+      "homepage": "https://naghamfm1053.com/",
+      "sourcePage": "https://naghamfm1053.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9090",
+      "name": "الراديو 9090",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "music"
+      ],
+      "streamUrl": "https://9090streaming.mobtada.com/9090FMEGYPT",
+      "homepage": "https://9090.fm/",
+      "sourcePage": "https://9090.fm/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "onsport",
+      "name": "أون سبورت FM",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "sports"
+      ],
+      "streamUrl": "https://carina.streamerr.co:2020/stream/OnSportFM",
+      "homepage": "https://onsportfm.com/",
+      "sourcePage": "https://onsportfm.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg; charset=UTF-8",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hits",
+      "name": "راديو هيتس 88.2",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://radiohits882.radioca.st/;",
+      "homepage": "https://radiohits882.com/",
+      "sourcePage": "https://radiohits882.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sha3by",
+      "name": "شعبي FM 95",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://radio95.radioca.st/;",
+      "homepage": "https://95-fm.com/",
+      "sourcePage": "https://95-fm.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cairo-quran",
+      "name": "القرآن الكريم — القاهرة",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://stream.radiojar.com/8s5u5tpdtwzuv",
+      "homepage": "https://www.maspero.eg/stream/7",
+      "sourcePage": "https://www.maspero.eg/stream/7",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "timed out"
+      }
+    },
+    {
+      "id": "vdl",
+      "name": "صوت لبنان",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "news",
+        "talk"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9054/stream",
+      "homepage": "https://www.vdl.me/",
+      "sourcePage": "https://www.vdl.me/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kol-lebnan",
+      "name": "صوت كل لبنان",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "news",
+        "talk"
+      ],
+      "streamUrl": "https://audio.osina.cloud:9323/stream",
+      "homepage": "https://www.vdlnews.com/",
+      "sourcePage": "https://www.vdlnews.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "liban",
+      "name": "إذاعة لبنان",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "culture",
+        "talk"
+      ],
+      "streamUrl": "https://media2.streambrothers.com:2020/stream/8194",
+      "homepage": "https://www.radioliban.gov.lb/",
+      "sourcePage": "https://www.radioliban.gov.lb/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rll",
+      "name": "لبنان الحر",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "music"
+      ],
+      "streamUrl": "https://edge.mixlr.com/channel/qtqeb",
+      "homepage": "https://www.rll.com.lb/",
+      "sourcePage": "https://www.rll.com.lb/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mp3",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ghad",
+      "name": "صوت الغد",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9030/stream",
+      "homepage": "https://www.sawtelghad.com/",
+      "sourcePage": "https://www.sawtelghad.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hoda",
+      "name": "صوت الهدى",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "culture",
+        "talk"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9032/stream",
+      "homepage": "https://www.sawtalhoda.com/",
+      "sourcePage": "https://www.sawtalhoda.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "farah",
+      "name": "صوت الفرح",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9036/stream",
+      "homepage": "https://www.sawtalfarah.com/",
+      "sourcePage": "https://www.sawtalfarah.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aghani",
+      "name": "أغاني أغاني",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "music"
+      ],
+      "streamUrl": "https://streaming.nrjaudio.fm/ou6pfgxp336f",
+      "homepage": "https://aghaniaghani.com/",
+      "sourcePage": "https://aghaniaghani.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lb-quran",
+      "name": "إذاعة القرآن الكريم — لبنان 93.3",
+      "countryCode": "LB",
+      "city": "بيروت",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://audio.osina.cloud:7987/stream",
+      "homepage": "https://www.quranradio.org.lb/",
+      "sourcePage": "https://www.quranradio.org.lb/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "arabiya-news",
+      "name": "العربية FM",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "language": "arabic",
+      "categories": [
+        "news"
+      ],
+      "streamUrl": "https://fm.alarabiya.net/fm/myStream/playlist.m3u8",
+      "homepage": "https://www.alarabiya.net/alarabiya-fm",
+      "sourcePage": "https://www.alarabiya.net/alarabiya-fm",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/x-aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "abudhabi",
+      "name": "أبوظبي FM",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture",
+        "sports"
+      ],
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/abudhabi_fm/abudhabi_fm_hls_nd/index.m3u8",
+      "homepage": "https://www.admn.ae/ar/brand/4197610/",
+      "sourcePage": "https://www.admn.ae/ar/brand/4197610/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "emarat",
+      "name": "إمارات FM",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/emarat_fm/emarat_fm_hls_nd/index.m3u8",
+      "homepage": "https://www.admn.ae/ar/brand/4197611/",
+      "sourcePage": "https://www.admn.ae/ar/brand/4197611/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "cairo-quran",
+      "name": "القرآن الكريم — القاهرة",
+      "countryCode": "EG",
+      "city": "القاهرة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://stream.radiojar.com/8s5u5tpdtwzuv",
+      "homepage": "https://www.maspero.eg/stream/7",
+      "sourcePage": "https://www.maspero.eg/stream/7",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sout-khaleej",
+      "name": "صوت الخليج",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "culture"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/qmcslkrradiolive/slkrradio/playlist.m3u8",
+      "homepage": "https://www.soutalkhaleej.fm/",
+      "sourcePage": "https://www.soutalkhaleej.fm/wp-content/themes/AlKhaleej/assets/js/live-player.js?ver=7.0.3",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sout-khaleej2",
+      "name": "صوت الخليج FM",
+      "countryCode": "QA",
+      "city": "الدوحة",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "culture"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/qmcslkr2radiolive/slkr2radio/playlist.m3u8",
+      "homepage": "https://www.soutalkhaleej.fm/",
+      "sourcePage": "https://www.soutalkhaleej.fm/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "oula",
+      "name": "الأولى 107.4",
+      "countryCode": "AE",
+      "city": "دبي",
+      "language": "arabic",
+      "categories": [
+        "culture",
+        "talk"
+      ],
+      "streamUrl": "https://uk6.internet-radio.com/proxy/aloula?mp=/stream;",
+      "homepage": "https://www.aloularadio.ae/live",
+      "sourcePage": "https://www.aloularadio.ae/live",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fujairah",
+      "name": "إذاعة الفجيرة",
+      "countryCode": "AE",
+      "city": "الفجيرة",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/fujairahradiolive/fujairahradio/playlist.m3u8",
+      "homepage": "https://www.fujairahtv.ae/live-watch/2/fujairah-fm/audio",
+      "sourcePage": "https://www.fujairahtv.ae/live-watch/2/fujairah-fm/audio",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "sharjah",
+      "name": "إذاعة الشارقة",
+      "countryCode": "AE",
+      "city": "الشارقة",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture"
+      ],
+      "streamUrl": "https://l3.itworkscdn.net/smcradiolive/smcradiolive/icecast.audio",
+      "homepage": "https://sba.net.ae/en/live/3c0dca8b528bc0ad3a3110815f0ff719",
+      "sourcePage": "https://radiostay.com/station/18910-sharjah-radio",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kuwait-fm",
+      "name": "كويت FM",
+      "countryCode": "KW",
+      "city": "الكويت",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://kwtkrdota.cdn.mangomolo.com/kfmrdo/kfmrdo.stream_aac/chunklist.m3u8",
+      "homepage": "https://51.com.kw/radio-live/367/",
+      "sourcePage": "https://www.radio-addict.com/en/stream-Gy2PRB8peLviNv2v4xnU8F/listen-Kuwait-FM-103-7",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/x-aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "marina",
+      "name": "مارينا FM",
+      "countryCode": "KW",
+      "city": "الكويت",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://ffs3.gulfsat.com/MARINA-FM-904/tracks-a1/mono.m3u8",
+      "homepage": "https://marinafm.com/",
+      "sourcePage": "https://onlineradiobox.com/kw/marina/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 503,
+        "detail": "HTTP Error 503: Service Unavailable"
+      }
+    },
+    {
+      "id": "emarat-alt",
+      "name": "إمارات FM",
+      "countryCode": "AE",
+      "city": "أبوظبي",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://admdn7.cdn.mangomolo.com/emrdo/emrdo.stream_aac/playlist.m3u8",
+      "homepage": "https://www.admn.ae/ar/brand/4197611/",
+      "sourcePage": "https://onlineradiobox.com/ae/emarat/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 503,
+        "detail": "HTTP Error 503: Service Unavailable"
+      }
+    },
+    {
+      "id": "fujairah-token",
+      "name": "إذاعة الفجيرة (رابط موقع رسمي مؤقت)",
+      "countryCode": "AE",
+      "city": "الفجيرة",
+      "language": "arabic",
+      "categories": [
+        "talk",
+        "culture"
+      ],
+      "streamUrl": "https://live.kwikmotion.com/fujairahradiolive/fujairahradio/playlist.m3u8?hdnts=exp=1795698915~acl=/fujairahradiolive/fujairahradio/*~hmac=43245cb13b6cae18c0acaed9a99bdc264052dc63b76acfb808bdaa82b41cdb45",
+      "homepage": "https://www.fujairahtv.ae/live-watch/2/fujairah-fm/audio",
+      "sourcePage": "https://www.fujairahtv.ae/live-watch/2/fujairah-fm/audio",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "rak-quran",
+      "name": "إذاعة رأس الخيمة للقرآن الكريم",
+      "countryCode": "AE",
+      "city": "رأس الخيمة",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://studio18.radiolize.com/radio/8130/rakquran.mp3",
+      "homepage": "https://play.google.com/store/apps/details?id=ae.rak.QuranApp",
+      "sourcePage": "https://radio-uae.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dubai-quran",
+      "name": "دبي للقرآن الكريم",
+      "countryCode": "AE",
+      "city": "دبي",
+      "language": "arabic",
+      "categories": [
+        "quran"
+      ],
+      "streamUrl": "https://uk5.internet-radio.com/proxy/dubaiholyquran?mp=/stream",
+      "homepage": "https://www.dmi.gov.ae/",
+      "sourcePage": "https://radio-uae.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "marina-index",
+      "name": "مارينا FM",
+      "countryCode": "KW",
+      "city": "الكويت",
+      "language": "arabic",
+      "categories": [
+        "music",
+        "talk"
+      ],
+      "streamUrl": "https://ffs3.gulfsat.com/MARINA-FM-904/index.m3u8",
+      "homepage": "https://marinafm.com/",
+      "sourcePage": "https://radio-kuwait.com/",
+      "checkedAt": "2026-11-26",
+      "audit": {
+        "status": "http_error",
+        "http": 503,
+        "detail": "HTTP Error 503: Service Unavailable"
+      }
+    }
+  ],
+  "directory": [
+    {
+      "id": "ae5ae7aa-b82e-4b87-8970-f19200e0a5e9",
+      "name": "Abdulwali Al-Arkani",
+      "countryCode": "AE",
+      "streamUrl": "https://serverkw.quran-uni.com:8238/",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "24718db6-7ced-4a28-a7de-e0c09eeb0095",
+      "name": "Abu Dhabi fm",
+      "countryCode": "AE",
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/abudhabi_fm/abudhabi_fm_hls_nd/index.m3u8",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "1ee6530c-1890-4fbe-807f-69135a8c6f49",
+      "name": "Al Arabiya 99 FM",
+      "countryCode": "AE",
+      "streamUrl": "https://stream.radiojar.com/s1mygd1frxquv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f3b19087-2ab7-435d-b9f3-02b24d9e2f34",
+      "name": "Al Khaleejiya 100.9 FM",
+      "countryCode": "AE",
+      "streamUrl": "https://stream.radiojar.com/5wpf9e4erxquv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7bcabdad-dc4e-4a92-a935-30289f8ce368",
+      "name": "Emarat fm",
+      "countryCode": "AE",
+      "streamUrl": "https://admn-radio-cdn-lb.starzplayarabia.com/out/v1/admn_radio_enc/emarat_fm/emarat_fm_hls_nd/index.m3u8",
+      "audit": {
+        "status": "http_error",
+        "http": 403,
+        "detail": "HTTP Error 403: Forbidden"
+      }
+    },
+    {
+      "id": "7cca8bd6-a173-4fca-9a74-ca1e15a631e5",
+      "name": "Quran Radio From Sharjah",
+      "countryCode": "AE",
+      "streamUrl": "https://l3.itworkscdn.net/smcquranlive/quranradiolive/icecast.audio",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "98688060-6cbe-4f73-be94-da8d8efc2ead",
+      "name": "Al araby",
+      "countryCode": "QA",
+      "streamUrl": "https://l3.itworkscdn.net/alarabyradiolive/alarabyradio_audio/icecast.audio",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a6bc8a3b-67bf-4042-9af8-f7bad29f0734",
+      "name": "Al Jazeera - English",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-audio-web-aje.getaj.net/VOICE-AJE/01.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "video/mp2t",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a93d497f-74d9-43b9-bb61-fe376ebe240e",
+      "name": "Al Jazeera Arabic",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-web-aja-gcp.thehlive.com/VOICE-AJA/index.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f518d918-8700-460f-89f4-de27b6cc8dce",
+      "name": "Al Jazeera English (Audio)",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-web-aje-gcp.thehlive.com/VOICE-AJE/index.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ada3cd11-4035-41b2-899a-45eee0cf8756",
+      "name": "Al Jazeera English (Live)",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-web-aje-gcp.thehlive.com/AJE/index.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          },
+          {
+            "codec_name": "scte_35",
+            "codec_type": "data"
+          },
+          {
+            "codec_name": "timed_id3",
+            "codec_type": "data"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6ec50764-7237-405a-8864-4b9b22b8100b",
+      "name": "Al Jazeera Video",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-apps-aje-fa.getaj.net/AJE/index.m3u8",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "87837d17-7314-459a-adb4-3a0b9bf76bbf",
+      "name": "Qatar Radio",
+      "countryCode": "QA",
+      "streamUrl": "https://live.kwikmotion.com/qmcqatarradiolive/qatarradio/playlist.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "244cf1a8-52d8-4e26-bf23-821a21129bbf",
+      "name": "قناة الجزيرة",
+      "countryCode": "QA",
+      "streamUrl": "https://live-hls-web-aja.getaj.net/AJA/06.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/mp2t",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "44989117-d472-44c5-afac-e8fdf578b432",
+      "name": "40 Hadith Of An Nawawi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8302/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aae5e83c-a051-4595-9321-50996f3b6b45",
+      "name": "Al-Adab Al-Mufrad",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8366/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "51d6ce03-2598-4c2e-a80e-66de43e0e0fe",
+      "name": "Al-Ameed fi Ilm al-Tajweed",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8246/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7e6bbfbd-36ba-4f7e-8845-e3f31c5c4da4",
+      "name": "Al-Mushaf Al-Mu`allim by Sheikh Muhammad Siddiq Al-Minshawi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8242/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "eb23dc7c-ebca-4ceb-b7f0-a8f2ed149f82",
+      "name": "Al-Tafseer al-Mawdui il-ayat al-Tawheed fi al-Quran",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8244/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7266feab-84b7-446b-9286-8fbed00de6f4",
+      "name": "Ar-Raheeq Al-Makhtum",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8364/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "75fd2e14-af5d-4ed9-a9a8-3f2c70ff87ca",
+      "name": "Fatwas by Ibn `Uthaymin",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8254/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a83841d9-1511-436c-b765-a7fe82003bca",
+      "name": "Funun al-Afnan fi Ajaib Ulum al-Quran",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8250/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "19c5487d-f46f-4286-b5c9-1b2aa77c25f1",
+      "name": "Ghayat al-Mureed fi Ilm al-Tajweed",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8248/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "186ff22a-2697-4ecc-9371-5b03d9ec61e3",
+      "name": "islamina",
+      "countryCode": "KW",
+      "streamUrl": "https://islamina.com/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d586544b-3964-4a3f-90c9-cf336e804f7e",
+      "name": "Jami` at-Tirmidhi 1 - 31",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8298/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0607ec61-be38-43be-8eb5-8ba41a917963",
+      "name": "Jami` at-Tirmidhi 32 - 63",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8300/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "38bb16a5-7996-442d-a03f-3cccf0aa8bb7",
+      "name": "Kuwait General Radio",
+      "countryCode": "KW",
+      "streamUrl": "https://kwtkrdota.cdn.mangomolo.com/k1rdo/k1rdo.stream_aac/chunklist.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/x-aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4df6e87c-1326-400f-9355-6be71547f02b",
+      "name": "Lulu al-Maknun fi Seera al-Nabi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8360/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a2cbccb1-1a45-4461-8aa2-abdeea31aa51",
+      "name": "Mabahith fi Ulum al-Quran",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8252/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "432877eb-7faa-42e3-a731-c5c82270d7f4",
+      "name": "Maher Muaiqly",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8014/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd37f590-64d5-43c0-8e9e-0b9b3734e35f",
+      "name": "Mahmoud Khalil Al-Hussary",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8018/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e7a348f2-cee7-4e37-adc0-6d91b57a5554",
+      "name": "Mukhtasar Sirat al-Rasul",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8362/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "beef45d2-3b07-4a2f-b679-5f3c912c793a",
+      "name": "Musnad Ahmad - Abu Said al-Khudri to Anas",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8344/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c9a4b0f3-7bc9-402d-bb13-d6294c00e013",
+      "name": "Musnad Ahmad - Aisha to Women",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8356/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3df229d7-856d-4327-8df0-b83d68d4a420",
+      "name": "Musnad Ahmad - Anas ibn Malik to Jabir",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8346/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "86218380-7f54-455e-bc65-464c68dd7d8e",
+      "name": "Musnad Ahmad - Ansar",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8354/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2eb474dd-9aef-4b57-915b-e0559dc309cb",
+      "name": "Musnad Ahmad - Basrans to Ansar",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8352/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d008faac-137b-448f-82b0-7d458012f7aa",
+      "name": "Musnad Ahmad - Makkans to Syrians",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8348/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7a84103d-726a-45f5-8591-c12c11e58270",
+      "name": "Musnad Ahmad - Musnad Abu Hurairah 1",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8340/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a6a6f1da-181d-4f0d-9ac1-127e631f62a2",
+      "name": "Musnad Ahmad - Musnad Abu Hurairah 2",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8342/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "af423759-5871-4b28-a923-c8da5bf7a14a",
+      "name": "Musnad Ahmad - Syrians to Kufans",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8350/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e7a7e977-b9d0-4a9a-8da0-7518a3b26a78",
+      "name": "Musnad Ahmad ibn Hanbal 1-23",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8334/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "85b8f706-d6fd-4511-b450-f0cf54f3afc1",
+      "name": "Musnad Ahmad ibn Hanbal 24-27",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8336/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0d3322ab-1d47-4dd2-90ae-c0226f0be0e7",
+      "name": "Musnad Ahmad ibn Hanbal 28-31",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8338/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ffcbe088-06aa-4cdc-bad6-09f99e4e7c0f",
+      "name": "Muwatta Imam Malik",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8322/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0d468016-910f-497f-b75e-26aed21086e9",
+      "name": "Quran Radio راديو القرآن - Abdulbasit Abdulsamad - عبدالباسط عبدالصمد",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/abdulbasit/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "77c8094d-6822-4221-be7b-1d54ab477d78",
+      "name": "Quran Radio راديو القرآن - Abdulrahman Alsudais - عبدالرحمن السديس",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/sudais/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dd1a2ef3-0136-4ed7-8215-3a7b3564d044",
+      "name": "Quran Radio راديو القرآن - Ali Alhuthaifi - علي الحذيفي",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/alhuthaifi/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4ce99c8e-47bd-4d4d-896b-e9d5310384d3",
+      "name": "Quran Radio راديو القرآن - Kuwait الكويت",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/quran_radio/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e4df1ea1-b0c6-43b1-a0fb-fa685a42d72f",
+      "name": "Quran Radio راديو القرآن - Maher Al Mueaqly - ماهر المعيقلي",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/maher/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e1affe77-8021-424b-ad88-d648919f17fe",
+      "name": "Quran Radio راديو القرآن - Mishary Alafasy - مشاري العفاسي",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/mishary/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0a97035a-bd76-46da-acbb-894f0876da1f",
+      "name": "Quran Radio راديو القرآن - Muhammad Al-Minshawi محمد صديق المنشاوي",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/minshawi/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "10f95a01-1066-471b-89c5-f9092e73a373",
+      "name": "Quran Radio راديو القرآن - Saud Al-Shuraim سعود الشريم",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/alshuraim/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f25fc24b-c5b9-4800-8d51-3e26bb89a99d",
+      "name": "Quran Radio راديو القرآن - Yasser AlDosari - ياسر الدوسري",
+      "countryCode": "KW",
+      "streamUrl": "https://radio.mp3islam.com/listen/yaser/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7ec06630-8ded-4cfa-ac5a-d0c348459c0c",
+      "name": "Quran Recitation by Abdul Rahman Al-Sudais",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8196/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "29a7d0a4-c245-4359-8cb9-e1f778272b18",
+      "name": "Quran Recitation by Abdul-Rahman Al-Usi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8076/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5702d5d1-def7-4a30-86a8-f8338d636d75",
+      "name": "Quran Recitation by Jaza Al-Suweilih",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8228/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a6d49fac-cc85-4c86-b55b-344a891d6e17",
+      "name": "Quran Recitation by Muhammad Siddiq AL-Minshawi (Al-Mushaf Al-Mujawwad)",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8230/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9ba586c3-98a4-4b8d-b582-d97443a0c6f6",
+      "name": "Quran Recitation by Sheikh Abdul Basit Abdul Samad",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8004/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b96c6ea9-9b60-45bc-95fc-b8a2ac88f93b",
+      "name": "Quran Recitation by Sheikh Abdul Mohsin Al-Qasim",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8188/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a2827266-1806-4669-bfa3-3d2bb9fc7e0b",
+      "name": "Quran Recitation by Sheikh Abdul-Aziz Al-Ahmad",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8142/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a192c370-a163-43f7-a367-87fee536fc10",
+      "name": "Quran Recitation by Sheikh Abdulaziz Az-Zahrani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8234/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dc02da95-f5b0-46ee-a8ed-0e751dcc938d",
+      "name": "Quran Recitation by Sheikh Abdulbari Al-Thubayti",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8222/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "96191366-20b2-4d71-9e7e-d71a7f53e723",
+      "name": "Quran Recitation by Sheikh Abdullah Ali Jabir",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8150/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0e5ebe47-7427-4a38-b935-34967c4f355e",
+      "name": "Quran Recitation by Sheikh Abdullah Awad al-Juhani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8066/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6eb87ab6-b4e7-4272-8e8c-5c496f7d8605",
+      "name": "Quran Recitation by Sheikh Abdullah Basfar",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8182/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4f4c8bbf-d6ac-40d0-a3f6-925dee4ed5c7",
+      "name": "Quran Recitation by Sheikh Abdullah Khayat",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8152/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e4cfb2f3-c05a-498f-96ac-5fa066346e35",
+      "name": "Quran Recitation by Sheikh Abu Bakr al-Shatiri",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8162/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "10d8ba62-0c82-4bac-8ff8-c5a4f2c8c878",
+      "name": "Quran Recitation by Sheikh Ahmad al-`Ajmi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8184/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "019a3d75-c3c1-46b4-9e2a-2e5fbb585f9b",
+      "name": "Quran Recitation by Sheikh Ali Al-Hudhaifi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8186/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e3e5fae5-d30d-42ad-981d-bda64a530333",
+      "name": "Quran Recitation by Sheikh Emad Zuhair Hafez",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8080/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1446d8d0-eea1-4c7d-9042-c14296cb3431",
+      "name": "Quran Recitation by Sheikh Fahd Al-Kandari",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8240/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d1d62125-9694-432b-800c-d47f68b79fc9",
+      "name": "Quran Recitation by Sheikh Faris `Abbad",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8068/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d87cb45a-0428-4911-8f09-09eeab0664b7",
+      "name": "Quran Recitation by Sheikh Hani ar-Rifa`i",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8154/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "45b8bd05-a4f4-4a4d-8ea2-b79dc8b468f0",
+      "name": "Quran Recitation by Sheikh Ibrahim Al-Akhdar",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8192/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2f93f40f-2653-42ca-b46b-2a76cda94ae1",
+      "name": "Quran Recitation by Sheikh Idris Abkar",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8236/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0e1923e8-f5c6-4038-b87a-a96c3c6fe84f",
+      "name": "Quran Recitation by Sheikh Khalid AL-Jalil",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8062/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a118df2c-2fcf-4534-8b4a-32907fa4e4c9",
+      "name": "Quran Recitation by Sheikh Khalid al-Qahtani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8070/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e1d3fe4b-11fa-4609-9379-47b44918bcca",
+      "name": "Quran Recitation by Sheikh Khalifah Al-Tunaiji",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8190/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7184ad14-e76f-4828-aac2-9b9acf3079d4",
+      "name": "Quran Recitation by Sheikh Mahmud Ali Al-Banna",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8024/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6540faa8-1336-4393-b557-be9148869282",
+      "name": "Quran Recitation by Sheikh Mishary Al-Ifasy",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8002/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "578f896c-cad6-4252-9226-58c7fd7ef01f",
+      "name": "Quran Recitation by Sheikh Mohammad Al-Tablawi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8078/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1303fa26-f1bd-4c27-8fd1-e8975895e462",
+      "name": "Quran Recitation by Sheikh Muhammad al-Luhaidan",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8156/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5fb11f2a-8027-46ae-a2c9-5bfe5e0734a2",
+      "name": "Quran Recitation by Sheikh Muhammad Ayyub",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8158/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8efa4e37-cdf2-47d8-b397-43dcef27ea2b",
+      "name": "Quran Recitation by Sheikh Muhammad Jibreel",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8160/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5c11eae5-1ab7-4bc4-9024-7003183dab13",
+      "name": "Quran Recitation by Sheikh Muhammad Siddiq al-Minshawi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8074/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aab8cf39-c021-4248-98fb-7c55152457f3",
+      "name": "Quran Recitation by Sheikh Mustafa Ismail",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8224/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cfd4b53e-e4b2-47af-9678-3d830dcec85d",
+      "name": "Quran Recitation by Sheikh Nasser Al-Qatami",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8166/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cac87fa5-4654-40c2-871b-7d2c266a4e1a",
+      "name": "Quran Recitation by Sheikh Osama bin Mohammed Abu Zaid",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8082/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d3fbfdc1-597b-4d72-85a2-f5514ed229ff",
+      "name": "Quran Recitation by Sheikh Sa`d Al-Ghamidi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8026/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "828f1d85-4304-4634-af26-2877a42c1e9e",
+      "name": "Quran Recitation by Sheikh Saud Al-Shuraim",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8194/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bbd7ce96-53f7-42de-a2c4-fe4329922aeb",
+      "name": "Quran Recitation by Sheikh Shaya Al-Tamimi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8264/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3ed16327-63ab-466a-9e3c-da03cde0159e",
+      "name": "Quran Recitation by Sheikh Tawfiq Al-Saigh",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8220/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2cad3c1f-d425-45fc-bf91-e30acf81775f",
+      "name": "Quran Recitation by Sheikh Wadi Al-Yamani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8226/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b4ae5625-2755-4220-99c7-b3ba0cc0b2d3",
+      "name": "Quran Recitation by Sheikh Yasser Al-Dosari",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8168/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "32de1fff-9ca9-4216-8d37-e3147c954333",
+      "name": "Quran Recitation by Sheikh Zaki Daghistani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8072/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c8f67397-4584-486d-8db3-9188ed238872",
+      "name": "Quran Recitation with the Reading of Al-Bizzi from Ibn Kathir",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8064/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "92e2a1ff-c88d-46cf-8801-4c459c7ffa79",
+      "name": "Quran Recitation with the Reading of Ibn Dhakwan from Ibn `Amir",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8174/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bb19e7e9-4740-40ef-8941-b9fc8f1ed360",
+      "name": "Quran Recitation with the Reading of Ruh from Ya`qub al-Hadrami",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8056/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8a3aff15-f050-498c-ad3d-600e82fced74",
+      "name": "Quran Recitation with the Reading of Shu`bah from `Asim ibn Abi al-Nujud",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8172/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "57796c54-d949-4485-8c57-12a5c49044d9",
+      "name": "Reading of Abu Al-Harith from Al-Kisai from Al-Kisai, by Abdul-Rashid Sufi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8042/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3e82bb25-e975-43a8-abd2-fd0625ae1969",
+      "name": "Reading of Al-Duri from Abu Amr by Abul-Rashid Sufi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8048/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2b6b3f97-8e7e-4216-ab12-194f7be13bd5",
+      "name": "Reading of Al-Mushaf Al-Murattal of Al-Duri from Abu Amr by Al-Fatih Muhammad Zubayr",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8046/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "50aa20b3-3eec-44c1-bf8d-d8b3f447fa2d",
+      "name": "Reading of Al-Mushaf Al-Murattal of Al-Duri from Abu Amr by Sheikh Muftah Al-Saltani .",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8044/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f6b54f86-e417-467d-af35-9221382ada77",
+      "name": "Reading of Al-Mushaf Al-Murattal of Al-Susi from Abu Amr by Abdul-Rashid Sufi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8052/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9a4740ae-6ff2-43be-9681-3bde60eeac17",
+      "name": "Reading of Ibn Jummaz from Abu Jafar by Al-Sultani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8040/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b7387a1e-f7b9-4812-a470-e9ff36b0a4c2",
+      "name": "Reading of Khalaf from Hamzah by Abdul-Rashid Al-Sufi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8054/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5d900f6f-c7f3-4510-b655-7fd9beeaeaa4",
+      "name": "Reading of Qalun from Nafi by Ahmad Khidr Al-Tarabulsi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8198/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "3ddbf765-a152-49a5-924d-42e044e554f4",
+      "name": "Reading of Qalun from Nafi by Al-Dukali Muhammad Al-Alim'",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8200/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "499d998f-e268-4202-9430-4f0e4bce3a9c",
+      "name": "Reading of Qalun from Nafi by Ali l-Hudhaifi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8204/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "69911fb2-ace8-414e-83fa-04458ecc66f8",
+      "name": "Reading of Qalun from Nafi by Mahmoud Khalil Al-Husari",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8206/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ae2b4031-3f6c-442a-b65f-152860ea8f6e",
+      "name": "Reading of Ruways from Yaqub al-Hadrami by Mufah Muhammad Al-Saltani",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8170/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6bd06990-ea48-46b5-ac60-efb33f964b99",
+      "name": "Reading of Ruways from Yaqub Al-Hadrami by Yasir Al-Mazrui",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8058/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "af1da416-139c-411e-a41a-cca88f03aa58",
+      "name": "Reading of Warsh from Nafi by Abdul-Basit Abdul-Samad",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8210/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "488286b4-729d-4ba6-8b39-34221750dfd5",
+      "name": "Reading of Warsh from Nafi by Ibrahim Al-Dusari",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8208/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9d784c36-ad85-4b82-bbea-c9a843b6c7e4",
+      "name": "Reading of Warsh from Nafi by Muhammad Al-Tayyib Himdan",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8214/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "377098c5-dadc-4019-952c-b68a1b9f8d75",
+      "name": "Reading of Warsh from Nafi by Mustafa Gharbi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8216/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5f0efbbb-5e95-4c59-8f10-ab3440016710",
+      "name": "Reading of Warsh from Nafi by Umar Al-Qazabri",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8212/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fa2f3d26-88b6-411b-b515-dd7b500ec174",
+      "name": "Reading of Warsh from Nafi by Yasin Al-Jazairi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8218/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "97ce42cb-1560-41d3-85b4-a9affabc3ab4",
+      "name": "Reading of Warsh from Nafi`by Alkouchi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8164/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a38fbfc9-3ccd-41c9-a680-84745fb1b508",
+      "name": "Recitation of Al-Duri from Abu Amr by Sheikh Al-Husary",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8050/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "26c1620c-e6e9-4210-b620-e20c4106c0e6",
+      "name": "Riyad as-Salihin",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8308/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f6525431-74d1-4357-a5ec-af5bc4ce4e10",
+      "name": "Ruqyah Al-Afasy",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8028/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8ca659e7-d615-4fd1-a5a3-d2da87eb561c",
+      "name": "Sahih al-Bukhari 1 - 30",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8266/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c53d845c-efa2-4c90-80d6-94c1a872a6de",
+      "name": "Sahih al-Bukhari 31 - 58",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8268/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ece752af-115d-4a8d-beb5-f0241b541ac8",
+      "name": "Sahih al-Bukhari 59 - 62",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8270/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b9c14ee3-1eb6-4d46-b38e-03a64231d881",
+      "name": "Sahih al-Bukhari 63 - 94",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8272/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f7c4322a-42c2-4a23-8dfd-d3158ab992b8",
+      "name": "Sahih Muslim 1 - 15",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8286/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8a179265-77e5-4e31-ad8f-21d27c065f45",
+      "name": "Sahih Muslim 16 - 34",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8288/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a03baf8f-8177-4c6c-bda7-8de9d6d9f60e",
+      "name": "Sahih Muslim 35 - 55",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8290/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "79c43883-88ad-4517-b032-3454962f0024",
+      "name": "Sunan Abu Dawud 1 - 9",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8316/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "a985c8f0-3105-4a2d-9479-3f6637d47d05",
+      "name": "Sunan Abu Dawud 10 - 23",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8318/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "307d2915-f882-49d4-86bf-ce7f4a365625",
+      "name": "Sunan Abu Dawud 24 - 42",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8320/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "49d1b1e2-7da4-4b6c-a95b-3129fd4afe2e",
+      "name": "Sunan ad-Darimi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8358/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8afef0f2-0a40-47ec-976b-92a0095fa8fb",
+      "name": "Sunan an-Nasa`i 1-17",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8332/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c9d8973b-1332-424e-bece-0fc2e0a10b1a",
+      "name": "Sunan an-Nasa`i 15-39",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8330/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "af343bff-f7d9-4a47-9f4e-e7862acc8d8a",
+      "name": "Sunan an-Nasa`i 40-51",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8328/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8148ff2a-76c5-41a5-879b-6c5135cfbc94",
+      "name": "Sunan Ibn Majah 1-18",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8324/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4a07cf7f-54d5-49b9-bcd9-23790a6f384f",
+      "name": "Sunan Ibn Majah 19-36",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8326/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "52c547ab-0b43-406e-8b23-a67d1767703b",
+      "name": "Tafsir Al-muyassar - Mohammad Ayyub",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8086/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fd3f1605-fbaa-44a3-b4e1-9129ae6fede6",
+      "name": "Tafsir by Al-Sha'rawi",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8202/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5f349a7d-94f4-45c3-8380-1b69eac98591",
+      "name": "Tafsir Sheikh Al-Sadi in arabic",
+      "countryCode": "KW",
+      "streamUrl": "https://serverkw.quran-uni.com:8012/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0b14ae20-92b3-4db7-834f-ee6ba39ad080",
+      "name": " إذاعة مشاري العفاسي",
+      "countryCode": "EG",
+      "streamUrl": "https://qurango.net/radio/mishary_alafasi",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "580ef7ef-3ebe-45fd-8c90-25e365c64bc3",
+      "name": "Abdel Halim Hafez عبدالحليم حافظ",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/8a4eqkd0pnhvv",
+      "audit": {
+        "status": "http_error",
+        "http": 401,
+        "detail": "HTTP Error 401: Unauthorized"
+      }
+    },
+    {
+      "id": "30a739aa-0ef2-484c-a45a-4be7fbcb9603",
+      "name": "Arab Mix Drama",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/egynebf171zuv.acc",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7eb9e8cd-bf7f-4bcc-afe2-3f56608911e6",
+      "name": "Elissa FM",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/v7n499m8ckhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "aa7c21f6-3bc2-4f13-b984-822757330918",
+      "name": "Mega FM 92.7",
+      "countryCode": "EG",
+      "streamUrl": "https://megafm927.radioca.st/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4d590a62-e31e-487b-af57-02394dc9c6f8",
+      "name": "Nagham FM 105.3",
+      "countryCode": "EG",
+      "streamUrl": "https://ahmsamir.radioca.st/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "047fcfb5-9e59-478e-9e6a-a006cc401868",
+      "name": "Nogoum FM",
+      "countryCode": "EG",
+      "streamUrl": "https://stream-159.zeno.fm/qb1zvsykm98uv?zt=eyJhbGciOiJIUzI1NiJ9.eyJzdHJlYW0iOiJxYjF6dnN5a205OHV2IiwiaG9zdCI6InN0cmVhbS0xNTkuemVuby5mbSIsInJ0dGwiOjUsImp0aSI6Ild2WTItbVhJU2Z5VlBEOHc3a2J1X0EiLCJpYXQiOjE3NzA5ODcyOTUsImV4cCI6MTc3MDk4NzM1NX0.ob8jdjoAgAzIcrxMk5b127wgaxpnJHEASSChnE5v5ro",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6ac1523c-e81c-44ad-9d71-23f8f510c588",
+      "name": "Nogoum FM 100.6",
+      "countryCode": "EG",
+      "streamUrl": "https://audio.nrpstream.com/listen/nogoumfm/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d792c407-26af-4bd4-9ad5-6a9c23c704f7",
+      "name": "OM Kalthom",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/zsgrfxg71s8uv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b1d17829-6522-481b-bb5c-839c3fd44353",
+      "name": "Radio Hits 88.2 Cairo",
+      "countryCode": "EG",
+      "streamUrl": "https://radiohits882.radioca.st/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "9ded7036-a3d3-47a4-ab4d-da8c9ba2c4d3",
+      "name": "Solly",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/vo4dh4tlesivv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "0155ec12-7308-468a-88dc-fcbd440e01da",
+      "name": "إذاعة مصطفى إسماعيل",
+      "countryCode": "EG",
+      "streamUrl": "https://qurango.net/radio/mustafa_ismail",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5e1c31e7-7541-439a-9081-6f78508bb637",
+      "name": "إذاعة ياسر الدوسري",
+      "countryCode": "EG",
+      "streamUrl": "https://qurango.net/radio/yasser_aldosari",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d241e555-9691-46fb-bbe2-7573b6d14e4d",
+      "name": " صوت كل لبنان",
+      "countryCode": "LB",
+      "streamUrl": "https://audio.osina.cloud:9323/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2f91a94c-c986-4799-8553-2258069628c6",
+      "name": "Adeem",
+      "countryCode": "LB",
+      "streamUrl": "https://usa19.fastcast4u.com/adeem",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "12e6be24-23f1-42ea-8d6e-b816f901aba6",
+      "name": "Aghani Aghani 87.9 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://streaming.nrjaudio.fm/ou6pfgxp336f",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/aacp",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4987accb-73cd-4571-b5da-1f341f7255f8",
+      "name": "Aghani Aghani TV",
+      "countryCode": "LB",
+      "streamUrl": "https://cdn.streamlane.tv/hls/aghanitv/master.m3u8",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "9e501df8-ad5d-44a1-b2ca-b2beadd5486e",
+      "name": "Al Salam Radio 90.3 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://audio.osina.cloud:9304/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "860e4b99-6ffe-4b2b-8a24-e103b7a95ace",
+      "name": "Al Saqr Online Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/28oiocehr1ytv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "1fa8b13f-924c-4d3f-949e-39e72bc18a26",
+      "name": "Alhaan Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/407axfdtcphvv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "4a116b98-e289-4630-9b62-b93a67159c7e",
+      "name": "Anghamy",
+      "countryCode": "LB",
+      "streamUrl": "https://radio.avazfarsi.com:8010/radio.mp3",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "c207546d-4987-4fe3-a7c5-422f98c1f0b6",
+      "name": "Ashohra Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://cp9.serverse.com/proxy/fzqxpbgi/stream",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "46d54920-eece-4b59-b6f9-9ef271c41371",
+      "name": "Ayat Al Quran Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/1fatuk10fkhvv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "2bf1823d-bee5-43cb-977b-9126c0727b2f",
+      "name": "Beirut Beats Station",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/eepzp860exhvv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "24a69c54-7237-4573-9669-e907f7b51ff1",
+      "name": "BeLight FM 104.1",
+      "countryCode": "LB",
+      "streamUrl": "https://cast4.my-control-panel.com/proxy/radiode1/stream",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "2c076f29-e122-4f09-a853-f99b294a3569",
+      "name": "Click FM Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://a12.my-control-panel.com:7530/radio.mp3",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "f0d6b0a0-a6b7-4574-8921-f581357ea998",
+      "name": "Fairuz فيروز",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/xkhnk4vee18uv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "d275b356-1068-4012-a46a-46e340e12ab9",
+      "name": "Fame FM Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9044/stream",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "dc0d3b6b-e150-4896-b329-23c250797298",
+      "name": "Hanin Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/qeovun3uqwdtv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4d9e38b6-73c8-4116-9019-d2d84766175f",
+      "name": "iBM Online Radio Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/fau8h70x5hhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "19b673e5-2aa3-4236-9f79-be9e61dfb517",
+      "name": "Irtiqaa Way Radio - Prophetic Hadith",
+      "countryCode": "LB",
+      "streamUrl": "https://s4.radio.co/s5a0c81b0f/listen",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "daa09c4e-3e34-45db-87bb-c3b8571f17a1",
+      "name": "Irtiqaa Way Radio - Quran",
+      "countryCode": "LB",
+      "streamUrl": "https://streaming.radio.co/s596b42805/listen",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "43fd050f-0fdf-45d0-8e25-f6d230ad5fcb",
+      "name": "Irtiqaa Way Radio 87.5 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://streams.radio.co/s8c9468a81/listen",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4ad7cfac-4c7c-4793-9138-7848790ade3c",
+      "name": "LBI Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://live.lbiradio.com/listen/station_1/1",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "73f665df-37cd-4c4c-b398-6e97e526a01d",
+      "name": "LBI Radio Hits",
+      "countryCode": "LB",
+      "streamUrl": "https://lbihits-lbnet2.radioca.st/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5f654c9c-b3b9-4413-b201-5c79248c787c",
+      "name": "LBI Radio Oldies",
+      "countryCode": "LB",
+      "streamUrl": "https://lbioldies-lbnet2.radioca.st/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1f6711e6-2899-4f2b-9cc0-945a80843f32",
+      "name": "Lob Anan Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://listen.radioking.com/radio/152170/stream/192625",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "d8061b6c-ec99-43c4-9b22-38fb3713fe61",
+      "name": "Maestro FM 90.9",
+      "countryCode": "LB",
+      "streamUrl": "https://cast5.my-control-panel.com/proxy/tripoli1/stream",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      }
+    },
+    {
+      "id": "862001c7-1ff4-4573-b936-40f634d8be45",
+      "name": "Matrix FM 103.5 Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://play.matrixfmlebanon.com:8003/;stream.mp3",
+      "audit": {
+        "status": "http_error",
+        "http": 503,
+        "detail": "HTTP Error 503: Service Unavailable"
+      }
+    },
+    {
+      "id": "ebc377af-dba9-4bd3-8aab-1166edb12a8b",
+      "name": "Mazaj Music 98.7 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://cast1.soundcast.ca:8443/mazaj",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "124da4f3-080e-411e-b3d3-7fddbe83d014",
+      "name": "mfm",
+      "countryCode": "LB",
+      "streamUrl": "https://hms.pfs.gdn/hms/v1/broadcast/hlmvmp2jtth90njc1/playlist.m3u8",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      }
+    },
+    {
+      "id": "8e4e4f6e-a838-4475-9cd1-61552d90252c",
+      "name": "Middle East Radio International",
+      "countryCode": "LB",
+      "streamUrl": "https://listen.radioking.com/radio/343456/stream/392077",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "8487b54a-8336-43d6-b9db-6b8bdcde1085",
+      "name": "Nuray Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/qh2t5gnehfhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ea1c2e79-8c0a-4873-b8a4-260a9d364c68",
+      "name": "One FM",
+      "countryCode": "LB",
+      "streamUrl": "https://hms.pfs.gdn/v1/broadcast/onefmaudio/playlist.m3u8",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "33f4be5d-0a6b-42ca-987d-3eadcf0b9257",
+      "name": "Oxygen Radio Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/bxb675sx5hhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "e82181dd-b7dd-4ba1-8c1b-2c7c8c715602",
+      "name": "Quran Radio 93.3 FM Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://audio.osina.cloud:7987/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "738e0842-090f-4d8f-9d52-c48af3e4a1c8",
+      "name": "Radio Enooma",
+      "countryCode": "LB",
+      "streamUrl": "https://audio.osina.cloud:7777/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ff062f02-5a6f-4941-8e08-a35b2e7b8e66",
+      "name": "Radio Joie",
+      "countryCode": "LB",
+      "streamUrl": "https://charbyone.radioca.st/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5bd0f7f7-e6f9-44cd-b0d3-90c056b13acd",
+      "name": "Radio Kawkaba",
+      "countryCode": "LB",
+      "streamUrl": "https://cad.casthost.ca/proxy/antoine/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "eec68cdb-9fde-4a44-81d1-4e752f05fdf5",
+      "name": "Radio Liban",
+      "countryCode": "LB",
+      "streamUrl": "https://media2.streambrothers.com:2020/stream/8194",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6b77cd64-68ef-4984-91ec-9b7e77a26eda",
+      "name": "Radio Liban Libre",
+      "countryCode": "LB",
+      "streamUrl": "https://edge.mixlr.com/channel/qtqeb",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mp3",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c9950cf9-3f09-4077-8795-a885c49bc73c",
+      "name": "Radio Orient 88.3 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://streams.radiomast.io/69a2563f-dc86-4b76-a823-a4c314b08bdf?referer=onlineradiobox",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bfc08897-31fa-4d40-9a37-a84d5cd4616c",
+      "name": "Radio Sawt El Noujoum",
+      "countryCode": "LB",
+      "streamUrl": "https://radiozahle.net/proxy/rzoldies/;stream/1",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5cde6cd5-2916-46e4-945b-b92222a0d981",
+      "name": "Radio YaSour",
+      "countryCode": "LB",
+      "streamUrl": "https://yasourfm.radioca.st/stream",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      }
+    },
+    {
+      "id": "4a196468-d8e3-4d28-8079-1e59d7981c31",
+      "name": "Radio Zahle",
+      "countryCode": "LB",
+      "streamUrl": "https://radiozahle.net/proxy/radiozahlelive/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c6d71255-a5e0-4631-a605-ff9eed2d092c",
+      "name": "Sabah Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/3p1ec6shguhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "606ef575-397a-4561-82a6-69026d10790c",
+      "name": "Saint Charbel Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://a7.asurahosting.com:7600/radio.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "audio/aac",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "c4a64f1f-b77d-47b2-8187-f472a52669c3",
+      "name": "Sawt Al Farah 104.3 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9036/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "4e0c8d68-ad04-46e7-884d-0605979eb8d2",
+      "name": "Sawt Al Hob",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/0b97ef7rxchvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "84fa3e78-74ff-4a18-a40d-0edf87e9fa05",
+      "name": "Sawt Al Hoda 92.1 FM",
+      "countryCode": "LB",
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9032/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cbf8067e-8c54-4d62-81b9-df6589d782b1",
+      "name": "Sawt El Ghad",
+      "countryCode": "LB",
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9030/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd74834d-9504-42e9-a165-4d7194afaf54",
+      "name": "Sawt El Nagham",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/66sfwug4ag0uv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "de55427f-864f-453b-83e6-caf8f8bfb1a1",
+      "name": "Star LB FM Arabic Remix",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/5u91z7t3afhvv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "7defb860-5ce0-481d-a827-1330c6611686",
+      "name": "Tripoli FM Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://cast4.my-control-panel.com/proxy/tripolifm/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "47c10505-5ce4-4b1b-b6f0-16c33bb6b4e8",
+      "name": "Virgin Radio Lebanon",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/dwxw3p9vea0uv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "234b8531-a493-4f79-8837-f8f2ad9bbc6b",
+      "name": "Virgin Radio Lebanon Stars",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/h66yxnapga0uv",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error timed out>"
+      }
+    },
+    {
+      "id": "e266ecb9-493b-40b7-8cc7-4ccff9a75665",
+      "name": "Voice of Grace Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://securestreams5.reliastream.com:1820/;",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "368ef657-f8b5-47ce-b578-337e401cc744",
+      "name": "Voice of Lebanon (Sawtlebnan) Radio",
+      "countryCode": "LB",
+      "streamUrl": "https://l3.itworkscdn.net/itwaudio/9054/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b49729be-3ce1-4d90-b9b3-6a095a14df86",
+      "name": "Voix du Liban Arabe",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/eek5rvi7rxytv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b444dadd-28b2-4dcb-84f2-3e2b73094f24",
+      "name": "Wa3 Radio وع",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.wa3.live/wa3.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "38ebb90e-1fce-4884-9d60-98dab8fc4520",
+      "name": "ذكريات",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/ctmapun6ot5vv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "5e489ee4-30fe-4933-a0b8-3d739a866d30",
+      "name": "راديو عالبال",
+      "countryCode": "LB",
+      "streamUrl": "https://albal-lbnet2.radioca.st/stream.mp3",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cafebc2c-32b8-4499-bfbf-d26feb9a8751",
+      "name": "راديو عالبال",
+      "countryCode": "LB",
+      "streamUrl": "https://albal-lbnet2.radioca.st/stream",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "f221e5e9-8d01-4906-bd6b-2e8985dbbea7",
+      "name": "رحبانيات",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/4g8xck48kfhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "215dd8ad-56af-4234-9ace-573b20567d28",
+      "name": "فيروز",
+      "countryCode": "LB",
+      "streamUrl": "https://stream.zeno.fm/9vrahqqfuuhvv",
+      "audit": {
+        "status": "audio_verified",
+        "http": 200,
+        "contentType": "audio/mpeg",
+        "codecs": [
+          {
+            "codec_name": "mp3",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    }
+  ],
+  "rechecks": [
+    {
+      "id": "580ef7ef-3ebe-45fd-8c90-25e365c64bc3",
+      "name": "Abdel Halim Hafez عبدالحليم حافظ",
+      "countryCode": "EG",
+      "streamUrl": "https://stream.zeno.fm/8a4eqkd0pnhvv",
+      "audit": {
+        "status": "http_error",
+        "http": 401,
+        "detail": "HTTP Error 401: Unauthorized"
+      },
+      "recheckHttp": 401
+    },
+    {
+      "id": "d8061b6c-ec99-43c4-9b22-38fb3713fe61",
+      "name": "Maestro FM 90.9",
+      "countryCode": "LB",
+      "streamUrl": "https://cast5.my-control-panel.com/proxy/tripoli1/stream",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      },
+      "recheckHttp": 404
+    },
+    {
+      "id": "124da4f3-080e-411e-b3d3-7fddbe83d014",
+      "name": "mfm",
+      "countryCode": "LB",
+      "streamUrl": "https://hms.pfs.gdn/hms/v1/broadcast/hlmvmp2jtth90njc1/playlist.m3u8",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      },
+      "recheckHttp": 200
+    },
+    {
+      "id": "5cde6cd5-2916-46e4-945b-b92222a0d981",
+      "name": "Radio YaSour",
+      "countryCode": "LB",
+      "streamUrl": "https://yasourfm.radioca.st/stream",
+      "audit": {
+        "status": "http_error",
+        "http": 404,
+        "detail": "HTTP Error 404: Not Found"
+      },
+      "recheckHttp": 404
+    }
+  ]
+}

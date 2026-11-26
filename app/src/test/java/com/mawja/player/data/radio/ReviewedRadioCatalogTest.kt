@@ -1,6 +1,7 @@
 package com.mawja.player.data.radio
 
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.junit.Assert.*
 import org.junit.Test
@@ -37,5 +38,12 @@ class ReviewedRadioCatalogTest {
         assertFalse(radioLanguages.any { it.name == "111" })
         assertTrue(isRetiredRadioEntry("BBC Arabic", "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"))
         assertFalse(isRetiredRadioEntry("BBC World Service", "https://stream.live.vc.bbcmedia.co.uk/bbc_world_service"))
+    }
+    @Test fun rejectedEndpointsAreExplicitAndDoNotIncludeRegionalFailures() {
+        val urls = Json.decodeFromString(ListSerializer(String.serializer()), File("src/main/assets/radio/unavailable-streams.json").readText())
+        assertEquals(3, urls.size)
+        assertTrue(urls.any { "yasourfm" in it })
+        assertFalse(urls.any { "starzplayarabia" in it })
+        assertFalse(urls.any { "hlmvmp2jtth90njc1" in it }) // MFM recovered on recheck.
     }
 }
