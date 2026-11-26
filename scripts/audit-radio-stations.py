@@ -32,8 +32,8 @@ def request(url,limit):
 def sample(url,depth=0):
  if depth>4:raise ValueError('Manifest nesting limit')
  b,url,status,ctype=request(url,150000)
- if b.lstrip().startswith(b'#EXTM3U'):
-  s=b.decode();lines=[l.strip() for l in s.splitlines() if l.strip()]
+ if b.removeprefix(b'\xef\xbb\xbf').lstrip().startswith(b'#EXTM3U'):
+  s=b.decode('utf-8-sig');lines=[l.strip() for l in s.splitlines() if l.strip()]
   audio=[l for l in lines if l.startswith('#EXT-X-MEDIA:') and 'TYPE=AUDIO' in l and 'URI="' in l]
   uris=[l for l in lines if not l.startswith('#')]
   if audio:

@@ -16,6 +16,7 @@ def select(row):
     except Exception as e:row["publisherPage"]={"error":str(e)}
     try:
         manifest,final_url=get(row["streamUrl"])
+        print("MANIFEST_PREFIX "+row["id"]+" "+repr(manifest[:160]),flush=True)
         if not manifest.lstrip().startswith("#EXTM3U"):raise ValueError("Not HLS")
         audio=re.findall(r'#EXT-X-MEDIA:[^\n]*TYPE=AUDIO[^\n]*URI="([^"]+)"',manifest)
         choices=[]

@@ -18,44 +18,5 @@
     "language": "arabic",
     "isTvAudio": true,
     "checkedAt": "2026-11-26"
-  },
-  {
-    "id": "mamlaka-ar-tv",
-    "name": "المملكة",
-    "countryCode": "JO",
-    "city": "عمّان",
-    "categories": [
-      "news",
-      "tv_audio"
-    ],
-    "streamUrl": "https://almamlka-live.ercdn.net/almamlka/almamlka.m3u8",
-    "homepage": "https://www.almamlakatv.com/",
-    "sourcePage": "https://www.almamlakatv.com/live",
-    "aliases": [
-      "Al Mamlaka",
-      "Almamlaka"
-    ],
-    "language": "arabic",
-    "isTvAudio": true,
-    "checkedAt": "2026-11-26"
-  },
-  {
-    "id": "asharq-ar-tv",
-    "name": "الشرق للأخبار — صوت القناة",
-    "countryCode": "SA",
-    "city": "الرياض",
-    "categories": [
-      "news",
-      "tv_audio"
-    ],
-    "streamUrl": "https://live-news.asharq.com/asharq.m3u8",
-    "homepage": "https://asharq.com/",
-    "sourcePage": "https://now.asharq.com/live/",
-    "aliases": [
-      "Asharq News TV"
-    ],
-    "language": "arabic",
-    "isTvAudio": true,
-    "checkedAt": "2026-11-26"
   }
 ]
