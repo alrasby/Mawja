@@ -79,7 +79,7 @@ class ReviewedRadioCatalogTest {
     }
     @Test fun tvAudioIsLabeledAndOldBbcRadioStaysExcluded() {
         val channels = catalog.filter { it.isTvAudio }
-        assertEquals(setOf("bbc-ar-tv", "france24-ar-tv", "dw-ar-tv"), channels.map { it.id }.toSet())
+        assertEquals(setOf("france24-ar-tv", "dw-ar-tv", "bbc-ar-tv", "hadath-ar-tv", "arabiya-ar-tv", "rt-ar-tv", "asharq-ar-tv"), channels.map { it.id }.toSet())
         channels.forEach { entry ->
             assertTrue(entry.matches(RadioFilters.tvAudio, entry.countryCode, "arabic"))
             assertFalse(entry.track().isVideo)

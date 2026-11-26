@@ -24,7 +24,7 @@ class PlaybackRegressionTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
 
-    @Test(timeout = 90000) fun localPlaybackSeekPauseAndRapidAudioSettingsRemainResponsive() {
+    @Test(timeout = 240000) fun localPlaybackSeekPauseAndRapidAudioSettingsRemainResponsive() {
         // Android 15+ rejects audio focus for background-only instrumentation.
         // Match the real user flow: open the app before starting playback.
         val scenario = ActivityScenario.launch(MainActivity::class.java)

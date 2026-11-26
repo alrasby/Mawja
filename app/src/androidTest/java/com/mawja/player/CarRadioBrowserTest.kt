@@ -50,7 +50,7 @@ class CarRadioBrowserTest {
             val channels = AtomicReference<ListenableFuture<LibraryResult<ImmutableList<MediaItem>>>>()
             instrumentation.runOnMainSync { channels.set(browser.getChildren(CarRadioBrowse.id(RadioFilters.tvAudio), 0, 100, null)) }
             val channelItems = requireNotNull(channels.get().get(10, TimeUnit.SECONDS).value)
-            assertEquals(setOf("radio:official-bbc-ar-tv", "radio:official-france24-ar-tv", "radio:official-dw-ar-tv"),
+            assertEquals(setOf("radio:official-france24-ar-tv", "radio:official-dw-ar-tv", "radio:official-bbc-ar-tv", "radio:official-hadath-ar-tv", "radio:official-arabiya-ar-tv", "radio:official-rt-ar-tv", "radio:official-asharq-ar-tv"),
                 channelItems.filter { it.mediaMetadata.isPlayable == true }.map { it.mediaId }.toSet())
             channelItems.filter { it.mediaMetadata.isPlayable == true }.forEach {
                 assertEquals(androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC, it.mediaMetadata.mediaType)

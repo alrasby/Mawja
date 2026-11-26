@@ -8,101 +8,45 @@ on:
         required: true
         default: 'debug'
         type: choice
-        options:
-          - debug
-          - release
+        options: [debug, release]
   push:
-    branches: [ main, design/glass-preview ]
+    branches: [main, design/glass-preview]
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      BUILD_RELEASE: ${{ inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]')) }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
+      - uses: gradle/actions/setup-gradle@v4
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 9.3.1
-
-      - name: Decode keystore (release only)
-        if: env.BUILD_RELEASE == 'true'
-        env:
-          MAWJA_KEYSTORE_BASE64: ${{ secrets.MAWJA_KEYSTORE_BASE64 }}
-        run: |
-          test -n "$MAWJA_KEYSTORE_BASE64" || { echo "::error::Missing MAWJA_KEYSTORE_BASE64"; exit 1; }
-          umask 077
-          printf '%s' "$MAWJA_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mawja-upload.jks"
-
-      - name: Build Debug APK
-        if: env.BUILD_RELEASE != 'true'
+      - name: Verify release guard rejection cases
+        run: python scripts/test-verify-release.py
+      - name: Unit tests and test APKs
         run: ./gradlew testDebugUnitTest assembleDebug assembleDebugAndroidTest --stacktrace
-
-      - name: Build signed release APK and AAB
-        if: env.BUILD_RELEASE == 'true'
-        env:
-          MAWJA_KEYSTORE: ${{ runner.temp }}/mawja-upload.jks
-          MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
-          MAWJA_KEY_ALIAS: ${{ secrets.MAWJA_KEY_ALIAS }}
-          MAWJA_KEY_PASSWORD: ${{ secrets.MAWJA_KEY_PASSWORD }}
-        run: |
-          test -n "$MAWJA_KEYSTORE_PASSWORD" || { echo "Missing release keystore password"; exit 1; }
-          test -f "$MAWJA_KEYSTORE" || { echo "Missing release keystore"; exit 1; }
-          test -n "$MAWJA_KEY_ALIAS" || export MAWJA_KEY_ALIAS=mawjaUpload
-          test -n "$MAWJA_KEY_PASSWORD" || export MAWJA_KEY_PASSWORD="$MAWJA_KEYSTORE_PASSWORD"
-          ./gradlew assembleRelease bundleRelease --stacktrace
-          bundle=app/build/outputs/bundle/release/app-release.aab
-          jarsigner -verify "$bundle" | tee "$RUNNER_TEMP/mawja-bundle-verification.txt"
-          grep -q '^jar verified' "$RUNNER_TEMP/mawja-bundle-verification.txt"
-          wc -c "$bundle" app/build/outputs/apk/release/app-release.apk
-
-      - name: Upload Debug APK
-        if: env.BUILD_RELEASE != 'true'
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Mawja-debug
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
-
-      - name: Upload playback test APK
-        if: env.BUILD_RELEASE != 'true'
-        uses: actions/upload-artifact@v4
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
         with:
           name: Mawja-playback-test
           path: app/build/outputs/apk/androidTest/debug/*.apk
           retention-days: 14
-
-      - name: Upload Release APK
-        if: env.BUILD_RELEASE == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Mawja-release
-          path: app/build/outputs/apk/release/*.apk
-          retention-days: 30
-          if-no-files-found: error
-
-      - name: Upload signed Google Play bundle
-        if: env.BUILD_RELEASE == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Mawja-Google-Play
-          path: app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
           if-no-files-found: error
 
   runtime-profile:
     needs: build
-    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[profile-runtime]')
+    if: inputs.build_type == 'release' || (github.event_name == 'push' && (contains(github.event.head_commit.message, '[profile-runtime]') || contains(github.event.head_commit.message, '[play-release]')))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -147,3 +91,107 @@ jobs:
           name: Mawja-runtime-profile-emulator
           path: runtime-report/
           retention-days: 14
+
+  release:
+    needs: [build, runtime-profile]
+    if: inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper --gradle-version 9.3.1
+      - name: Build with the existing upload key
+        env:
+          MAWJA_KEYSTORE_BASE64: ${{ secrets.MAWJA_KEYSTORE_BASE64 }}
+          MAWJA_KEYSTORE: ${{ runner.temp }}/mawja-upload.jks
+          MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
+          MAWJA_KEY_ALIAS: ${{ secrets.MAWJA_KEY_ALIAS }}
+          MAWJA_KEY_PASSWORD: ${{ secrets.MAWJA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$MAWJA_KEYSTORE_BASE64" || { echo "::error::Missing existing upload key"; exit 1; }
+          test -n "$MAWJA_KEYSTORE_PASSWORD" || { echo "::error::Missing upload key password"; exit 1; }
+          umask 077
+          printf '%s' "$MAWJA_KEYSTORE_BASE64" | base64 --decode > "$MAWJA_KEYSTORE"
+          test -n "$MAWJA_KEY_ALIAS" || export MAWJA_KEY_ALIAS=mawjaUpload
+          test -n "$MAWJA_KEY_PASSWORD" || export MAWJA_KEY_PASSWORD="$MAWJA_KEYSTORE_PASSWORD"
+          ./gradlew assembleRelease bundleRelease --stacktrace
+          keytool -exportcert -keystore "$MAWJA_KEYSTORE" -alias "$MAWJA_KEY_ALIAS" -storepass:env MAWJA_KEYSTORE_PASSWORD -file "$RUNNER_TEMP/upload-cert.der"
+      - name: Verify signatures and Play bundle
+        run: |
+          set -euo pipefail
+          mkdir -p release-report
+          signer_tool=$(printf '%s\n' "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          aapt_tool="${signer_tool%/apksigner}/aapt"
+          "$signer_tool" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk | tee release-report/apk-signature.txt
+          "$aapt_tool" dump badging app/build/outputs/apk/release/app-release.apk > release-report/apk-badging.txt
+          "$aapt_tool" dump permissions app/build/outputs/apk/release/app-release.apk > release-report/permissions.txt
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab | tee release-report/bundle-signature.txt
+          keytool -J-Duser.language=en -printcert -jarfile app/build/outputs/bundle/release/app-release.aab > release-report/bundle-certificate.txt
+          curl -fsSL --retry 2 https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar -o "$RUNNER_TEMP/bundletool.jar"
+          printf '%s  %s\n' a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29 "$RUNNER_TEMP/bundletool.jar" | sha256sum --check
+          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle=app/build/outputs/bundle/release/app-release.aab | tee release-report/bundle-validation.txt
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle=app/build/outputs/bundle/release/app-release.aab > release-report/bundle-manifest.xml
+          python scripts/verify-release.py "$RUNNER_TEMP/upload-cert.der"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mawja-release
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 90
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mawja-Google-Play
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 90
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-release-verification
+          path: release-report/
+          retention-days: 90
+      - name: Remove temporary signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mawja-upload.jks" "$RUNNER_TEMP/upload-cert.der"
+
+  release-smoke:
+    needs: release
+    if: inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Mawja-release
+          path: release-apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise optimized signed APK
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: |
+            adb install release-apk/*.apk
+            adb logcat -c
+            python scripts/release-ui-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-signed-release-smoke
+          path: |
+            release-smoke/
+            runtime-report/
+          retention-days: 90

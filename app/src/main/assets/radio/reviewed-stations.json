@@ -718,5 +718,84 @@
     ],
     "checkedAt": "2026-11-26",
     "isTvAudio": true
+  },
+  {
+    "id": "hadath-ar-tv",
+    "name": "الحدث",
+    "countryCode": "SA",
+    "city": "الرياض",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "streamUrl": "https://live.alarabiya.net/alarabiapublish/alhadath.smil/alarabiapublish/alhadath_240p/chunks.m3u8",
+    "homepage": "https://www.alhadath.net/",
+    "sourcePage": "https://www.alhadath.net/live-stream",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Hadath",
+      "Alhadath"
+    ],
+    "isTvAudio": true
+  },
+  {
+    "id": "arabiya-ar-tv",
+    "name": "العربية — صوت القناة",
+    "countryCode": "SA",
+    "city": "الرياض",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "streamUrl": "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/alarabiapublish/alarabiya_240p/chunks.m3u8",
+    "homepage": "https://www.alarabiya.net/",
+    "sourcePage": "https://www.alarabiya.net/live-stream",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Arabiya TV",
+      "Alarabiya Arabic TV"
+    ],
+    "isTvAudio": true
+  },
+  {
+    "id": "rt-ar-tv",
+    "name": "RT عربي",
+    "countryCode": "RU",
+    "city": "موسكو",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "streamUrl": "https://rt-arb.rttv.com/live/rtarab/playlist_800Kb.m3u8",
+    "homepage": "https://arabic.rt.com/",
+    "sourcePage": "https://arabic.rt.com/live/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "RT Arabic",
+      "Russia Today Arabic"
+    ],
+    "isTvAudio": true
+  },
+  {
+    "id": "asharq-ar-tv",
+    "name": "الشرق للأخبار — صوت القناة",
+    "countryCode": "SA",
+    "city": "الرياض",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "streamUrl": "https://live-news.asharq.com/asharq_audio_1.m3u8",
+    "homepage": "https://asharq.com/",
+    "sourcePage": "https://now.asharq.com/live/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Asharq News TV"
+    ],
+    "isTvAudio": true
   }
 ]

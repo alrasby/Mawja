@@ -1,0 +1,360 @@
+{
+  "checkedAt": "2026-11-26",
+  "runs": [
+    45871616766,
+    45871867182,
+    45872141144
+  ],
+  "initial": [
+    {
+      "id": "trt-ar-tv",
+      "name": "TRT عربي",
+      "countryCode": "TR",
+      "city": "إسطنبول",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://tv-trtarabi.medya.trt.com.tr/master_360.m3u8",
+      "homepage": "https://www.trtarabi.com/",
+      "sourcePage": "https://www.trtarabi.com/",
+      "aliases": [
+        "TRT Arabi",
+        "TRT Arabic"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "url": "https://www.trtarabi.com/",
+        "hlsFound": [
+          "https://tv-trtworld.medya.trt.com.tr/master.m3u8",
+          "https://tv-trtarabi.medya.trt.com.tr/master.m3u8"
+        ]
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "http_error",
+        "http": 400,
+        "detail": "HTTP Error 400: Bad Request"
+      }
+    },
+    {
+      "id": "hadath-ar-tv",
+      "name": "الحدث",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://live.alarabiya.net/alarabiapublish/alhadath.smil/alarabiapublish/alhadath_240p/chunks.m3u8",
+      "homepage": "https://www.alhadath.net/",
+      "sourcePage": "https://www.alhadath.net/live-stream",
+      "aliases": [
+        "Al Hadath",
+        "Alhadath"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/m2ts",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "arabiya-ar-tv",
+      "name": "العربية — صوت القناة",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/alarabiapublish/alarabiya_240p/chunks.m3u8",
+      "homepage": "https://www.alarabiya.net/",
+      "sourcePage": "https://www.alarabiya.net/live-stream",
+      "aliases": [
+        "Al Arabiya TV",
+        "Alarabiya Arabic TV"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/m2ts",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mamlaka-ar-tv",
+      "name": "المملكة",
+      "countryCode": "JO",
+      "city": "عمّان",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://almamlka-live.ercdn.net/almamlka/almamlka.m3u8",
+      "homepage": "https://www.almamlakatv.com/",
+      "sourcePage": "https://www.almamlakatv.com/live",
+      "aliases": [
+        "Al Mamlaka",
+        "Almamlaka"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selectionError": "<urlopen error [Errno -2] Name or service not known>",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error [Errno -2] Name or service not known>"
+      }
+    },
+    {
+      "id": "asharq-ar-tv",
+      "name": "الشرق للأخبار — صوت القناة",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://svs.itworkscdn.net/asharqlive/asharq.smil/playlist.m3u8",
+      "homepage": "https://asharq.com/",
+      "sourcePage": "https://now.asharq.com/live/",
+      "aliases": [
+        "Asharq News TV"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selectionError": "Not HLS",
+      "audit": {
+        "status": "unrecognized_media",
+        "http": 200,
+        "contentType": "application/x-mpegURL",
+        "codecs": []
+      }
+    },
+    {
+      "id": "rt-ar-tv",
+      "name": "RT عربي",
+      "countryCode": "RU",
+      "city": "موسكو",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://rt-arb.rttv.com/live/rtarab/playlist_800Kb.m3u8",
+      "homepage": "https://arabic.rt.com/",
+      "sourcePage": "https://arabic.rt.com/live/",
+      "aliases": [
+        "RT Arabic",
+        "Russia Today Arabic"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "url": "https://rtarabic.com/live/",
+        "hlsFound": [
+          "https://rt-arb.rttv.com/dvr/rtarab/playlist.m3u8"
+        ]
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/mp2t",
+        "codecs": [
+          {
+            "codec_name": "h264",
+            "codec_type": "video"
+          },
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    }
+  ],
+  "updatedSources": [
+    {
+      "id": "trt-ar-tv",
+      "name": "TRT عربي",
+      "countryCode": "TR",
+      "city": "إسطنبول",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://tv-trtarabi.medya.trt.com.tr/master_360.m3u8",
+      "homepage": "https://www.trtarabi.com/",
+      "sourcePage": "https://www.trtarabi.com/",
+      "aliases": [
+        "TRT Arabi",
+        "TRT Arabic"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "url": "https://www.trtarabi.com/",
+        "hlsFound": [
+          "https://tv-trtworld.medya.trt.com.tr/master.m3u8",
+          "https://tv-trtarabi.medya.trt.com.tr/master.m3u8"
+        ]
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "unrecognized_media",
+        "http": 206,
+        "contentType": "application/x-mpegURL",
+        "codecs": []
+      }
+    },
+    {
+      "id": "mamlaka-ar-tv",
+      "name": "المملكة",
+      "countryCode": "JO",
+      "city": "عمّان",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://almamlka-live.ercdn.net/almamlka/almamlka.m3u8",
+      "homepage": "https://www.almamlakatv.com/",
+      "sourcePage": "https://www.almamlakatv.com/live",
+      "aliases": [
+        "Al Mamlaka",
+        "Almamlaka"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selectionError": "<urlopen error [Errno -2] Name or service not known>",
+      "audit": {
+        "status": "inconclusive",
+        "detail": "<urlopen error [Errno -2] Name or service not known>"
+      }
+    },
+    {
+      "id": "asharq-ar-tv",
+      "name": "الشرق للأخبار — صوت القناة",
+      "countryCode": "SA",
+      "city": "الرياض",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://live-news.asharq.com/asharq_audio_1.m3u8",
+      "homepage": "https://asharq.com/",
+      "sourcePage": "https://now.asharq.com/live/",
+      "aliases": [
+        "Asharq News TV"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "error": "HTTP Error 403: Forbidden"
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "audio_verified",
+        "http": 206,
+        "contentType": "video/MP2T",
+        "codecs": [
+          {
+            "codec_name": "aac",
+            "codec_type": "audio"
+          }
+        ]
+      }
+    }
+  ],
+  "trtRecheck": [
+    {
+      "id": "trt-ar-tv",
+      "name": "TRT عربي",
+      "countryCode": "TR",
+      "city": "إسطنبول",
+      "categories": [
+        "news",
+        "tv_audio"
+      ],
+      "streamUrl": "https://tv-trtarabi.medya.trt.com.tr/master_360.m3u8",
+      "homepage": "https://www.trtarabi.com/",
+      "sourcePage": "https://www.trtarabi.com/",
+      "aliases": [
+        "TRT Arabi",
+        "TRT Arabic"
+      ],
+      "language": "arabic",
+      "isTvAudio": true,
+      "checkedAt": "2026-11-26",
+      "publisherPage": {
+        "url": "https://www.trtarabi.com/",
+        "hlsFound": [
+          "https://tv-trtworld.medya.trt.com.tr/master.m3u8",
+          "https://tv-trtarabi.medya.trt.com.tr/master.m3u8"
+        ]
+      },
+      "selection": "lowest_muxed_variant",
+      "audit": {
+        "status": "http_error",
+        "http": 400,
+        "detail": "HTTP Error 400: Bad Request"
+      }
+    }
+  ],
+  "approvedIds": [
+    "hadath-ar-tv",
+    "arabiya-ar-tv",
+    "rt-ar-tv",
+    "asharq-ar-tv"
+  ],
+  "limits": "Probe confirms audio codec/data at the time, not 24/7 availability or editorial accuracy. HTTP restrictions are respected; no proxy/DRM bypass."
+}

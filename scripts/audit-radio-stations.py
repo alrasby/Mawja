@@ -10,7 +10,13 @@ rows = json.loads(catalog.read_text())
 samples = tempfile.TemporaryDirectory(prefix="mawja-radio-audit-")
 def request(url,limit):
  req=urllib.request.Request(url,headers={'User-Agent':'Mawja-Station-Audit/1.0','Range':'bytes=0-'+str(limit-1)})
- with urllib.request.urlopen(req,timeout=10) as r:
+ try:
+  response = urllib.request.urlopen(req,timeout=10)
+ except urllib.error.HTTPError as error:
+  if error.code not in (400, 416): raise
+  # Some public HLS servers reject Range. Retry the same URL without Range.
+  response = urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mawja-Station-Audit/1.0'}),timeout=10)
+ with response as r:
   content_type = r.headers.get('Content-Type', '')
   # read1 prevents a never-ending ICY stream from holding a worker indefinitely.
   deadline = time.monotonic() + 4
@@ -26,8 +32,8 @@ def request(url,limit):
 def sample(url,depth=0):
  if depth>4:raise ValueError('Manifest nesting limit')
  b,url,status,ctype=request(url,150000)
- if b.lstrip().startswith(b'#EXTM3U'):
-  s=b.decode();lines=[l.strip() for l in s.splitlines() if l.strip()]
+ if b.removeprefix(b'\xef\xbb\xbf').lstrip().startswith(b'#EXTM3U'):
+  s=b.decode('utf-8-sig');lines=[l.strip() for l in s.splitlines() if l.strip()]
   audio=[l for l in lines if l.startswith('#EXT-X-MEDIA:') and 'TYPE=AUDIO' in l and 'URI="' in l]
   uris=[l for l in lines if not l.startswith('#')]
   if audio:
