@@ -1,0 +1,140 @@
+name: Complete verified release 47
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/47-verified-signing]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Exercise old and new signer formats
+        run: python scripts/test-verify-release.py
+      - name: Confirm application source is unchanged
+        run: git diff --exit-code a274e7c56a77bb5aac9df718ecc0f64dd5cba20b HEAD -- app/ build.gradle.kts settings.gradle.kts gradle.properties
+      - name: Confirm prior application tests succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os,urllib.request
+          base="https://api.github.com/repos/alrasby/Mawja/actions/runs/45872625364"
+          def get(url):
+              request=urllib.request.Request(url,headers={"Authorization":"Bearer "+os.environ["GH_TOKEN"],"Accept":"application/vnd.github+json"})
+              with urllib.request.urlopen(request,timeout=20) as response:return json.load(response)
+          run=get(base)
+          assert run["head_sha"]=="a274e7c56a77bb5aac9df718ecc0f64dd5cba20b"
+          jobs={j["name"]:j for j in get(base+"/jobs?filter=latest&per_page=100")["jobs"]}
+          for name in ("build","runtime-profile"):
+              assert jobs[name]["conclusion"]=="success",name+" did not succeed"
+          print("PASS: same application source; unit tests and live playback/Auto/GUI tests succeeded in prior run")
+          PY
+
+  release:
+    needs: preflight
+    if: inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper --gradle-version 9.3.1
+      - name: Build with the existing upload key
+        env:
+          MAWJA_KEYSTORE_BASE64: ${{ secrets.MAWJA_KEYSTORE_BASE64 }}
+          MAWJA_KEYSTORE: ${{ runner.temp }}/mawja-upload.jks
+          MAWJA_KEYSTORE_PASSWORD: ${{ secrets.MAWJA_KEYSTORE_PASSWORD }}
+          MAWJA_KEY_ALIAS: ${{ secrets.MAWJA_KEY_ALIAS }}
+          MAWJA_KEY_PASSWORD: ${{ secrets.MAWJA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$MAWJA_KEYSTORE_BASE64" || { echo "::error::Missing existing upload key"; exit 1; }
+          test -n "$MAWJA_KEYSTORE_PASSWORD" || { echo "::error::Missing upload key password"; exit 1; }
+          umask 077
+          printf '%s' "$MAWJA_KEYSTORE_BASE64" | base64 --decode > "$MAWJA_KEYSTORE"
+          test -n "$MAWJA_KEY_ALIAS" || export MAWJA_KEY_ALIAS=mawjaUpload
+          test -n "$MAWJA_KEY_PASSWORD" || export MAWJA_KEY_PASSWORD="$MAWJA_KEYSTORE_PASSWORD"
+          ./gradlew assembleRelease bundleRelease --stacktrace
+          keytool -exportcert -keystore "$MAWJA_KEYSTORE" -alias "$MAWJA_KEY_ALIAS" -storepass:env MAWJA_KEYSTORE_PASSWORD -file "$RUNNER_TEMP/upload-cert.der"
+      - name: Verify signatures and Play bundle
+        run: |
+          set -euo pipefail
+          mkdir -p release-report
+          signer_tool=$(printf '%s\n' "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          aapt_tool="${signer_tool%/apksigner}/aapt"
+          "$signer_tool" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk | tee release-report/apk-signature.txt
+          "$aapt_tool" dump badging app/build/outputs/apk/release/app-release.apk > release-report/apk-badging.txt
+          "$aapt_tool" dump permissions app/build/outputs/apk/release/app-release.apk > release-report/permissions.txt
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab | tee release-report/bundle-signature.txt
+          keytool -J-Duser.language=en -printcert -jarfile app/build/outputs/bundle/release/app-release.aab > release-report/bundle-certificate.txt
+          curl -fsSL --retry 2 https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar -o "$RUNNER_TEMP/bundletool.jar"
+          printf '%s  %s\n' a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29 "$RUNNER_TEMP/bundletool.jar" | sha256sum --check
+          java -jar "$RUNNER_TEMP/bundletool.jar" validate --bundle=app/build/outputs/bundle/release/app-release.aab | tee release-report/bundle-validation.txt
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump manifest --bundle=app/build/outputs/bundle/release/app-release.aab > release-report/bundle-manifest.xml
+          python scripts/verify-release.py "$RUNNER_TEMP/upload-cert.der"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mawja-release
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 90
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mawja-Google-Play
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 90
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-release-verification
+          path: release-report/
+          retention-days: 90
+      - name: Remove temporary signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mawja-upload.jks" "$RUNNER_TEMP/upload-cert.der"
+
+  release-smoke:
+    needs: release
+    if: inputs.build_type == 'release' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[play-release]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Mawja-release
+          path: release-apk
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise optimized signed APK
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: |
+            adb install release-apk/*.apk
+            adb logcat -c
+            python scripts/release-ui-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-signed-release-smoke
+          path: |
+            release-smoke/
+            runtime-report/
+          retention-days: 90
