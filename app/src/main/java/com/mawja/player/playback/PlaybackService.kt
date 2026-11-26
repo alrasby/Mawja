@@ -131,7 +131,7 @@ class PlaybackService : MediaLibraryService() {
             .setMediaSourceFactory(object : MediaSource.Factory by mediaSources {
                 override fun createMediaSource(mediaItem: MediaItem): MediaSource {
                     val source = mediaSources.createMediaSource(mediaItem)
-                    return if (mediaItem.mediaId.startsWith(VIDEO_AUDIO_PREFIX) ||
+                    return if (mediaItem.mediaId.startsWith("radio:") || mediaItem.mediaId.startsWith(VIDEO_AUDIO_PREFIX) ||
                         (mediaItem.mediaId.startsWith("yt:") && mediaItem.mediaMetadata.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC)) {
                         FilteringMediaSource(source, C.TRACK_TYPE_AUDIO)
                     } else source
@@ -475,11 +475,24 @@ class PlaybackService : MediaLibraryService() {
             val custom = async { appContainer.library.customStations.first() }
             (favorites.await() + recent.await() + custom.await()).distinctBy { it.id }.map(::playableItem)
         }
-        parentId == RADIO_WORLD -> appContainer.radio.countries().map {
+        parentId.startsWith("radio-languages:") -> CarRadioBrowse.route(parentId)?.let { route ->
+            listOf(browseItem(CarRadioBrowse.choiceId(route.filter, route.country, null),
+                getString(R.string.radio_all_languages), MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)) +
+                com.mawja.player.data.radio.radioLanguages.map { language ->
+                    browseItem(CarRadioBrowse.choiceId(route.filter, route.country, language.name),
+                        java.util.Locale.forLanguageTag(language.code).getDisplayLanguage(java.util.Locale.getDefault()),
+                        MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+                }
+        }.orEmpty()
+        parentId.startsWith("radio-choice:") -> CarRadioBrowse.route(parentId)?.let { route ->
+            appContainer.radio.stations(route.filter, countryCode = route.country, language = route.language).map(::playableItem)
+        }.orEmpty()
+        parentId == RADIO_WORLD -> listOf(radioLanguageItem(RadioFilters.world, null)) + appContainer.radio.countries().map {
             browseItem("world:${it.iso_3166_1}", "${it.name} (${it.stationcount})", MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
         }
         parentId.startsWith("radio:") -> CarRadioBrowse.category(parentId)?.let { filter ->
-            carRadioStations(filter).map(::playableItem)
+            val (country, _) = CarRadioBrowse.selection(filter, appContainer.preferences.language.value, appContainer.preferences::radioOption)
+            listOf(radioLanguageItem(filter, country)) + carRadioStations(filter).map(::playableItem)
         }.orEmpty()
         parentId == ONLINE_AUDIO -> appContainer.audius.trending().map(::playableItem)
         parentId == ONLINE_YOUTUBE -> if (appContainer.youtubeData.isConfigured) {
@@ -491,10 +504,15 @@ class PlaybackService : MediaLibraryService() {
             val country = parentId.removePrefix("world:").uppercase(Locale.ROOT)
             val stations = carRadioStations(RadioFilters.world, countryOverride = country)
             Log.d(TAG, "Android Auto radio country=$country stations=${stations.size}")
-            stations.map(::playableItem)
+            listOf(radioLanguageItem(RadioFilters.world, country)) + stations.map(::playableItem)
         }
         else -> emptyList()
     }
+
+    private fun radioLanguageItem(filter: RadioFilter, country: String?) = browseItem(
+        CarRadioBrowse.languagesId(filter, country), getString(R.string.radio_language),
+        MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS,
+    )
 
     private fun radioCategoryItem(filter: RadioFilter): MediaItem = browseItem(
         CarRadioBrowse.id(filter),
@@ -658,6 +676,11 @@ class PlaybackService : MediaLibraryService() {
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
         CarRadioBrowse.category(id)?.let { return radioCategoryItem(it) }
+        CarRadioBrowse.route(id)?.let { route ->
+            val title = if (id.startsWith("radio-languages:")) getString(R.string.radio_language)
+                else route.language?.replaceFirstChar { it.uppercase() } ?: getString(R.string.radio_all_languages)
+            return browseItem(id, title, MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
+        }
         if (id.startsWith("podcast-feed:")) {
             val feed = appContainer.podcasts.subscriptions.value.firstOrNull {
                 "podcast-feed:" + com.mawja.player.data.digest(it) == id

@@ -1,0 +1,659 @@
+[
+  {
+    "id": "sky-ar",
+    "name": "سكاي نيوز عربية",
+    "countryCode": "AE",
+    "city": "أبوظبي",
+    "language": "arabic",
+    "categories": [
+      "news"
+    ],
+    "streamUrl": "https://radio.skynewsarabia.com/stream/radio/skynewsarabia",
+    "homepage": "https://www.skynewsarabia.com/radio",
+    "sourcePage": "https://api.skynewsarabia.com/rest/info.json",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "sky news arabia radio",
+      "Sky News Arabia",
+      "سكاي نيوز عربية"
+    ]
+  },
+  {
+    "id": "aja-ar",
+    "name": "الجزيرة — البث الصوتي",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "news"
+    ],
+    "streamUrl": "https://live-hls-web-aja-gcp.thehlive.com/VOICE-AJA/index.m3u8",
+    "homepage": "https://www.aljazeera.net/audio/live",
+    "sourcePage": "https://www.aljazeera.net/audio/live",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Jazeera Arabic",
+      "Al Jazeera",
+      "الجزيرة"
+    ]
+  },
+  {
+    "id": "asharq-ar",
+    "name": "راديو الشرق مع Bloomberg",
+    "countryCode": "SA",
+    "city": "الرياض",
+    "language": "arabic",
+    "categories": [
+      "news"
+    ],
+    "streamUrl": "https://live-radio.asharq.com/asharq_stereo.m3u8",
+    "homepage": "https://asharq.com/radio/",
+    "sourcePage": "https://asharq.com/radio/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Asharq Radio",
+      "راديو الشرق مع Bloomberg"
+    ]
+  },
+  {
+    "id": "mcd-ar",
+    "name": "مونت كارلو الدولية",
+    "countryCode": "FR",
+    "city": "باريس",
+    "language": "arabic",
+    "categories": [
+      "news"
+    ],
+    "streamUrl": "https://montecarlodoualiya128k.ice.infomaniak.ch/mc-doualiya.mp3",
+    "homepage": "https://www.mc-doualiya.com/",
+    "sourcePage": "https://www.mc-doualiya.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Monte Carlo Doualiya",
+      "MC doualiya",
+      "مونت كارلو الدولية"
+    ]
+  },
+  {
+    "id": "arabiya-news",
+    "name": "العربية FM",
+    "countryCode": "SA",
+    "city": "الرياض",
+    "language": "arabic",
+    "categories": [
+      "news"
+    ],
+    "streamUrl": "https://fm.alarabiya.net/fm/myStream/playlist.m3u8",
+    "homepage": "https://www.alarabiya.net/alarabiya-fm",
+    "sourcePage": "https://www.alarabiya.net/alarabiya-fm",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Arabiya FM"
+    ]
+  },
+  {
+    "id": "alaraby",
+    "name": "راديو العربي",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "talk"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/alarabyradiolive/alarabyradio_audio/icecast.audio",
+    "homepage": "https://www.alaraby.com/",
+    "sourcePage": "https://www.alaraby.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al araby",
+      "Alaraby Radio"
+    ]
+  },
+  {
+    "id": "arabiya99",
+    "name": "العربية 99 FM",
+    "countryCode": "AE",
+    "city": "دبي",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://stream.radiojar.com/s1mygd1frxquv",
+    "homepage": "https://www.alarabiya99.ae/",
+    "sourcePage": "https://www.alarabiya99.ae/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Arabiya 99 FM",
+      "Alarabiya FM"
+    ]
+  },
+  {
+    "id": "khaleejiya",
+    "name": "الخليجية 100.9",
+    "countryCode": "AE",
+    "city": "دبي",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://stream.radiojar.com/5wpf9e4erxquv",
+    "homepage": "https://www.alkhaleejiya.ae/",
+    "sourcePage": "https://www.alkhaleejiya.ae/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Al Khaleejiya FM 100.9",
+      "Al Khaleejiya 100.9"
+    ]
+  },
+  {
+    "id": "sharjah-quran",
+    "name": "القرآن الكريم من الشارقة",
+    "countryCode": "AE",
+    "city": "الشارقة",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/smcquranlive/quranradiolive/icecast.audio",
+    "homepage": "https://sba.net.ae/en/live/a1f57dbe16971827aaa5c5e4dda1ca68",
+    "sourcePage": "https://sba.net.ae/en/live/a1f57dbe16971827aaa5c5e4dda1ca68",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Quran Radio From Sharjah"
+    ]
+  },
+  {
+    "id": "rabia",
+    "name": "الرابعة 107.8 FM",
+    "countryCode": "AE",
+    "city": "عجمان",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "talk"
+    ],
+    "streamUrl": "https://s2.radio.co/s770fa24b6/listen",
+    "homepage": "https://www.alrabiafm.com/",
+    "sourcePage": "https://m.alrabiafm.com/pop-up-player",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "qatar",
+    "name": "إذاعة قطر",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "talk",
+      "culture"
+    ],
+    "streamUrl": "https://live.kwikmotion.com/qmcqatarradiolive/qatarradio/playlist.m3u8",
+    "homepage": "https://qatarradio.qa/",
+    "sourcePage": "https://qatarradio.qa/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Qatar Radio"
+    ]
+  },
+  {
+    "id": "qatar-quran",
+    "name": "القرآن الكريم — قطر",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://live.kwikmotion.com/qmcquranradiolive/quranradio/playlist.m3u8",
+    "homepage": "https://quranradio.qa/",
+    "sourcePage": "https://quranradio.qa/",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "qatar-quran2",
+    "name": "القرآن الكريم — قطر 2",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://live.kwikmotion.com/qmcquranradio2live/quranradio2/playlist.m3u8",
+    "homepage": "https://quranradio.qa/",
+    "sourcePage": "https://quranradio.qa/",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "kuwait-general",
+    "name": "إذاعة الكويت — البرنامج العام",
+    "countryCode": "KW",
+    "city": "الكويت",
+    "language": "arabic",
+    "categories": [
+      "talk",
+      "culture"
+    ],
+    "streamUrl": "https://kwtkrdota.cdn.mangomolo.com/k1rdo/k1rdo.stream_aac/chunklist.m3u8",
+    "homepage": "https://51.com.kw/radio-live",
+    "sourcePage": "https://51.com.kw/radio-live",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Kuwait General Radio"
+    ]
+  },
+  {
+    "id": "nogoum",
+    "name": "نجوم FM",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "talk"
+    ],
+    "streamUrl": "https://audio.nrpstream.com/listen/nogoumfm/radio.mp3",
+    "homepage": "https://www.nogoumfm.net/",
+    "sourcePage": "https://www.nogoumfm.net/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Nogoum FM",
+      "Nogoum FM 100.6"
+    ]
+  },
+  {
+    "id": "mega",
+    "name": "ميجا FM",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://megafm927.radioca.st/stream",
+    "homepage": "https://megafm927.com/",
+    "sourcePage": "https://megafm927.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Mega FM 92.7"
+    ]
+  },
+  {
+    "id": "nagham",
+    "name": "نغم FM",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://ahmsamir.radioca.st/stream",
+    "homepage": "https://naghamfm1053.com/",
+    "sourcePage": "https://naghamfm1053.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Nagham FM 105.3"
+    ]
+  },
+  {
+    "id": "9090",
+    "name": "الراديو 9090",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "talk",
+      "music"
+    ],
+    "streamUrl": "https://9090streaming.mobtada.com/9090FMEGYPT",
+    "homepage": "https://9090.fm/",
+    "sourcePage": "https://9090.fm/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Radio 9090",
+      "Radio 9090 90.9"
+    ]
+  },
+  {
+    "id": "onsport",
+    "name": "أون سبورت FM",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "sports"
+    ],
+    "streamUrl": "https://carina.streamerr.co:2020/stream/OnSportFM",
+    "homepage": "https://onsportfm.com/",
+    "sourcePage": "https://onsportfm.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "On Sport FM"
+    ]
+  },
+  {
+    "id": "hits",
+    "name": "راديو هيتس 88.2",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://radiohits882.radioca.st/;",
+    "homepage": "https://radiohits882.com/",
+    "sourcePage": "https://radiohits882.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Radio Hits 88.2 Cairo"
+    ]
+  },
+  {
+    "id": "sha3by",
+    "name": "شعبي FM 95",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://radio95.radioca.st/;",
+    "homepage": "https://95-fm.com/",
+    "sourcePage": "https://95-fm.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "SHA3BY FM"
+    ]
+  },
+  {
+    "id": "cairo-quran",
+    "name": "القرآن الكريم — القاهرة",
+    "countryCode": "EG",
+    "city": "القاهرة",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://stream.radiojar.com/8s5u5tpdtwzuv",
+    "homepage": "https://www.maspero.eg/stream/7",
+    "sourcePage": "https://www.maspero.eg/stream/7",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Radio Quran"
+    ]
+  },
+  {
+    "id": "vdl",
+    "name": "صوت لبنان",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "talk"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/itwaudio/9054/stream",
+    "homepage": "https://www.vdl.me/",
+    "sourcePage": "https://www.vdl.me/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Voice of Lebanon (Sawtlebnan) Radio"
+    ]
+  },
+  {
+    "id": "kol-lebnan",
+    "name": "صوت كل لبنان",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "talk"
+    ],
+    "streamUrl": "https://audio.osina.cloud:9323/stream",
+    "homepage": "https://www.vdlnews.com/",
+    "sourcePage": "https://www.vdlnews.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "liban",
+    "name": "إذاعة لبنان",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "culture",
+      "talk"
+    ],
+    "streamUrl": "https://media2.streambrothers.com:2020/stream/8194",
+    "homepage": "https://www.radioliban.gov.lb/",
+    "sourcePage": "https://www.radioliban.gov.lb/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Radio Liban"
+    ]
+  },
+  {
+    "id": "rll",
+    "name": "لبنان الحر",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "talk",
+      "music"
+    ],
+    "streamUrl": "https://edge.mixlr.com/channel/qtqeb",
+    "homepage": "https://www.rll.com.lb/",
+    "sourcePage": "https://www.rll.com.lb/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Radio Liban Libre"
+    ]
+  },
+  {
+    "id": "ghad",
+    "name": "صوت الغد",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "talk"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/itwaudio/9030/stream",
+    "homepage": "https://www.sawtelghad.com/",
+    "sourcePage": "https://www.sawtelghad.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Sawt El Ghad",
+      "Sawt El Ghad - FM 96.7"
+    ]
+  },
+  {
+    "id": "hoda",
+    "name": "صوت الهدى",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "culture",
+      "talk"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/itwaudio/9032/stream",
+    "homepage": "https://www.sawtalhoda.com/",
+    "sourcePage": "https://www.sawtalhoda.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Sawt Al Hoda 92.1 FM"
+    ]
+  },
+  {
+    "id": "farah",
+    "name": "صوت الفرح",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "talk"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/itwaudio/9036/stream",
+    "homepage": "https://www.sawtalfarah.com/",
+    "sourcePage": "https://www.sawtalfarah.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Sawt Al Farah 104.3 FM"
+    ]
+  },
+  {
+    "id": "aghani",
+    "name": "أغاني أغاني",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "music"
+    ],
+    "streamUrl": "https://streaming.nrjaudio.fm/ou6pfgxp336f",
+    "homepage": "https://aghaniaghani.com/",
+    "sourcePage": "https://aghaniaghani.com/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Aghani Aghani"
+    ]
+  },
+  {
+    "id": "lb-quran",
+    "name": "إذاعة القرآن الكريم — لبنان 93.3",
+    "countryCode": "LB",
+    "city": "بيروت",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://audio.osina.cloud:7987/stream",
+    "homepage": "https://www.quranradio.org.lb/",
+    "sourcePage": "https://www.quranradio.org.lb/",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Quran Radio 93.3 FM Lebanon"
+    ]
+  },
+  {
+    "id": "sout-khaleej",
+    "name": "صوت الخليج",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "culture"
+    ],
+    "streamUrl": "https://live.kwikmotion.com/qmcslkrradiolive/slkrradio/playlist.m3u8",
+    "homepage": "https://www.soutalkhaleej.fm/",
+    "sourcePage": "https://www.soutalkhaleej.fm/wp-content/themes/AlKhaleej/assets/js/live-player.js?ver=7.0.3",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "sout-khaleej2",
+    "name": "صوت الخليج FM",
+    "countryCode": "QA",
+    "city": "الدوحة",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "culture"
+    ],
+    "streamUrl": "https://live.kwikmotion.com/qmcslkr2radiolive/slkr2radio/playlist.m3u8",
+    "homepage": "https://www.soutalkhaleej.fm/",
+    "sourcePage": "https://www.soutalkhaleej.fm/",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "oula",
+    "name": "الأولى 107.4",
+    "countryCode": "AE",
+    "city": "دبي",
+    "language": "arabic",
+    "categories": [
+      "culture",
+      "talk"
+    ],
+    "streamUrl": "https://uk6.internet-radio.com/proxy/aloula?mp=/stream;",
+    "homepage": "https://www.aloularadio.ae/live",
+    "sourcePage": "https://www.aloularadio.ae/live",
+    "checkedAt": "2026-11-26",
+    "aliases": []
+  },
+  {
+    "id": "sharjah",
+    "name": "إذاعة الشارقة",
+    "countryCode": "AE",
+    "city": "الشارقة",
+    "language": "arabic",
+    "categories": [
+      "talk",
+      "culture"
+    ],
+    "streamUrl": "https://l3.itworkscdn.net/smcradiolive/smcradiolive/icecast.audio",
+    "homepage": "https://sba.net.ae/en/live/3c0dca8b528bc0ad3a3110815f0ff719",
+    "sourcePage": "https://radiostay.com/station/18910-sharjah-radio",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Sharjah Radio"
+    ]
+  },
+  {
+    "id": "kuwait-fm",
+    "name": "كويت FM",
+    "countryCode": "KW",
+    "city": "الكويت",
+    "language": "arabic",
+    "categories": [
+      "music",
+      "talk"
+    ],
+    "streamUrl": "https://kwtkrdota.cdn.mangomolo.com/kfmrdo/kfmrdo.stream_aac/chunklist.m3u8",
+    "homepage": "https://51.com.kw/radio-live/367/",
+    "sourcePage": "https://www.radio-addict.com/en/stream-Gy2PRB8peLviNv2v4xnU8F/listen-Kuwait-FM-103-7",
+    "checkedAt": "2026-11-26",
+    "aliases": [
+      "Kuwait FM 103.7"
+    ]
+  },
+  {
+    "id": "rak-quran",
+    "name": "إذاعة رأس الخيمة للقرآن الكريم",
+    "countryCode": "AE",
+    "city": "رأس الخيمة",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://studio18.radiolize.com/radio/8130/rakquran.mp3",
+    "homepage": "https://play.google.com/store/apps/details?id=ae.rak.QuranApp",
+    "sourcePage": "https://radio-uae.com/",
+    "checkedAt": "2026-11-26"
+  },
+  {
+    "id": "dubai-quran",
+    "name": "دبي للقرآن الكريم",
+    "countryCode": "AE",
+    "city": "دبي",
+    "language": "arabic",
+    "categories": [
+      "quran"
+    ],
+    "streamUrl": "https://uk5.internet-radio.com/proxy/dubaiholyquran?mp=/stream",
+    "homepage": "https://www.dmi.gov.ae/",
+    "sourcePage": "https://radio-uae.com/",
+    "checkedAt": "2026-11-26"
+  }
+]

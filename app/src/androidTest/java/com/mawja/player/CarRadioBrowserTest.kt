@@ -47,6 +47,19 @@ class CarRadioBrowserTest {
                 assertEquals(item.mediaId, resolved.mediaId)
                 assertEquals(item.mediaMetadata.title.toString(), resolved.mediaMetadata.title.toString())
             }
+            val languageFolder = CarRadioBrowse.languagesId(RadioFilters.news, "AE")
+            val languages = AtomicReference<ListenableFuture<LibraryResult<ImmutableList<MediaItem>>>>()
+            instrumentation.runOnMainSync { languages.set(browser.getChildren(languageFolder, 0, 300, null)) }
+            val choices = requireNotNull(languages.get().get(10, TimeUnit.SECONDS).value)
+            assertTrue(choices.any { it.mediaId == CarRadioBrowse.choiceId(RadioFilters.news, "AE", "arabic") })
+            assertTrue(choices.any { it.mediaId == CarRadioBrowse.choiceId(RadioFilters.news, "AE", null) })
+            choices.forEach { choice ->
+                assertEquals(true, choice.mediaMetadata.isBrowsable)
+                assertEquals(false, choice.mediaMetadata.isPlayable)
+            }
+            val lookup = AtomicReference<ListenableFuture<LibraryResult<MediaItem>>>()
+            instrumentation.runOnMainSync { lookup.set(browser.getItem(languageFolder)) }
+            assertEquals(languageFolder, requireNotNull(lookup.get().get(10, TimeUnit.SECONDS).value).mediaId)
         } finally { instrumentation.runOnMainSync { browser.release() } }
     }
 }

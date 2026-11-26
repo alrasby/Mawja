@@ -7,6 +7,22 @@ internal object CarRadioBrowse {
     fun id(filter: RadioFilter): String = "radio:${filter.id}"
     fun category(mediaId: String): RadioFilter? = RadioFilters.all.firstOrNull { id(it) == mediaId }
 
+    data class Route(val filter: RadioFilter, val country: String?, val language: String?)
+    fun languagesId(filter: RadioFilter, country: String?) = "radio-languages:${filter.id}:${country ?: "all"}"
+    fun choiceId(filter: RadioFilter, country: String?, language: String?) =
+        "radio-choice:${filter.id}:${country ?: "all"}:${language ?: "all"}"
+    fun route(id: String): Route? {
+        val parts = id.split(':')
+        if (parts.firstOrNull() !in setOf("radio-languages", "radio-choice")) return null
+        if (parts.size != if (parts[0] == "radio-languages") 3 else 4) return null
+        val filter = RadioFilters.all.firstOrNull { it.id == parts[1] && it != RadioFilters.local } ?: return null
+        val country = parts[2].takeUnless { it == "all" }
+        if (country != null && !country.matches(Regex("[A-Z]{2}"))) return null
+        val language = parts.getOrNull(3)?.takeUnless { it == "all" }
+        if (language != null && language !in radioLanguages.map { it.name }) return null
+        return Route(filter, country, language)
+    }
+
     fun selection(filter: RadioFilter, appLanguage: String, option: (String, String) -> String): Pair<String?, String?> {
         if (filter.id == RadioFilters.local.id) return null to null
         val country = option("country_${filter.id}", "").ifBlank { null }

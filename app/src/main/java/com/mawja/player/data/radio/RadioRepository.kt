@@ -100,6 +100,10 @@ private data class RadioStation(
 /** Radio Browser directory with verified official Oman streams added as a deterministic fallback. */
 class RadioRepository(private val context: Context, private val client: OkHttpClient) {
     private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
+    private val directoryClient = client.newBuilder()
+        .connectTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(4, java.util.concurrent.TimeUnit.SECONDS)
+        .callTimeout(5, java.util.concurrent.TimeUnit.SECONDS).build()
     private val stationList = ListSerializer(RadioStation.serializer())
     private val trackList = ListSerializer(Track.serializer())
     private val servers = listOf(
@@ -112,12 +116,29 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     @Serializable
     data class RadioLanguage(val name: String = "", val stationcount: Int = 0)
 
-    suspend fun languages(): List<RadioLanguage> = withContext(Dispatchers.IO) {
-        json.decodeFromString(ListSerializer(RadioLanguage.serializer()), fetchRaw("/json/languages", emptyMap()))
-            .filter { it.name.isNotBlank() && it.stationcount > 0 }.distinctBy { it.name }
+    suspend fun languages(): List<RadioLanguage> = radioLanguages.map { RadioLanguage(it.name, 1) }
+
+    private val reviewed by lazy {
+        context.assets.open("radio/reviewed-stations.json").bufferedReader().use {
+            json.decodeFromString(ListSerializer(ReviewedRadioStation.serializer()), it.readText())
+        }
     }
 
     suspend fun stations(
+        filter: RadioFilter, latitude: Double? = null, longitude: Double? = null,
+        countryCode: String? = null, language: String? = null,
+    ): List<Track> = withContext(Dispatchers.IO) {
+        val country = countryCode?.uppercase(Locale.ROOT)
+        if (filter.id == RadioFilters.local.id && country == null) return@withContext emptyList()
+        // Curated entries participate in every matching country/category, even
+        // when the directory is offline or lacks language/category metadata.
+        val curated = reviewed.filter { it.matches(filter, country, language) }.map { it.track() }
+        val directory = directoryStations(filter, latitude, longitude, country, language)
+        (curated + directory).filterNot { isRetiredRadioEntry(it.title, it.streamUrl.orEmpty()) }
+            .distinctBy { it.streamUrl?.trimEnd('/') }
+    }
+
+    private suspend fun directoryStations(
         filter: RadioFilter,
         latitude: Double? = null,
         longitude: Double? = null,
@@ -126,7 +147,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     ): List<Track> = withContext(Dispatchers.IO) { if (filter.id == RadioFilters.local.id) {
         if (countryCode.isNullOrBlank()) emptyList()
         else {
-            val key = "local_$countryCode"
+            val key = "local_v2_$countryCode"
             val fallback = { loadCache(key) ?: if (countryCode == "OM") fallbackStations(RadioFilters.oman) else emptyList() }
             try {
                 val result = withContext(Dispatchers.IO) {
@@ -166,7 +187,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     }
 
     suspend fun countries(): List<RadioCountry> = withContext(Dispatchers.IO) {
-        for (base in servers) {
+        for (base in servers.take(2)) {
             runCatching {
                 val response = request(base, "/json/countries", mapOf("order" to "name", "reverse" to "false", "limit" to "300"))
                 json.decodeFromString(ListSerializer(RadioCountry.serializer()), response)
@@ -188,10 +209,6 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         f.id == RadioFilters.local.id && latitude != null && longitude != null -> fetchNearby(latitude, longitude, countryCode)
         f.id == RadioFilters.local.id -> emptyList()
         f.id == RadioFilters.oman.id -> fetchOman()
-        f.id == RadioFilters.news.id -> (
-            (if (countryCode == null && f.language == "arabic") reviewedNewsStreams() else emptyList()) +
-                fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode)))
-            ).distinctBy { it.streamUrl }
         f.id == RadioFilters.world.id -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode)))
         else -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode).ifEmpty { f.countryCodes }))
     }
@@ -253,18 +270,29 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             "order" to "clickcount",
             "reverse" to "true",
         )
-        f.language?.let { base["language"] = it; base["languageExact"] = "true" }
-        f.tag?.let { base["tag"] = it; base["tagExact"] = "true" }
+        // Country queries must include unlabeled stations. The previous exact
+        // language predicate and 60-result cap hid most regional broadcasters.
+        if (f.countryCodes.isEmpty()) {
+            f.language?.let { base["language"] = normalizeRadioLanguage(it) }
+            f.tag?.let { base["tag"] = it }
+        }
         val stations = if (f.countryCodes.isEmpty()) {
-            fetch(base + ("limit" to "200"))
+            val languages = if (normalizeRadioLanguage(f.language.orEmpty()) == "arabic") listOf("arabic", "ar", "العربية") else listOf(f.language)
+            languages.map { language -> async {
+                runCatching { fetch(base + mapOf("limit" to "1000") + (language?.let { mapOf("language" to it) } ?: emptyMap())) }
+                    .getOrDefault(emptyList())
+            } }.awaitAll().flatten()
         } else {
-            f.countryCodes.map { cc -> async { runCatching { fetch(base + mapOf("countrycode" to cc, "limit" to "60")) }.getOrDefault(emptyList()) } }
+            f.countryCodes.map { cc -> async { runCatching { fetch(base + mapOf("countrycode" to cc, "limit" to "1000")) }.getOrDefault(emptyList()) } }
                 .awaitAll().flatten()
         }
         stations.filter { station ->
             (f.countryCodes.isEmpty() || station.countrycode.uppercase(Locale.ROOT) in f.countryCodes) &&
-                (f.language == null || station.language.split(',').any { it.trim().equals(f.language, true) }) &&
-                (f.id != RadioFilters.news.id || isNewsStation(station.name, station.tags))
+                matchesRadioLanguage(station.reviewedEntry()?.language ?: station.language.ifBlank {
+                    station.tags.split(',').firstOrNull { normalizeRadioLanguage(it) == normalizeRadioLanguage(f.language.orEmpty()) }.orEmpty()
+                }, f.language) &&
+                (station.reviewedEntry()?.let { f.tag == null || f.id in it.categories }
+                    ?: matchesRadioCategory(f, station.name, station.tags))
         }
             .distinctBy { it.stationuuid }
             .sortedByDescending { it.clickcount }
@@ -342,13 +370,6 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         }
     }
 
-    private fun reviewedNewsStreams(): List<Track> = listOf(
-        direct("radio:official-asharq-radio", "راديو الشرق مع Bloomberg", "Arabic • News",
-            "https://live-radio.asharq.com/asharq_stereo.m3u8"),
-        direct("radio:official-mcd", "مونت كارلو الدولية", "Arabic • News",
-            "https://montecarlodoualiya128k.ice.infomaniak.ch/mc-doualiya.mp3"),
-    )
-
     private fun direct(id: String, title: String, subtitle: String, stream: String) = Track(
         id = id,
         source = SourceType.RADIO,
@@ -382,7 +403,14 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         return 2 * earth * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
     }
 
+    private fun RadioStation.reviewedEntry(): ReviewedRadioStation? = reviewed.firstOrNull { entry ->
+        entry.streamUrl.trimEnd('/') == url_resolved.ifBlank { url }.trimEnd('/') ||
+            ((countrycode.isBlank() || countrycode.equals(entry.countryCode, true)) && (listOf(entry.name) + entry.aliases).any { it.equals(name.trim(), true) })
+    }
+
     private fun RadioStation.toTrack(): Track? {
+        if (isRetiredRadioEntry(name, url_resolved.ifBlank { url })) return null
+        reviewedEntry()?.let { return it.track() }
         val stream = url_resolved.ifBlank { url }.trim()
         if (stationuuid.isBlank() || lastcheckok != 1 || ssl_error != 0 || !isPlayableRadioUrl(stream)) return null
         val quality = codec.takeIf { it.isNotBlank() }?.uppercase()?.let { c -> if (bitrate > 0) "$c ${bitrate}k" else c }
@@ -409,7 +437,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun fetch(params: Map<String, String>): List<RadioStation> {
         var last: IOException? = null
-        for (base in servers) {
+        for (base in servers.take(2)) {
             try {
                 val result = json.decodeFromString(stationList, request(base, "/json/stations/search", params))
                 if (result.isNotEmpty()) return result
@@ -425,7 +453,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun fetchRaw(path: String, params: Map<String, String>): String {
         var last: IOException? = null
-        for (base in servers) {
+        for (base in servers.take(2)) {
             try { return request(base, path, params) } catch (e: IOException) { last = e }
         }
         throw last ?: IOException("No radio server reachable")
@@ -438,7 +466,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
             .header("User-Agent", "Mawja/1.1 (Android)")
             .header("Accept", "application/json")
             .build()
-        client.newCall(request).execute().use { response ->
+        directoryClient.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
             return response.body?.string() ?: throw IOException("Empty response")
         }
@@ -446,7 +474,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun cacheKey(filter: RadioFilter, countryCode: String?, language: String?): String {
         val languageKey = (language ?: filter.language ?: "all").map { if (it.isLetterOrDigit()) it else '_' }.joinToString("")
-        return "global_v1_${filter.id}_${countryCode ?: "all"}_$languageKey"
+        return "global_v2_${filter.id}_${countryCode ?: "all"}_$languageKey"
     }
 
     private val cacheLock = Any()

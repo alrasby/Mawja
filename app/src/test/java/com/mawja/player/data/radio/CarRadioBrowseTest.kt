@@ -19,4 +19,17 @@ class CarRadioBrowseTest {
         assertEquals(null to null, CarRadioBrowse.selection(RadioFilters.news, "ar") { _, _ -> "" })
         assertEquals(null to null, CarRadioBrowse.selection(RadioFilters.local, "ar") { _, _ -> "US" })
     }
+    @Test fun languageRoutesKeepSelectionsIsolatedAndRejectInvalidIds() {
+        val id = CarRadioBrowse.choiceId(RadioFilters.news, "AE", "arabic")
+        val route = requireNotNull(CarRadioBrowse.route(id))
+        assertEquals(RadioFilters.news, route.filter)
+        assertEquals("AE", route.country)
+        assertEquals("arabic", route.language)
+        assertNull(CarRadioBrowse.route("radio-choice:news:AE:invalid"))
+        assertNull(CarRadioBrowse.route("radio-choice:news:invalid:arabic"))
+        assertNull(CarRadioBrowse.route("radio-choice:local:AE:arabic"))
+        assertNull(CarRadioBrowse.route("radio-choice:news:AE"))
+        assertNull(CarRadioBrowse.route(CarRadioBrowse.choiceId(RadioFilters.world, null, null))?.language)
+        assertNotNull(CarRadioBrowse.route(CarRadioBrowse.languagesId(RadioFilters.news, "AE")))
+    }
 }
