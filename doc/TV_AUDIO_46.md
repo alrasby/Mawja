@@ -18,4 +18,24 @@
 
 [أدلة فحص العينات](radio/tv-audio-audit-2026-11-26.json). أداة الفحص أصبحت تقرأ EXT-X-MAP قبل مقطع fMP4 لتجنب نتيجة سلبية كاذبة عند فحص صوت BBC.
 
-اختبارات جديدة للتصنيف والمصدر والروابط المسموح بها، وتصفح القسم في خدمة MediaBrowser الفعلية. أضيف تشغيل القنوات الثلاث إلى اختبار PlaybackRegressionTest عبر الخدمة الإنتاجية، مع اشتراط READY/playing وعدم اختيار مسار فيديو، وحفظ النتيجة في artifact المحاكي. نتيجة التنفيذ تسجل بعد اكتمال CI؛ لم تُختبر سيارة فعلية.
+اختبارات جديدة للتصنيف والمصدر والروابط المسموح بها، وتصفح القسم في خدمة MediaBrowser الفعلية. أضيف تشغيل القنوات الثلاث إلى اختبار PlaybackRegressionTest عبر الخدمة الإنتاجية، مع اشتراط READY/playing وعدم اختيار مسار فيديو، وحفظ النتيجة في artifact المحاكي. نجح البناء والاختبارات الوحدوية وثلاثة اختبارات Android، وفحوص الواجهة ودورة الحياة في CI. لم تُختبر سيارة فعلية.
+
+## نتيجة التنفيذ المؤكدة
+
+- الكود المختبر: `88af832994c30fe7459970929cc672a987eda9f9`، versionCode 46.
+- [تشغيل البناء والاختبارات](https://github.com/alrasby/Mawja/actions/runs/45841951466): نجاح.
+- تقرير الاختبار من داخل الخدمة الإنتاجية على محاكي API35:
+
+```text
+radio:official-france24-ar-tv ready=true error=null: null: null
+radio:official-dw-ar-tv ready=true error=null: null: null
+radio:official-bbc-ar-tv ready=true error=null: null: null
+OK (3 tests)
+```
+
+يتضمن الاختبار أيضًا التأكد من isPlaying وعدم اختيار أي مسار فيديو، مع بقاء فحوص التشغيل المحلي والتقديم والإيقاف وإعدادات الصوت سليمة.
+
+- [APK Debug للاختبار](https://github.com/alrasby/Mawja/actions/runs/45841951466/artifacts/15128222567).
+- [أدلة المحاكي](https://github.com/alrasby/Mawja/actions/runs/45841951466/artifacts/15129441641)، تشمل `tv-audio-playback.txt` و`runtime-instrumentation.txt`.
+
+هذا تحقق قصير من شبكة CI، وليس ضمانًا لاستمرار البث أو توفره من كل الشبكات، ولا قياسًا لبطارية هاتف فعلي. لا AAB أو إصدار متجر جديد في هذا التنفيذ.
