@@ -11,8 +11,9 @@ m=re.search(r"package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)
 assert m and m[1]=="com.mawja.player" and int(m[2])==expected_code,"Wrong package/version"
 assert "application-debuggable" not in badging,"APK is debuggable"
 apk_info=(folder/"apk-signature.txt").read_text()
-apk_cert=re.search(r"Signer #1 certificate SHA-256 digest: ([0-9a-fA-F]+)",apk_info)
-assert apk_cert and apk_cert[1].lower()==expected_cert,"APK signer mismatch"
+apk_certs=re.findall(r"(?:Signer #\d+|V[23](?:\.\d+)? Signer):? certificate SHA-256 digest: ([0-9a-fA-F]+)",apk_info)
+assert apk_certs,"Unrecognized apksigner certificate output"
+assert {value.lower() for value in apk_certs}=={expected_cert},"APK signer mismatch"
 bundle_info=(folder/"bundle-certificate.txt").read_text()
 bundle_cert=re.search(r"SHA256:\s*([0-9A-Fa-f:]+)",bundle_info)
 assert bundle_cert and bundle_cert[1].replace(":","").lower()==expected_cert,"AAB signer mismatch"

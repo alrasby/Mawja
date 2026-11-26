@@ -20,6 +20,13 @@ class ReleaseVerificationTest(unittest.TestCase):
             result=subprocess.run([sys.executable,str(SCRIPT),str(p/"cert.der")],cwd=p,capture_output=True,text=True)
             return result.returncode
     def test_accepts_matching_release(self):self.assertEqual(0,self.run_check())
+    def test_accepts_modern_v2_signer(self):
+        def modern(r):
+            p=r/"apk-signature.txt"
+            p.write_text(p.read_text().replace("Signer #1 certificate","V2 Signer: certificate"))
+        self.assertEqual(0,self.run_check(modern))
+    def test_rejects_additional_mismatched_signer(self):
+        self.assertNotEqual(0,self.run_check(lambda r:(r/"apk-signature.txt").write_text((r/"apk-signature.txt").read_text()+"\nV3 Signer: certificate SHA-256 digest: "+"0"*64)))
     def test_rejects_wrong_apk_signer(self):self.assertNotEqual(0,self.run_check(lambda r:(r/"apk-signature.txt").write_text("Signer #1 certificate SHA-256 digest: "+"0"*64)))
     def test_rejects_wrong_bundle_signer(self):self.assertNotEqual(0,self.run_check(lambda r:(r/"bundle-certificate.txt").write_text("SHA256: "+"0"*64)))
     def test_rejects_debug_apk(self):self.assertNotEqual(0,self.run_check(lambda r:(r/"apk-badging.txt").write_text((r/"apk-badging.txt").read_text()+"\napplication-debuggable")))
