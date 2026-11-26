@@ -9,6 +9,11 @@ import android.os.CancellationSignal
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.Role
+import com.mawja.player.data.radio.radioLanguageOptions
+import com.mawja.player.data.radio.radioLanguageLabel
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -95,7 +100,7 @@ fun RadioScreen() {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { picker = "country" }, modifier = Modifier.weight(1f)) { Text(countryLabel, maxLines = 2) }
                 OutlinedButton(onClick = { picker = "language" }, modifier = Modifier.weight(1f)) {
-                    Text(language ?: stringResource(R.string.radio_all_languages), maxLines = 2)
+                    Text(language?.let { radioLanguageLabel(it, locale) } ?: stringResource(R.string.radio_all_languages), maxLines = 2)
                 }
             }
         }
@@ -110,7 +115,7 @@ fun RadioScreen() {
     }
     if (picker != null && !isLocal) {
         val isCountryPicker = picker == "country"
-        val choices = if (isCountryPicker) countryOptions else languages.map { it.name to it.name }
+        val choices = if (isCountryPicker) countryOptions else radioLanguageOptions(languages.map { it.name }, locale)
         RadioOptionDialog(
             title = stringResource(if (isCountryPicker) R.string.choose_world_country else R.string.radio_language),
             allLabel = if (isCountryPicker) allCountries else stringResource(R.string.radio_all_languages),
@@ -126,7 +131,7 @@ fun RadioScreen() {
 }
 
 @Composable
-private fun RadioOptionDialog(
+internal fun RadioOptionDialog(
     title: String, allLabel: String, choices: List<Pair<String, String>>,
     selected: String?, onSelect: (String?) -> Unit, onDismiss: () -> Unit,
 ) {
@@ -138,20 +143,34 @@ private fun RadioOptionDialog(
                 Text(title, style = MaterialTheme.typography.titleLarge)
                 OutlinedTextField(query, { query = it }, singleLine = true,
                     placeholder = { Text(stringResource(R.string.search)) }, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
-                LazyColumn(Modifier.weight(1f, fill = false)) {
-                    item {
-                        TextButton(onClick = { onSelect(null) }) { Text(allLabel) }
+                val validChoices = choices.filter { it.first.isNotBlank() && it.second.isNotBlank() }.distinctBy { it.first }
+                val visibleChoices = validChoices.filter { it.first.contains(query.trim(), true) || it.second.contains(query.trim(), true) }
+                val current = selected?.trim()?.takeIf { value -> validChoices.any { it.first == value } }
+                LazyColumn(Modifier.weight(1f, fill = false).selectableGroup()) {
+                    // One explicit, labeled reset row replaces the old text button + blank option.
+                    item(key = "all-options") {
+                        RadioOptionRow(allLabel, current == null) { onSelect(null) }
                     }
-                    items(choices.filter { it.first.contains(query, true) || it.second.contains(query, true) }, key = { it.first }) { (value, label) ->
-                        Row(Modifier.fillMaxWidth().clickable { onSelect(value) }.padding(vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected == value, onClick = null)
-                            Text(label, modifier = Modifier.padding(start = 10.dp))
-                        }
+                    items(visibleChoices, key = { it.first }) { (value, label) ->
+                        RadioOptionRow(label, current == value) { onSelect(value) }
                     }
                 }
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.close)) }
             }
+        }
+    }
+}
+
+@Composable
+private fun RadioOptionRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+        shape = MaterialTheme.shapes.medium) {
+        Row(Modifier.fillMaxWidth().selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .heightIn(min = 48.dp).padding(horizontal = 8.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(selected = selected, onClick = null)
+            Text(label, modifier = Modifier.padding(start = 10.dp),
+                color = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface)
         }
     }
 }

@@ -26,7 +26,7 @@ internal object CarRadioBrowse {
     fun selection(filter: RadioFilter, appLanguage: String, option: (String, String) -> String): Pair<String?, String?> {
         if (filter.id == RadioFilters.local.id) return null to null
         val country = option("country_${filter.id}", "").ifBlank { null }
-        val language = option("language_${filter.id}", radioDefaultLanguage(filter.id, appLanguage)).ifBlank { null }
+        val language = selectedRadioLanguage(option("language_${filter.id}", radioDefaultLanguage(filter.id, appLanguage)))
         return country to language
     }
 }

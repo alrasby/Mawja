@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.mawja.player.data.ThemeMode
+import com.mawja.player.ui.screens.RadioOptionDialog
 import com.mawja.player.ui.GlassDialog
 import com.mawja.player.ui.MawjaTheme
 import org.junit.Assert.*
@@ -67,6 +68,30 @@ class ThemeRegressionTest {
                 }
                 screenshot.recycle()
             }
+            scenario.onActivity { activity ->
+                activity.setContent {
+                    MawjaTheme(ThemeMode.LIGHT) {
+                        RadioOptionDialog(title = "Station language", allLabel = "All languages",
+                            choices = listOf("" to "", "arabic" to "Arabic · العربية"),
+                            selected = "", onSelect = {}, onDismiss = {})
+                    }
+                }
+            }
+            val deadline = android.os.SystemClock.uptimeMillis() + 5000
+            var labels = emptyList<String>()
+            while (android.os.SystemClock.uptimeMillis() < deadline) {
+                instrumentation.waitForIdleSync()
+                val root = instrumentation.uiAutomation.rootInActiveWindow
+                fun collect(node: android.view.accessibility.AccessibilityNodeInfo?): List<String> {
+                    if (node == null) return emptyList()
+                    return listOfNotNull(node.text?.toString()) + (0 until node.childCount).flatMap { collect(node.getChild(it)) }
+                }
+                labels = collect(root)
+                if (labels.any { it.contains("Arabic") } && labels.any { it == "All languages" }) break
+                Thread.sleep(30)
+            }
+            assertTrue(labels.any { it == "All languages" })
+            assertTrue(labels.any { it.contains("Arabic · العربية") })
         }
     }
 }

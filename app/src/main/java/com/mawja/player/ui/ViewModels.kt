@@ -69,7 +69,7 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
         val id = filter.value.id
         country.value = if (id == RadioFilters.local.id) null else c.preferences.radioOption("country_$id").ifBlank { null }
         val defaultLanguage = com.mawja.player.data.radio.radioDefaultLanguage(id, c.preferences.language.value)
-        language.value = c.preferences.radioOption("language_$id", defaultLanguage).ifBlank { null }
+        language.value = com.mawja.player.data.radio.selectedRadioLanguage(c.preferences.radioOption("language_$id", defaultLanguage))
     }
 
     fun select(f: RadioFilter) {
@@ -84,8 +84,9 @@ class RadioVm(private val c: AppContainer) : ViewModel() {
         load()
     }
     fun selectLanguage(value: String?) {
-        language.value = value
-        c.preferences.setRadioOption("language_${filter.value.id}", value.orEmpty())
+        val canonical = com.mawja.player.data.radio.selectedRadioLanguage(value)
+        language.value = canonical
+        c.preferences.setRadioOption("language_${filter.value.id}", canonical.orEmpty())
         load()
     }
     fun setLocalLocation(latitude: Double, longitude: Double) {

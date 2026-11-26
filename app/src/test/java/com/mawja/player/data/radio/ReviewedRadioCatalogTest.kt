@@ -46,4 +46,28 @@ class ReviewedRadioCatalogTest {
         assertFalse(urls.any { "starzplayarabia" in it })
         assertFalse(urls.any { "hlmvmp2jtth90njc1" in it }) // MFM recovered on recheck.
     }
+    @Test fun languagePickerRejectsBlankRowsAndUsesStableLocalizedValues() {
+        val values = listOf("", " ", "ar", "arabic", "العربية", "english", "111", "#japan")
+        val options = radioLanguageOptions(values, java.util.Locale.ENGLISH)
+        assertEquals(setOf("arabic", "english"), options.map { it.first }.toSet())
+        assertTrue(options.all { it.first.isNotBlank() && it.second.isNotBlank() })
+        assertTrue(options.single { it.first == "arabic" }.second.contains("العربية"))
+        assertTrue(radioLanguageLabel("arabic", java.util.Locale("ar")).contains("العربية"))
+        assertNull(selectedRadioLanguage(" "))
+        assertNull(selectedRadioLanguage("invalid-old-language"))
+        assertEquals("arabic", selectedRadioLanguage(" AR "))
+    }
+
+    @Test fun everyReviewedStationAppearsOnlyInItsDeclaredCategoriesAndCountry() {
+        catalog.forEach { station ->
+            RadioFilters.all.filter { it.tag != null }.forEach { filter ->
+                assertEquals("${station.id}/${filter.id}", filter.id in station.categories,
+                    station.matches(filter, station.countryCode, "arabic"))
+                assertFalse(station.matches(filter, "ZZ", "arabic"))
+            }
+        }
+        assertTrue(matchesRadioCategory(RadioFilters.music, "Jazz station", "jazz,english"))
+        assertFalse(matchesRadioCategory(RadioFilters.music, "Quran", "music,quran,religion"))
+        assertFalse(matchesRadioCategory(RadioFilters.news, "Mixed", "news,pop"))
+    }
 }

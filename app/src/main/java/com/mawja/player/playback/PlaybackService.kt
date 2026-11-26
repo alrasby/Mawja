@@ -480,7 +480,7 @@ class PlaybackService : MediaLibraryService() {
                 getString(R.string.radio_all_languages), MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)) +
                 com.mawja.player.data.radio.radioLanguages.map { language ->
                     browseItem(CarRadioBrowse.choiceId(route.filter, route.country, language.name),
-                        java.util.Locale.forLanguageTag(language.code).getDisplayLanguage(java.util.Locale.getDefault()),
+                        com.mawja.player.data.radio.radioLanguageLabel(language.name, resources.configuration.locales[0]),
                         MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
                 }
         }.orEmpty()
@@ -678,7 +678,7 @@ class PlaybackService : MediaLibraryService() {
         CarRadioBrowse.category(id)?.let { return radioCategoryItem(it) }
         CarRadioBrowse.route(id)?.let { route ->
             val title = if (id.startsWith("radio-languages:")) getString(R.string.radio_language)
-                else route.language?.replaceFirstChar { it.uppercase() } ?: getString(R.string.radio_all_languages)
+                else route.language?.let { com.mawja.player.data.radio.radioLanguageLabel(it, resources.configuration.locales[0]) } ?: getString(R.string.radio_all_languages)
             return browseItem(id, title, MediaMetadata.MEDIA_TYPE_FOLDER_RADIO_STATIONS)
         }
         if (id.startsWith("podcast-feed:")) {

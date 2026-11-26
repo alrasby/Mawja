@@ -21,6 +21,25 @@ internal fun normalizeRadioLanguage(value: String): String {
 internal fun matchesRadioLanguage(value: String, requested: String?): Boolean = requested.isNullOrBlank() ||
     value.split(',', ';', '/').any { normalizeRadioLanguage(it) == normalizeRadioLanguage(requested) }
 
+/** Store directory tokens, display localized names; blank/unknown legacy values mean all. */
+internal fun selectedRadioLanguage(value: String?): String? = value?.let(::normalizeRadioLanguage)
+    ?.takeIf { normalized -> normalized.isNotBlank() && radioLanguages.any { it.name == normalized } }
+
+internal fun radioLanguageLabel(value: String, locale: Locale): String {
+    val entry = radioLanguages.firstOrNull { it.name == normalizeRadioLanguage(value) } ?: return value.trim()
+    val language = Locale.forLanguageTag(entry.code)
+    val translated = language.getDisplayLanguage(locale).trim()
+    val native = language.getDisplayLanguage(language).trim()
+    return if (translated.equals(native, true)) translated else "$translated · $native"
+}
+
+internal fun radioLanguageOptions(values: List<String>, locale: Locale): List<Pair<String, String>> {
+    val collator = java.text.Collator.getInstance(locale)
+    return values.mapNotNull(::selectedRadioLanguage).distinct()
+        .map { it to radioLanguageLabel(it, locale) }
+        .sortedWith { a, b -> collator.compare(a.second, b.second) }
+}
+
 @Serializable
 internal data class ReviewedRadioStation(
     val id: String,
@@ -66,7 +85,7 @@ internal fun matchesRadioCategory(filter: RadioFilter, name: String, rawTags: St
         "sports" -> setOf("sports", "sport", "رياضة", "رياضي")
         "culture" -> setOf("culture", "cultural", "ثقافة", "ثقافي")
         "talk" -> setOf("talk", "news talk", "news/talk", "حوار", "منوعات")
-        "music" -> setOf("music", "pop", "arabic music", "موسيقى", "أغاني", "اغاني")
+        "music" -> setOf("music", "pop", "rock", "jazz", "classical", "oldies", "dance", "electronic", "hip hop", "hip-hop", "soul", "r&b", "arabic music", "موسيقى", "أغاني", "اغاني")
         else -> setOf(filter.tag)
     }
     return tags.any { it in aliases } &&
