@@ -655,5 +655,68 @@
     "homepage": "https://www.dmi.gov.ae/",
     "sourcePage": "https://radio-uae.com/",
     "checkedAt": "2026-11-26"
+  },
+  {
+    "id": "france24-ar-tv",
+    "name": "فرانس 24 عربي",
+    "countryCode": "FR",
+    "streamUrl": "https://live.france24.com/hls/live/2037222-b/F24_AR_HI_HLS/master_500.m3u8",
+    "city": "باريس",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "homepage": "https://www.france24.com/ar/live",
+    "sourcePage": "https://live.france24.com/hls/live/2037222-b/F24_AR_HI_HLS/master_500.m3u8",
+    "aliases": [
+      "France 24 Arabic",
+      "France24 Arabic"
+    ],
+    "checkedAt": "2026-11-26",
+    "isTvAudio": true
+  },
+  {
+    "id": "dw-ar-tv",
+    "name": "DW عربية",
+    "countryCode": "DE",
+    "streamUrl": "https://dwamdstream103.akamaized.net/hls/live/2015526/dwstream103/stream01/streamPlaylist.m3u8",
+    "city": "بون",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "culture",
+      "talk",
+      "tv_audio"
+    ],
+    "homepage": "https://www.dw.com/arabic",
+    "sourcePage": "https://github.com/iptv-org/iptv/blob/master/streams/de.m3u",
+    "aliases": [
+      "DW Arabic",
+      "دويتشه فيله عربية"
+    ],
+    "checkedAt": "2026-11-26",
+    "isTvAudio": true
+  },
+  {
+    "id": "bbc-ar-tv",
+    "name": "BBC News عربي",
+    "countryCode": "GB",
+    "streamUrl": "https://vs-cmaf-pushb-ww-live.akamaized.net/x=4/i=urn:bbc:pips:service:bbc_arabic_tv/t=3840/a=pa2/al=en-GB/ap=main/b=48000/main.fmp4.m3u8",
+    "city": "لندن",
+    "language": "arabic",
+    "categories": [
+      "news",
+      "tv_audio"
+    ],
+    "homepage": "https://www.bbc.com/arabic/watch/bbc_arabic_tv/live",
+    "sourcePage": "https://open.live.bbc.co.uk/mediaselector/6/select/version/2.0/mediaset/pc/vpid/bbc_arabic_tv/format/json",
+    "aliases": [
+      "BBC Arabic TV",
+      "BBC News Arabic",
+      "بي بي سي عربي"
+    ],
+    "checkedAt": "2026-11-26",
+    "isTvAudio": true
   }
 ]

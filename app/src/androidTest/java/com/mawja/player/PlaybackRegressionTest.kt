@@ -73,6 +73,40 @@ class PlaybackRegressionTest {
             main { controller.play() }
             Thread.sleep(500)
             main { assertTrue(controller.isPlaying); assertNull(controller.playerError); assertEquals("treble", prefs.equalizerPreset.value) }
+            // Probe actual publisher streams through the production service and HLS pipeline.
+            val catalog = org.json.JSONArray(context.assets.open("radio/reviewed-stations.json").bufferedReader().use { it.readText() })
+            val report = File(context.filesDir, "tv-audio-playback.txt")
+            report.writeText("")
+            for (index in 0 until catalog.length()) {
+                val channel = catalog.getJSONObject(index)
+                if (!channel.optBoolean("isTvAudio")) continue
+                val id = "radio:official-" + channel.getString("id")
+                main {
+                    controller.setMediaItem(MediaItem.Builder().setMediaId(id).setUri(channel.getString("streamUrl")).build())
+                    controller.prepare(); controller.play()
+                }
+                val liveReady = AtomicReference(false)
+                val failed = AtomicReference(false)
+                val liveDeadline = System.currentTimeMillis() + 22000
+                while (!liveReady.get() && !failed.get() && System.currentTimeMillis() < liveDeadline) {
+                    main {
+                        liveReady.set(controller.playbackState == Player.STATE_READY && controller.isPlaying)
+                        failed.set(controller.playerError != null)
+                    }
+                    Thread.sleep(100)
+                }
+                main {
+                    val state = "$id ready=${liveReady.get()} error=${controller.playerError?.errorCodeName}: ${controller.playerError?.message}: ${controller.playerError?.cause}"
+                    report.appendText(state + "\n")
+                    assertTrue(state, liveReady.get())
+                    assertFalse("Video selected for $id", controller.currentTracks.groups.any {
+                        it.type == androidx.media3.common.C.TRACK_TYPE_VIDEO && it.isSelected
+                    })
+                    assertNull(controller.playerError)
+                    controller.pause()
+                }
+            }
+
         } finally {
             main { prefs.setEqualizerPreset(oldPreset); prefs.setBatterySaver(oldSaver); controller.stop(); controller.clearMediaItems(); controller.release() }
             file.delete()

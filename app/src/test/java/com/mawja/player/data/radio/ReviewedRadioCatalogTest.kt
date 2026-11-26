@@ -77,4 +77,22 @@ class ReviewedRadioCatalogTest {
             assertFalse(matchesRadioCategory(RadioFilters.news, "Mixed", "news,$genre"))
         }
     }
+    @Test fun tvAudioIsLabeledAndOldBbcRadioStaysExcluded() {
+        val channels = catalog.filter { it.isTvAudio }
+        assertEquals(setOf("bbc-ar-tv", "france24-ar-tv", "dw-ar-tv"), channels.map { it.id }.toSet())
+        channels.forEach { entry ->
+            assertTrue(entry.matches(RadioFilters.tvAudio, entry.countryCode, "arabic"))
+            assertFalse(entry.track().isVideo)
+            assertTrue(entry.track().isLive)
+            assertTrue(entry.track("صوت القناة — بث مباشر").subtitle.startsWith("صوت القناة"))
+            assertFalse(isRetiredRadioEntry(entry.name, entry.streamUrl))
+        }
+        assertFalse(catalog.single { it.id == "mcd-ar" }.matches(RadioFilters.tvAudio, "FR", "arabic"))
+        val bbc = channels.single { it.id == "bbc-ar-tv" }
+        assertTrue(isBbcArabicTvStream(bbc.streamUrl))
+        assertFalse(isBbcArabicTvStream(bbc.streamUrl.replace("bbc_arabic_tv", "bbc_world_service")))
+        assertFalse(isBbcArabicTvStream(bbc.streamUrl.replace(".akamaized.net/", ".akamaized.net.evil.example/")))
+        assertFalse(isBbcArabicTvStream(bbc.streamUrl.replace("https://", "https://user:password@")))
+        assertTrue(isRetiredRadioEntry("BBC Arabic", "https://stream.live.vc.bbcmedia.co.uk/bbc_arabic_radio"))
+    }
 }

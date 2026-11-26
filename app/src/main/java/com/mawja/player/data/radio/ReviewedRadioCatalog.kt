@@ -53,6 +53,7 @@ internal data class ReviewedRadioStation(
     val sourcePage: String,
     val checkedAt: String,
     val aliases: List<String> = emptyList(),
+    val isTvAudio: Boolean = false,
 ) {
     fun matches(filter: RadioFilter, country: String?, requestedLanguage: String?): Boolean =
         (country.isNullOrBlank() || countryCode.equals(country, true)) &&
@@ -60,12 +61,20 @@ internal data class ReviewedRadioStation(
             matchesRadioLanguage(language, requestedLanguage ?: filter.language) &&
             (filter.tag == null || filter.id in categories)
 
-    fun track() = Track(
+    fun track(tvAudioLabel: String = "TV audio — Live") = Track(
         id = "radio:official-$id", source = SourceType.RADIO, title = name,
-        subtitle = listOf(Locale("", countryCode).displayCountry, city, language).filter { it.isNotBlank() }.joinToString(" • "),
+        subtitle = listOf(if (isTvAudio) tvAudioLabel else "", Locale("", countryCode).displayCountry, city, language).filter { it.isNotBlank() }.joinToString(" • "),
         streamUrl = streamUrl, isLive = true,
     )
 }
+
+/** Allow the verified TV audio without re-admitting old radio or English-service links. */
+internal fun isBbcArabicTvStream(value: String): Boolean = runCatching {
+    val uri = java.net.URI(value)
+    uri.scheme == "https" && uri.rawUserInfo == null && uri.host in setOf(
+        "vs-cmaf-pushb-ww-live.akamaized.net", "vs-cmaf-pushb-ww.live.cf.md.bbci.co.uk",
+    ) && uri.path.startsWith("/x=4/i=urn:bbc:pips:service:bbc_arabic_tv/") && uri.path.endsWith(".m3u8")
+}.getOrDefault(false)
 
 internal fun isRetiredRadioEntry(name: String, stream: String): Boolean {
     // BBC ended its Arabic radio service in January 2023. Some directory entries
@@ -73,7 +82,7 @@ internal fun isRetiredRadioEntry(name: String, stream: String): Boolean {
     val normalized = name.lowercase(Locale.ROOT)
     return stream.contains("bbc_arabic_radio", true) ||
         ((normalized.contains("bbc") || normalized.contains("بي بي سي")) &&
-            (normalized.contains("arabic") || normalized.contains("عرب")))
+            (normalized.contains("arabic") || normalized.contains("عرب")) && !isBbcArabicTvStream(stream))
 }
 
 internal fun matchesRadioCategory(filter: RadioFilter, name: String, rawTags: String): Boolean {

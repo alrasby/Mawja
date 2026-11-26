@@ -133,6 +133,7 @@ jobs:
             adb logcat -c
             adb shell am instrument -w -r -e class com.mawja.player.PlaybackRegressionTest,com.mawja.player.ThemeRegressionTest,com.mawja.player.CarRadioBrowserTest com.mawja.player.test/androidx.test.runner.AndroidJUnitRunner | tee runtime-report/runtime-instrumentation.txt
             adb logcat -d > runtime-report/playback-logcat.txt
+            adb exec-out run-as com.mawja.player cat files/tv-audio-playback.txt > runtime-report/tv-audio-playback.txt
             ! grep -E 'FAILURES|INSTRUMENTATION_FAILED|shortMsg=' runtime-report/runtime-instrumentation.txt
             grep -q 'OK (3 tests)' runtime-report/runtime-instrumentation.txt
 

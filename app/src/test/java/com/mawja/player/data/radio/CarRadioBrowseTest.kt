@@ -5,7 +5,7 @@ import org.junit.Test
 
 class CarRadioBrowseTest {
     @Test fun everyPhoneCategoryHasAnAutoRouteAndOldIdsStayStable() {
-        assertEquals(listOf("local", "world", "news", "music", "sports", "talk", "culture", "quran"), RadioFilters.all.map { it.id })
+        assertEquals(listOf("local", "world", "news", "music", "sports", "talk", "culture", "quran", "tv_audio"), RadioFilters.all.map { it.id })
         RadioFilters.all.forEach { assertSame(it, CarRadioBrowse.category(CarRadioBrowse.id(it))) }
         assertEquals("radio:local", CarRadioBrowse.id(RadioFilters.local))
         assertEquals("radio:world", CarRadioBrowse.id(RadioFilters.world))

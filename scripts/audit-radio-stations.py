@@ -35,7 +35,16 @@ def sample(url,depth=0):
    target=re.search('URI="([^"]+)"',audio[0]).group(1)
   elif uris:target=uris[-1] if '#EXTINF:' in s else uris[0]
   else:raise ValueError('No media in manifest')
-  return sample(urllib.parse.urljoin(url,target),depth+1)
+  media_url = urllib.parse.urljoin(url,target)
+  if '#EXTINF:' in s:
+   import re
+   init = re.search(r'#EXT-X-MAP:.*?URI="([^"]+)"', s)
+   if init:
+    # Fragmented MP4 needs its initialization segment before codec inspection.
+    header, _, _, _ = request(urllib.parse.urljoin(url, init.group(1)), 150000)
+    media, status, media_type = sample(media_url, depth+1)
+    return header + media, status, media_type
+  return sample(media_url,depth+1)
  return b,status,ctype
 
 def go(x):

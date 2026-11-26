@@ -150,4 +150,6 @@
     <string name="refine_online_desc">المصادر والدولة واللغة والاهتمامات</string>
     <string name="refine_playback_desc">توفير البطارية والصوت والمعادل</string>
     <string name="playback_diagnostics">مشاركة تشخيص التشغيل</string>
+    <string name="radio_tv_audio">صوت القنوات</string>
+    <string name="radio_tv_audio_live">صوت القناة — بث مباشر</string>
 </resources>

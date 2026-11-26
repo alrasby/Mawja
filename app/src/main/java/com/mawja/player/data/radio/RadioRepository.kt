@@ -58,7 +58,8 @@ object RadioFilters {
     val sports = RadioFilter("sports", tag = "sports", labelRes = R.string.radio_sports)
     val talk = RadioFilter("talk", tag = "talk", labelRes = R.string.radio_talk)
     val culture = RadioFilter("culture", tag = "culture", labelRes = R.string.radio_culture)
-    val all: List<RadioFilter> = listOf(local, world, news, music, sports, talk, culture, quran)
+    val tvAudio = RadioFilter("tv_audio", tag = "tv_audio", labelRes = R.string.radio_tv_audio)
+    val all: List<RadioFilter> = listOf(local, world, news, music, sports, talk, culture, quran, tvAudio)
 }
 
 object OmanSeeds {
@@ -139,7 +140,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         if (filter.id == RadioFilters.local.id && country == null) return@withContext emptyList()
         // Curated entries participate in every matching country/category, even
         // when the directory is offline or lacks language/category metadata.
-        val curated = reviewed.filter { it.matches(filter, country, language) }.map { it.track() }
+        val curated = reviewed.filter { it.matches(filter, country, language) }.map { it.track(context.getString(R.string.radio_tv_audio_live)) }
         val directory = directoryStations(filter, latitude, longitude, country, language)
         (curated + directory).filterNot { isRetiredRadioEntry(it.title, it.streamUrl.orEmpty()) || it.streamUrl in unavailableStreams }
             .distinctBy { it.streamUrl?.trimEnd('/') }
@@ -185,7 +186,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
     suspend fun search(query: String): List<Track> = withContext(Dispatchers.IO) {
         val curated = reviewed.filter { entry ->
             (listOf(entry.name) + entry.aliases).any { it.contains(query.trim(), ignoreCase = true) }
-        }.map { it.track() }
+        }.map { it.track(context.getString(R.string.radio_tv_audio_live)) }
         val directory = runCatching { fetch(mapOf(
             "name" to query,
             "hidebroken" to "true",
@@ -223,6 +224,8 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
         f.id == RadioFilters.local.id && latitude != null && longitude != null -> fetchNearby(latitude, longitude, countryCode)
         f.id == RadioFilters.local.id -> emptyList()
         f.id == RadioFilters.oman.id -> fetchOman()
+        // Only reviewed channel audio belongs here; do not query a user-entered directory tag.
+        f.id == RadioFilters.tvAudio.id -> emptyList()
         f.id == RadioFilters.world.id -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode)))
         else -> fetchGeneric(f.copy(countryCodes = listOfNotNull(countryCode).ifEmpty { f.countryCodes }))
     }
@@ -424,7 +427,7 @@ class RadioRepository(private val context: Context, private val client: OkHttpCl
 
     private fun RadioStation.toTrack(): Track? {
         if (isRetiredRadioEntry(name, url_resolved.ifBlank { url })) return null
-        reviewedEntry()?.let { return it.track() }
+        reviewedEntry()?.let { return it.track(context.getString(R.string.radio_tv_audio_live)) }
         val stream = url_resolved.ifBlank { url }.trim()
         if (stream in unavailableStreams || stationuuid.isBlank() || lastcheckok != 1 || ssl_error != 0 || !isPlayableRadioUrl(stream)) return null
         val quality = codec.takeIf { it.isNotBlank() }?.uppercase()?.let { c -> if (bitrate > 0) "$c ${bitrate}k" else c }
