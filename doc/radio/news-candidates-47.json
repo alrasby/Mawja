@@ -20,46 +20,6 @@
     "checkedAt": "2026-11-26"
   },
   {
-    "id": "hadath-ar-tv",
-    "name": "الحدث",
-    "countryCode": "SA",
-    "city": "الرياض",
-    "categories": [
-      "news",
-      "tv_audio"
-    ],
-    "streamUrl": "https://live.alarabiya.net/alarabiapublish/alhadath.smil/playlist.m3u8",
-    "homepage": "https://www.alhadath.net/",
-    "sourcePage": "https://www.alhadath.net/live-stream",
-    "aliases": [
-      "Al Hadath",
-      "Alhadath"
-    ],
-    "language": "arabic",
-    "isTvAudio": true,
-    "checkedAt": "2026-11-26"
-  },
-  {
-    "id": "arabiya-ar-tv",
-    "name": "العربية — صوت القناة",
-    "countryCode": "SA",
-    "city": "الرياض",
-    "categories": [
-      "news",
-      "tv_audio"
-    ],
-    "streamUrl": "https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8",
-    "homepage": "https://www.alarabiya.net/",
-    "sourcePage": "https://www.alarabiya.net/live-stream",
-    "aliases": [
-      "Al Arabiya TV",
-      "Alarabiya Arabic TV"
-    ],
-    "language": "arabic",
-    "isTvAudio": true,
-    "checkedAt": "2026-11-26"
-  },
-  {
     "id": "mamlaka-ar-tv",
     "name": "المملكة",
     "countryCode": "JO",
@@ -88,31 +48,11 @@
       "news",
       "tv_audio"
     ],
-    "streamUrl": "https://svs.itworkscdn.net/asharqlive/asharq.smil/playlist.m3u8",
+    "streamUrl": "https://live-news.asharq.com/asharq.m3u8",
     "homepage": "https://asharq.com/",
     "sourcePage": "https://now.asharq.com/live/",
     "aliases": [
       "Asharq News TV"
-    ],
-    "language": "arabic",
-    "isTvAudio": true,
-    "checkedAt": "2026-11-26"
-  },
-  {
-    "id": "rt-ar-tv",
-    "name": "RT عربي",
-    "countryCode": "RU",
-    "city": "موسكو",
-    "categories": [
-      "news",
-      "tv_audio"
-    ],
-    "streamUrl": "https://rt-arb.rttv.com/live/rtarab/playlist.m3u8",
-    "homepage": "https://arabic.rt.com/",
-    "sourcePage": "https://arabic.rt.com/live/",
-    "aliases": [
-      "RT Arabic",
-      "Russia Today Arabic"
     ],
     "language": "arabic",
     "isTvAudio": true,

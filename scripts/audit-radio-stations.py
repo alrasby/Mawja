@@ -10,7 +10,13 @@ rows = json.loads(catalog.read_text())
 samples = tempfile.TemporaryDirectory(prefix="mawja-radio-audit-")
 def request(url,limit):
  req=urllib.request.Request(url,headers={'User-Agent':'Mawja-Station-Audit/1.0','Range':'bytes=0-'+str(limit-1)})
- with urllib.request.urlopen(req,timeout=10) as r:
+ try:
+  response = urllib.request.urlopen(req,timeout=10)
+ except urllib.error.HTTPError as error:
+  if error.code not in (400, 416): raise
+  # Some public HLS servers reject Range. Retry the same URL without Range.
+  response = urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mawja-Station-Audit/1.0'}),timeout=10)
+ with response as r:
   content_type = r.headers.get('Content-Type', '')
   # read1 prevents a never-ending ICY stream from holding a worker indefinitely.
   deadline = time.monotonic() + 4
