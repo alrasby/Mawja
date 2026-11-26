@@ -1,0 +1,27 @@
+name: Audit Arabic news sources
+on:
+  workflow_dispatch:
+  push:
+    branches: [audit/arabic-news-47]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure media inspector
+        run: |
+          if ! command -v ffprobe >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y ffmpeg
+          fi
+      - name: Audit publisher streams
+        run: python scripts/audit-news-candidates.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-news-source-audit-47
+          path: source-audit/
+          retention-days: 30
