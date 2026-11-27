@@ -26,6 +26,9 @@ class PreferencesStore(context: Context) {
     val showMusicFolders: StateFlow<Boolean> = _showMusicFolders.asStateFlow()
     private val _hiddenFolders = MutableStateFlow(readHiddenFolders())
     val hiddenFolders: StateFlow<Set<String>> = _hiddenFolders.asStateFlow()
+    private val _homeDeviceEnabled = MutableStateFlow(prefs.getBoolean(KEY_HOME_DEVICE_ENABLED, true))
+    val homeDeviceEnabled: StateFlow<Boolean> = _homeDeviceEnabled.asStateFlow()
+    fun setHomeDeviceEnabled(value: Boolean) { prefs.edit().putBoolean(KEY_HOME_DEVICE_ENABLED, value).apply(); _homeDeviceEnabled.value = value }
     private val _audiusEnabled = MutableStateFlow(prefs.getBoolean(KEY_AUDIUS_ENABLED, true))
     val audiusEnabled: StateFlow<Boolean> = _audiusEnabled.asStateFlow()
     private val _youtubeEnabled = MutableStateFlow(prefs.getBoolean(KEY_YOUTUBE_ENABLED, true))
@@ -98,6 +101,7 @@ class PreferencesStore(context: Context) {
         const val KEY_EQ_PRESET = "equalizer_preset"
         const val KEY_SHOW_MUSIC_FOLDERS = "show_music_folders"
         const val KEY_HIDDEN_FOLDERS = "hidden_music_folders"
+        const val KEY_HOME_DEVICE_ENABLED = "home_device_enabled"
         const val KEY_AUDIUS_ENABLED = "audius_enabled"
         const val KEY_YOUTUBE_ENABLED = "youtube_enabled"
         const val KEY_FILE_DISPLAY_MODE = "file_display_mode"

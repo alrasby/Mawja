@@ -10,6 +10,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Surface
 import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.background
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,12 +98,12 @@ internal fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33
 fun HomeScreen(onDiscover: () -> Unit = {}, onSearch: () -> Unit = {}, onSettings: () -> Unit = {}) {
     val context = LocalContext.current
     val container = LocalContainer.current
-    val vm: OnlineVm = viewModel(factory = VmFactory(container))
+    val vm: OnlineVm = viewModel(key = "home-online", factory = VmFactory(container))
     val localVm: LocalVm = viewModel(factory = VmFactory(container))
-    val selected by vm.selectedSource.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     val state by vm.state.collectAsStateWithLifecycle()
     val localState by localVm.state.collectAsStateWithLifecycle()
+    val deviceEnabled by container.preferences.homeDeviceEnabled.collectAsStateWithLifecycle()
     val audiusEnabled by container.preferences.audiusEnabled.collectAsStateWithLifecycle()
     val youtubeEnabled by container.preferences.youtubeEnabled.collectAsStateWithLifecycle()
     val youtubeLanguage by container.preferences.youtubeLanguage.collectAsStateWithLifecycle()
@@ -115,14 +117,19 @@ fun HomeScreen(onDiscover: () -> Unit = {}, onSearch: () -> Unit = {}, onSetting
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.load() }
     LaunchedEffect(audiusEnabled, youtubeEnabled, youtubeCountry, youtubeLanguage, youtubeTopic) { vm.load() }
-    LaunchedEffect(selected, audiusEnabled, youtubeEnabled) {
-        if ((selected == SourceType.AUDIUS && !audiusEnabled) || (selected == SourceType.YOUTUBE && !youtubeEnabled)) vm.setSource(null)
-    }
+
 
     Column(Modifier.fillMaxSize().statusBarsPadding()) {
-        HomeHero(selected, audiusEnabled, youtubeEnabled, vm::setSource, onDiscover, onSearch, onSettings)
+        HomeHero(deviceEnabled, audiusEnabled, youtubeEnabled,
+            { container.preferences.setHomeDeviceEnabled(!container.preferences.homeDeviceEnabled.value) },
+            { container.preferences.setAudiusEnabled(!container.preferences.audiusEnabled.value) },
+            { container.preferences.setYoutubeEnabled(!container.preferences.youtubeEnabled.value) },
+            onDiscover, onSearch, onSettings)
         HomeContent(
-            state = state,
+            state = state.copy(sections = com.mawja.player.ui.homeSectionsForSources(state.sections, audiusEnabled, youtubeEnabled),
+                loading = state.loading && (audiusEnabled || youtubeEnabled), error = state.error.takeIf { audiusEnabled || youtubeEnabled }),
+            deviceEnabled = deviceEnabled,
+            anySourceEnabled = deviceEnabled || audiusEnabled || youtubeEnabled,
             query = query,
             localState = localState,
             mediaGranted = mediaGranted,
@@ -136,10 +143,12 @@ fun HomeScreen(onDiscover: () -> Unit = {}, onSearch: () -> Unit = {}, onSetting
 /** A balanced header and one horizontal source row inside the same glass card. */
 @Composable
 internal fun HomeHero(
-    selected: SourceType?,
+    deviceEnabled: Boolean,
     audiusEnabled: Boolean,
     youtubeEnabled: Boolean,
-    onSelect: (SourceType?) -> Unit,
+    onToggleDevice: () -> Unit,
+    onToggleAudius: () -> Unit,
+    onToggleYoutube: () -> Unit,
     onDiscover: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
@@ -180,13 +189,11 @@ internal fun HomeHero(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
             )
-            if (audiusEnabled || youtubeEnabled) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SourceChip(stringResource(R.string.all_sources), selected == null, Modifier.weight(1f)) { onSelect(null) }
-                        if (audiusEnabled) SourceChip(stringResource(R.string.source_audius), selected == SourceType.AUDIUS, Modifier.weight(1f)) { onSelect(SourceType.AUDIUS) }
-                        if (youtubeEnabled) SourceChip(stringResource(R.string.source_youtube), selected == SourceType.YOUTUBE, Modifier.weight(1f)) { onSelect(SourceType.YOUTUBE) }
-                    }
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SourceChip(stringResource(R.string.tab_device), deviceEnabled, Modifier.weight(1f), onToggleDevice)
+                    SourceChip(stringResource(R.string.source_audius), audiusEnabled, Modifier.weight(1f), onToggleAudius)
+                    SourceChip(stringResource(R.string.source_youtube), youtubeEnabled, Modifier.weight(1f), onToggleYoutube)
                 }
             }
         }
@@ -196,17 +203,23 @@ internal fun HomeHero(
 @Composable
 private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Surface(
-        onClick = onClick,
-        modifier = modifier.heightIn(min = 48.dp).semantics { this.selected = selected },
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) colors.primaryContainer else androidx.compose.ui.graphics.Color.Transparent,
-        contentColor = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
-        border = if (selected) null else BorderStroke(1.dp, colors.outline),
+    // The visible face is 36dp; the independent switch keeps a 48dp touch target.
+    Box(
+        modifier.heightIn(min = 48.dp)
+            .toggleable(value = selected, role = Role.Switch, onValueChange = { onClick() }),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(Modifier.padding(horizontal = 4.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
-            Text(label, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelMedium,
-                maxLines = 1, softWrap = false)
+        Surface(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = if (selected) colors.primaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+            contentColor = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+            border = if (selected) null else BorderStroke(1.dp, colors.outline),
+        ) {
+            Box(Modifier.padding(horizontal = 4.dp, vertical = 4.dp), contentAlignment = Alignment.Center) {
+                Text(label, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1, softWrap = false)
+            }
         }
     }
 }
@@ -214,6 +227,8 @@ private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Mo
 @Composable
 private fun HomeContent(
     state: HomeState,
+    deviceEnabled: Boolean,
+    anySourceEnabled: Boolean,
     query: String,
     localState: ListState,
     mediaGranted: Boolean,
@@ -227,8 +242,8 @@ private fun HomeContent(
     // During an online query, do not rebuild the complete local library
     // grouping on the UI thread. This also keeps the search screen focused on
     // the selected online source instead of mixing it with device folders.
-    val localItems = remember(localState.items, query, hiddenFolders) {
-        if (query.isNotBlank()) emptyList()
+    val localItems = remember(localState.items, query, hiddenFolders, deviceEnabled) {
+        if (!deviceEnabled || query.isNotBlank()) emptyList()
         else localState.items.filter { it.folder.isBlank() || it.folder !in hiddenFolders }
     }
     val videosLabel = stringResource(R.string.videos)
@@ -239,9 +254,10 @@ private fun HomeContent(
     val hasLocal = localItems.isNotEmpty()
 
     when {
+        !anySourceEnabled -> Box(modifier.padding(24.dp), Alignment.Center) { Text(stringResource(R.string.home_sources_disabled), textAlign = TextAlign.Center) }
         state.loading && state.sections.isEmpty() && !hasLocal -> Box(modifier, Alignment.Center) { androidx.compose.material3.CircularProgressIndicator() }
         else -> LazyColumn(modifier, contentPadding = PaddingValues(bottom = footerBottomPadding), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (!mediaGranted) item { PermissionCard(onRequestMedia) }
+            if (deviceEnabled && !mediaGranted) item { PermissionCard(onRequestMedia) }
             if (state.error != null) item { MessageState(stringResource(R.string.error_generic), stringResource(R.string.retry), onRetry) }
             else if (state.loading) item { androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) }
             state.sections.forEachIndexed { sectionIndex, section ->

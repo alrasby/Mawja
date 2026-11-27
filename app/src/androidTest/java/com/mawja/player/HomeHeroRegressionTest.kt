@@ -19,6 +19,9 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.mawja.player.data.PreferencesStore
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
 import com.mawja.player.data.ThemeMode
 import com.mawja.player.ui.MawjaTheme
 import com.mawja.player.ui.screens.HomeHero
@@ -44,7 +47,10 @@ class HomeHeroRegressionTest {
                 val localized = context.createConfigurationContext(configuration)
                 val search = localized.getString(R.string.search)
                 val settings = localized.getString(R.string.settings)
-                val all = localized.getString(R.string.all_sources)
+                val all = localized.getString(R.string.tab_device)
+                val preferences = PreferencesStore(context).apply {
+                    setHomeDeviceEnabled(true); setAudiusEnabled(true); setYoutubeEnabled(true)
+                }
                 scenario.onActivity { activity ->
                     activity.setContent {
                         MawjaTheme(mode) {
@@ -56,7 +62,13 @@ class HomeHeroRegressionTest {
                                 LocalDensity provides Density(density.density, 1.3f),
                             ) {
                                 Box(Modifier.width(320.dp)) {
-                                    HomeHero(null, true, true, { clicks.incrementAndGet() },
+                                    val device by preferences.homeDeviceEnabled.collectAsStateWithLifecycle()
+                                    val audius by preferences.audiusEnabled.collectAsStateWithLifecycle()
+                                    val youtube by preferences.youtubeEnabled.collectAsStateWithLifecycle()
+                                    HomeHero(device, audius, youtube,
+                                        { preferences.setHomeDeviceEnabled(!preferences.homeDeviceEnabled.value); clicks.incrementAndGet() },
+                                        { preferences.setAudiusEnabled(!preferences.audiusEnabled.value); clicks.incrementAndGet() },
+                                        { preferences.setYoutubeEnabled(!preferences.youtubeEnabled.value); clicks.incrementAndGet() },
                                         { clicks.incrementAndGet() }, { clicks.incrementAndGet() }, { clicks.incrementAndGet() })
                                 }
                             }
@@ -93,15 +105,36 @@ class HomeHeroRegressionTest {
                     it.text?.toString() == localized.getString(R.string.discover_more)
                 })
                 assertTrue(youtubeBounds.right <= context.resources.displayMetrics.widthPixels)
-                for (label in listOf(search, settings, all, localized.getString(R.string.source_audius),
-                    localized.getString(R.string.source_youtube), localized.getString(R.string.discover_more))) {
+                fun tap(label: String) {
                     val b = bounds(label)
                     val expected = clicks.get()
                     instrumentation.uiAutomation.executeShellCommand("input tap ${b.centerX()} ${b.centerY()}").close()
                     val deadline = android.os.SystemClock.uptimeMillis() + 2000
                     while (clicks.get() == expected && android.os.SystemClock.uptimeMillis() < deadline) Thread.sleep(30)
+                    assertEquals(expected + 1, clicks.get())
+                    Thread.sleep(100)
+                    instrumentation.waitForIdleSync()
                 }
-                assertEquals("Every control must respond: $language/$mode", 6, clicks.get())
+                val labels = listOf(all, localized.getString(R.string.source_audius), localized.getString(R.string.source_youtube))
+                fun checked(label: String): Boolean {
+                    var node = find(label)
+                    while (!node.isCheckable && node.parent != null) node = node.parent
+                    assertTrue("Independent switch semantics", node.isCheckable)
+                    return node.isChecked
+                }
+                assertTrue(labels.all(::checked))
+                labels.forEachIndexed { index, label ->
+                    tap(label)
+                    labels.forEachIndexed { other, name -> assertEquals(other > index, checked(name)) }
+                }
+                val restored = PreferencesStore(context)
+                assertFalse(restored.homeDeviceEnabled.value)
+                assertFalse(restored.audiusEnabled.value)
+                assertFalse(restored.youtubeEnabled.value)
+                labels.forEach(::tap)
+                assertTrue(labels.all(::checked))
+                for (label in listOf(search, settings, localized.getString(R.string.discover_more))) tap(label)
+                assertEquals("Every control must respond: $language/$mode", 9, clicks.get())
                 Thread.sleep(350) // Capture after the last touch ripple settles.
                 val screenshot = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
                 File(context.filesDir, "home-hero-$language-${mode.name.lowercase()}.png").outputStream().use {

@@ -26,6 +26,11 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 data class HomeSection(val titleRes: Int, val items: List<Track>)
+internal fun homeSectionsForSources(sections: List<HomeSection>, audius: Boolean, youtube: Boolean): List<HomeSection> =
+    sections.map { section -> section.copy(items = section.items.filter {
+        (it.source == SourceType.AUDIUS && audius) || (it.source == SourceType.YOUTUBE && youtube)
+    }) }.filter { it.items.isNotEmpty() }
+
 data class HomeState(val loading: Boolean = false, val sections: List<HomeSection> = emptyList(), val error: String? = null)
 
 class VmFactory(private val container: AppContainer) : ViewModelProvider.Factory {
@@ -168,6 +173,10 @@ class OnlineVm(private val c: AppContainer) : ViewModel() {
         val selected = selectedSource.value
         val audiusEnabled = c.preferences.audiusEnabled.value
         val youtubeEnabled = c.preferences.youtubeEnabled.value
+        if (!audiusEnabled && !youtubeEnabled) {
+            state.value = HomeState()
+            return
+        }
         job = viewModelScope.launch {
             state.value = HomeState(loading = true)
             try {
