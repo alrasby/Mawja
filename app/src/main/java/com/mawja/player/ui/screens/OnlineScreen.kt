@@ -20,6 +20,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -27,7 +30,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Folder
-import androidx.compose.material.icons.rounded.GraphicEq
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -81,7 +89,7 @@ internal fun mediaPermissions(): Array<String> = if (Build.VERSION.SDK_INT >= 33
 } else arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
 
 @Composable
-fun HomeScreen(onDiscover: () -> Unit = {}) {
+fun HomeScreen(onDiscover: () -> Unit = {}, onSearch: () -> Unit = {}, onSettings: () -> Unit = {}) {
     val context = LocalContext.current
     val container = LocalContainer.current
     val vm: OnlineVm = viewModel(factory = VmFactory(container))
@@ -107,9 +115,8 @@ fun HomeScreen(onDiscover: () -> Unit = {}) {
         if ((selected == SourceType.AUDIUS && !audiusEnabled) || (selected == SourceType.YOUTUBE && !youtubeEnabled)) vm.setSource(null)
     }
 
-    Column(Modifier.fillMaxSize()) {
-        HomeHero(onDiscover)
-        SourceFilterBar(selected, audiusEnabled, youtubeEnabled, vm::setSource)
+    Column(Modifier.fillMaxSize().statusBarsPadding()) {
+        HomeHero(selected, audiusEnabled, youtubeEnabled, vm::setSource, onDiscover, onSearch, onSettings)
         HomeContent(
             state = state,
             query = query,
@@ -122,39 +129,80 @@ fun HomeScreen(onDiscover: () -> Unit = {}) {
     }
 }
 
+/**
+ * One home control surface. Physical search/source positions follow the sketch;
+ * text retains the app's reading direction. Height grows with translated text.
+ */
 @Composable
-private fun HomeHero(onDiscover: () -> Unit) {
-    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), onClick = onDiscover) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(58.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                Icon(Icons.Rounded.GraphicEq, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(30.dp))
-            }
-            Column(Modifier.padding(start = 14.dp)) {
-                Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(2.dp))
-                Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .78f))
-                Text(stringResource(R.string.discover_more), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+internal fun HomeHero(
+    selected: SourceType?,
+    audiusEnabled: Boolean,
+    youtubeEnabled: Boolean,
+    onSelect: (SourceType?) -> Unit,
+    onDiscover: () -> Unit,
+    onSearch: () -> Unit,
+    onSettings: () -> Unit,
+) {
+    val textDirection = LocalLayoutDirection.current
+    val colors = MaterialTheme.colorScheme
+    GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().padding(12.dp)) {
+            val compact = maxWidth < 340.dp
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(
+                        onClick = onSearch,
+                        modifier = Modifier.size(48.dp).clip(CircleShape).background(colors.primaryContainer),
+                    ) {
+                        Icon(Icons.Rounded.Search, stringResource(R.string.search), tint = colors.onPrimaryContainer)
+                    }
+                    CompositionLocalProvider(LocalLayoutDirection provides textDirection) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold, color = colors.onSurface)
+                            Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium,
+                                color = colors.onSurfaceVariant)
+                            Text(
+                                stringResource(R.string.discover_more),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = colors.primary,
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                    .clip(RoundedCornerShape(12.dp)).clickable(onClick = onDiscover)
+                                    .padding(vertical = 6.dp),
+                            )
+                        }
+                    }
+                    Column(
+                        Modifier.width(if (compact) 88.dp else 104.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        IconButton(onClick = onSettings, modifier = Modifier.size(48.dp)) {
+                            Icon(Icons.Rounded.Settings, stringResource(R.string.settings), tint = colors.onSurface)
+                        }
+                        if (audiusEnabled || youtubeEnabled) {
+                            SourceChip(stringResource(R.string.all_sources), selected == null) { onSelect(null) }
+                            if (audiusEnabled) SourceChip(stringResource(R.string.source_audius), selected == SourceType.AUDIUS) { onSelect(SourceType.AUDIUS) }
+                            if (youtubeEnabled) SourceChip(stringResource(R.string.source_youtube), selected == SourceType.YOUTUBE) { onSelect(SourceType.YOUTUBE) }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun SourceFilterBar(selected: SourceType?, audiusEnabled: Boolean, youtubeEnabled: Boolean, onSelect: (SourceType?) -> Unit) {
-    if (!audiusEnabled && !youtubeEnabled) return
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).glassSurface(RoundedCornerShape(22.dp)),
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 7.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        item { SourceChip(stringResource(R.string.all_sources), selected == null) { onSelect(null) } }
-        if (audiusEnabled) item { SourceChip(stringResource(R.string.source_audius), selected == SourceType.AUDIUS) { onSelect(SourceType.AUDIUS) } }
-        if (youtubeEnabled) item { SourceChip(stringResource(R.string.source_youtube), selected == SourceType.YOUTUBE) { onSelect(SourceType.YOUTUBE) } }
-    }
-}
-
-@Composable
-private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) = FilterChip(selected = selected, onClick = onClick, label = { Text(label) })
+private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) =
+    FilterChip(
+        selected = selected, onClick = onClick,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        label = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1) },
+    )
 
 @Composable
 private fun HomeContent(

@@ -110,7 +110,7 @@ fun MawjaRoot() {
                 .background(MaterialTheme.colorScheme.background),
         ) {
             Column(Modifier.fillMaxSize()) {
-                MawjaHeader(
+                if (contentTab != 0 || showSearch || showSettings || showDiscover) MawjaHeader(
                     onSearch = { showDiscover = false; showSettings = false; showSearch = !showSearch },
                     onSettings = { showDiscover = false; showSettings = true; showSearch = false },
                 )
@@ -133,7 +133,11 @@ fun MawjaRoot() {
                                     onRadio = { showDiscover = false; selectedTab = 1; contentTab = 1 },
                                     onOnline = { showDiscover = false; selectedTab = 0; contentTab = 0 },
                                 )
-                                contentTab == 0 -> HomeScreen(onDiscover = { showDiscover = true })
+                                contentTab == 0 -> HomeScreen(
+                                    onDiscover = { showDiscover = true },
+                                    onSearch = { showSearch = true },
+                                    onSettings = { showSettings = true },
+                                )
                                 contentTab == 1 -> RadioScreen()
                                 contentTab == 2 -> LocalScreen()
                                 else -> LibraryScreen(onPodcasts = { showDiscover = true })
