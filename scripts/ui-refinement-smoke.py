@@ -41,7 +41,7 @@ try:
     adb("shell", "am", "start", "-W", "-n", "com.mawja.player/.MainActivity")
     source_labels = ["Device", "Audius", "YouTube"]
     def switch_state(label):
-        matches = [n for n in nodes() if n.get("text") == label and n.get("checkable") == "true"]
+        matches = [n for n in nodes() if n.get("checkable") == "true" and any(label in (child.get("text"), child.get("content-desc")) for child in n.iter("node"))]
         assert len(matches) == 1, "Missing independent home switch: " + label
         return matches[0].get("checked") == "true"
     assert all(switch_state(label) for label in source_labels)
