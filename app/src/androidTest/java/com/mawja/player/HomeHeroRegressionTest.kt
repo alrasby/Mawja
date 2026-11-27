@@ -140,6 +140,8 @@ class HomeHeroRegressionTest {
                     val rect = Rect().also { node.getBoundsInScreen(it) }
                     val density = context.resources.displayMetrics.density
                     val inset = (2 * density).toInt().coerceAtLeast(1)
+                    instrumentation.waitForIdleSync()
+                    Thread.sleep(400) // setContent/theme may be composed before its first frame is drawn.
                     val before = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
                     val downTime = android.os.SystemClock.uptimeMillis()
                     fun event(action: Int) = android.view.MotionEvent.obtain(downTime,
