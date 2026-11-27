@@ -83,9 +83,15 @@ class HomeHeroRegressionTest {
                 val audiusBounds = bounds(localized.getString(R.string.source_audius))
                 val youtubeBounds = bounds(localized.getString(R.string.source_youtube))
                 assertTrue(searchBounds.centerX() < settingsBounds.centerX())
+                assertEquals(searchBounds.centerY(), settingsBounds.centerY())
                 assertTrue(settingsBounds.bottom <= allBounds.top)
-                assertTrue(allBounds.bottom <= audiusBounds.top)
-                assertTrue(audiusBounds.bottom <= youtubeBounds.top)
+                assertEquals(allBounds.centerY(), audiusBounds.centerY())
+                assertEquals(audiusBounds.centerY(), youtubeBounds.centerY())
+                assertTrue(allBounds.right <= audiusBounds.left)
+                assertTrue(audiusBounds.right <= youtubeBounds.left)
+                assertTrue(descendants(instrumentation.uiAutomation.rootInActiveWindow).none {
+                    it.text?.toString() == localized.getString(R.string.discover_more)
+                })
                 assertTrue(youtubeBounds.right <= context.resources.displayMetrics.widthPixels)
                 for (label in listOf(search, settings, all, localized.getString(R.string.source_audius),
                     localized.getString(R.string.source_youtube), localized.getString(R.string.discover_more))) {
@@ -96,6 +102,7 @@ class HomeHeroRegressionTest {
                     while (clicks.get() == expected && android.os.SystemClock.uptimeMillis() < deadline) Thread.sleep(30)
                 }
                 assertEquals("Every control must respond: $language/$mode", 6, clicks.get())
+                Thread.sleep(350) // Capture after the last touch ripple settles.
                 val screenshot = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
                 File(context.filesDir, "home-hero-$language-${mode.name.lowercase()}.png").outputStream().use {
                     screenshot.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)

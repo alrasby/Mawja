@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -55,6 +54,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -129,10 +131,7 @@ fun HomeScreen(onDiscover: () -> Unit = {}, onSearch: () -> Unit = {}, onSetting
     }
 }
 
-/**
- * One home control surface. Physical search/source positions follow the sketch;
- * text retains the app's reading direction. Height grows with translated text.
- */
+/** A balanced header and one horizontal source row inside the same glass card. */
 @Composable
 internal fun HomeHero(
     selected: SourceType?,
@@ -143,52 +142,48 @@ internal fun HomeHero(
     onSearch: () -> Unit,
     onSettings: () -> Unit,
 ) {
-    val textDirection = LocalLayoutDirection.current
     val colors = MaterialTheme.colorScheme
+    val discoverDescription = stringResource(R.string.discover_more)
     GlassCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        BoxWithConstraints(Modifier.fillMaxWidth().padding(12.dp)) {
-            val compact = maxWidth < 340.dp
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Keep the physical search/title/settings positions stable in both languages.
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onSearch,
                         modifier = Modifier.size(48.dp).clip(CircleShape).background(colors.primaryContainer),
                     ) {
                         Icon(Icons.Rounded.Search, stringResource(R.string.search), tint = colors.onPrimaryContainer)
                     }
-                    CompositionLocalProvider(LocalLayoutDirection provides textDirection) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.SemiBold, color = colors.onSurface)
-                            Text(stringResource(R.string.home_subtitle), style = MaterialTheme.typography.bodyMedium,
-                                color = colors.onSurfaceVariant)
-                            Text(
-                                stringResource(R.string.discover_more),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = colors.primary,
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                                    .clip(RoundedCornerShape(12.dp)).clickable(onClick = onDiscover)
-                                    .padding(vertical = 6.dp),
-                            )
-                        }
-                    }
-                    Column(
-                        Modifier.width(if (compact) 88.dp else 104.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    Box(
+                        Modifier.weight(1f).heightIn(min = 48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable(onClick = onDiscover)
+                            .semantics { contentDescription = discoverDescription },
+                        contentAlignment = Alignment.Center,
                     ) {
-                        IconButton(onClick = onSettings, modifier = Modifier.size(48.dp)) {
-                            Icon(Icons.Rounded.Settings, stringResource(R.string.settings), tint = colors.onSurface)
-                        }
-                        if (audiusEnabled || youtubeEnabled) {
-                            SourceChip(stringResource(R.string.all_sources), selected == null) { onSelect(null) }
-                            if (audiusEnabled) SourceChip(stringResource(R.string.source_audius), selected == SourceType.AUDIUS) { onSelect(SourceType.AUDIUS) }
-                            if (youtubeEnabled) SourceChip(stringResource(R.string.source_youtube), selected == SourceType.YOUTUBE) { onSelect(SourceType.YOUTUBE) }
-                        }
+                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold, color = colors.onSurface,
+                            textAlign = TextAlign.Center)
+                    }
+                    IconButton(onClick = onSettings, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Rounded.Settings, stringResource(R.string.settings), tint = colors.onSurface)
+                    }
+                }
+            }
+            Text(
+                stringResource(R.string.home_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+            )
+            if (audiusEnabled || youtubeEnabled) {
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SourceChip(stringResource(R.string.all_sources), selected == null, Modifier.weight(1f)) { onSelect(null) }
+                        if (audiusEnabled) SourceChip(stringResource(R.string.source_audius), selected == SourceType.AUDIUS, Modifier.weight(1f)) { onSelect(SourceType.AUDIUS) }
+                        if (youtubeEnabled) SourceChip(stringResource(R.string.source_youtube), selected == SourceType.YOUTUBE, Modifier.weight(1f)) { onSelect(SourceType.YOUTUBE) }
                     }
                 }
             }
@@ -197,11 +192,12 @@ internal fun HomeHero(
 }
 
 @Composable
-private fun SourceChip(label: String, selected: Boolean, onClick: () -> Unit) =
+private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) =
     FilterChip(
         selected = selected, onClick = onClick,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-        label = { Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1) },
+        modifier = modifier.heightIn(min = 48.dp),
+        label = { Text(label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium) },
     )
 
 @Composable
