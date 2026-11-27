@@ -123,4 +123,7 @@ try:
     find("Close", tap=True)
     (OUT / "ui-smoke.txt").write_text("PASS: four settings pages, dark appearance/language dialog, back navigation, rotation restoration, discovery/RSS, location-only Local and World country picker. No subscribed episode playback tested.\n")
 finally:
+    (OUT / "ui-crash-logcat.txt").write_bytes(adb("logcat", "-d", "-b", "crash"))
+    (OUT / "ui-logcat.txt").write_bytes(adb("logcat", "-d"))
+    (OUT / "ui-final.xml").write_bytes(adb("exec-out", "cat", "/sdcard/mawja-ui.xml"))
     snapshot("ui-final")
