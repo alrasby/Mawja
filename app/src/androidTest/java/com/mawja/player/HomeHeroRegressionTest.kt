@@ -120,19 +120,32 @@ class HomeHeroRegressionTest {
                     var node = find(label)
                     while (!node.isCheckable && node.parent != null) node = node.parent
                     assertTrue("Independent switch semantics", node.isCheckable)
+                    node.refresh()
                     return node.isChecked
                 }
-                assertTrue(labels.all(::checked))
+                fun assertStates(expected: List<Boolean>) {
+                    val deadline = android.os.SystemClock.uptimeMillis() + 5000
+                    var actual = labels.map(::checked)
+                    while (actual != expected && android.os.SystemClock.uptimeMillis() < deadline) {
+                        Thread.sleep(100)
+                        actual = labels.map(::checked)
+                    }
+                    assertEquals("Rendered switches must follow saved preferences: $language/$mode", expected, actual)
+                }
+                assertStates(listOf(true, true, true))
                 labels.forEachIndexed { index, label ->
                     tap(label)
-                    labels.forEachIndexed { other, name -> assertEquals(other > index, checked(name)) }
+                    val expected = (0 until 3).map { it > index }
+                    assertEquals("Saved values", expected, listOf(preferences.homeDeviceEnabled.value,
+                        preferences.audiusEnabled.value, preferences.youtubeEnabled.value))
+                    assertStates(expected)
                 }
                 val restored = PreferencesStore(context)
                 assertFalse(restored.homeDeviceEnabled.value)
                 assertFalse(restored.audiusEnabled.value)
                 assertFalse(restored.youtubeEnabled.value)
                 labels.forEach(::tap)
-                assertTrue(labels.all(::checked))
+                assertStates(listOf(true, true, true))
                 for (label in listOf(search, settings, localized.getString(R.string.discover_more))) tap(label)
                 assertEquals("Every control must respond: $language/$mode", 9, clicks.get())
                 Thread.sleep(350) // Capture after the last touch ripple settles.
