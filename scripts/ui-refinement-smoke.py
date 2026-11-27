@@ -59,15 +59,24 @@ try:
     assert all(switch_state(label) for label in source_labels)
     snapshot("home-independent-sources")
     find("Settings", tap=True)
+    def control_bounds(label, contains=False):
+        tree = nodes()
+        parents = {child: parent for parent in tree for child in parent}
+        matches = [n for n in tree if (label in n.get("text", "") if contains else n.get("text") == label)]
+        assert matches, "Missing control: " + label
+        control = matches[0]
+        while control.get("clickable") != "true" and control in parents:
+            control = parents[control]
+        assert control.get("clickable") == "true", "Missing clickable bounds: " + label
+        return list(map(int, re.findall(r"\d+", control.get("bounds"))))
     def credit_bounds():
-        credit = next(n for n in nodes() if "Made with" in n.get("text", ""))
-        return list(map(int, re.findall(r"\d+", credit.get("bounds"))))
+        return control_bounds("Made with", contains=True)
     credit = credit_bounds()
     size = adb("shell", "wm", "size").decode()
     width, height = map(int, re.search(r"(\d+)x(\d+)", size).groups())
     assert credit[2] - credit[0] < width * .9, "Rights card is still full width"
-    home = next(n for n in nodes() if n.get("text") == "Home")
-    home_top = int(re.findall(r"\d+", home.get("bounds"))[1])
+    home_top = control_bounds("Home")[1]
+    (OUT / "settings-geometry.txt").write_text(f"rights={credit}; footerControlTop={home_top}; screen={width}x{height}\\n")
     assert 0 < home_top - credit[3] < height * .08, "Rights card is not just above footer"
     adb("shell", "input", "swipe", str(width//2), str(height//2), str(width//2), str(height//3), "350")
     assert credit_bounds() == credit, "Rights card moved with settings content"
