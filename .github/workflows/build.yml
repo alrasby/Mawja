@@ -28,7 +28,9 @@ jobs:
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 9.3.1
       - name: Verify release guard rejection cases
-        run: python scripts/test-verify-release.py
+        run: |
+          python scripts/test-verify-release.py
+          python scripts/test-media-session-state.py
       - name: Unit tests and test APKs
         run: ./gradlew testDebugUnitTest assembleDebug assembleDebugAndroidTest --stacktrace
       - uses: actions/upload-artifact@v4
