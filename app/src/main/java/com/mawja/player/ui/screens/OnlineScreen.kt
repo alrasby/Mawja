@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ripple
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Surface
 import androidx.compose.ui.semantics.selected
@@ -203,15 +206,19 @@ internal fun HomeHero(
 @Composable
 private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
+    val interaction = remember { MutableInteractionSource() }
+    val shape = RoundedCornerShape(12.dp)
     // The visible face is 36dp; the independent switch keeps a 48dp touch target.
     Box(
         modifier.heightIn(min = 48.dp)
-            .toggleable(value = selected, role = Role.Switch, onValueChange = { onClick() }),
+            .toggleable(value = selected, role = Role.Switch, interactionSource = interaction,
+                indication = null, onValueChange = { onClick() }),
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp),
-            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 36.dp)
+                .clip(shape).indication(interaction, ripple()),
+            shape = shape,
             color = if (selected) colors.primaryContainer else androidx.compose.ui.graphics.Color.Transparent,
             contentColor = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
             border = if (selected) null else BorderStroke(1.dp, colors.outline),

@@ -13,6 +13,16 @@ import androidx.compose.foundation.background
 import com.mawja.player.data.youtube.RegionResolver
 import com.mawja.player.data.youtube.YouTubeRegion
 import java.util.Locale
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.material3.Surface
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,7 +131,8 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
     val youtubeCountry by container.preferences.youtubeCountry.collectAsStateWithLifecycle()
     val player by container.player.state.collectAsStateWithLifecycle()
     val footerBottomPadding = LocalFooterBottomPadding.current
-    val uriHandler = LocalUriHandler.current
+    var rightsHeightPx by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val rightsClearance = with(LocalDensity.current) { rightsHeightPx.toDp() } + 12.dp
     var showLanguages by remember { mutableStateOf(false) }
     var showYoutubeCountries by remember { mutableStateOf(false) }
     var showYoutubeLanguages by remember { mutableStateOf(false) }
@@ -157,9 +168,10 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
         }
     }
 
+    Box(Modifier.fillMaxSize()) {
     Column(
-        Modifier.verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
-            .padding(top = 8.dp, bottom = footerBottomPadding),
+        Modifier.fillMaxSize().verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
+            .padding(top = 8.dp, bottom = footerBottomPadding + if (section == null) rightsClearance else 0.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (section == null) {
@@ -168,22 +180,6 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             SettingCard(Icons.Rounded.Folder, stringResource(R.string.tab_device), stringResource(R.string.refine_device_desc), { section = "device" })
             SettingCard(Icons.Rounded.Language, stringResource(R.string.settings_online_sources), stringResource(R.string.refine_online_desc), { section = "online" })
             SettingCard(Icons.Rounded.BatterySaver, stringResource(R.string.settings_playback), stringResource(R.string.refine_playback_desc), { section = "playback" })
-        GlassCard(
-            Modifier.fillMaxWidth(),
-            onClick = { uriHandler.openUri("https://nabdhserv.net") },
-        ) {
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("Made with ", style = MaterialTheme.typography.labelMedium)
-                    Text("♥", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.error)
-                    Text(" By NabdhServ.Net", style = MaterialTheme.typography.labelMedium)
-                }
-            }
-        }
         } else {
             TextButton(onClick = { section = null }) { Text(stringResource(R.string.refine_back_settings)) }
             when (section) {
@@ -384,6 +380,16 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
         }
     }
 
+    if (section == null) {
+        SettingsRights(
+            Modifier.align(Alignment.BottomCenter)
+                .padding(bottom = footerBottomPadding)
+                .fillMaxWidth(.82f)
+                .onSizeChanged { rightsHeightPx = it.height },
+        )
+    }
+    }
+
     if (showLanguages) {
         ChoiceDialog(
             title = stringResource(R.string.language),
@@ -529,6 +535,35 @@ private fun ChoiceDialog(title: String, options: List<LanguageOption>, selected:
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                     Text(stringResource(R.string.close))
                 }
+            }
+        }
+    }
+}
+
+/** Fixed above the measured glass footer; opaque so text stays readable over content. */
+@Composable
+private fun SettingsRights(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = { uriHandler.openUri("https://nabdhserv.net") },
+        modifier = modifier.heightIn(min = 48.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = colors.surfaceContainerHigh,
+        contentColor = colors.onSurface,
+        border = BorderStroke(1.dp, colors.outline.copy(alpha = .45f)),
+    ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Box(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    buildAnnotatedString {
+                        append("Made with ")
+                        withStyle(SpanStyle(color = colors.error)) { append("♥") }
+                        append(" By NabdhServ.Net")
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                )
             }
         }
     }

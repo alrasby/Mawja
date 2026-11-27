@@ -133,6 +133,35 @@ class HomeHeroRegressionTest {
                     assertEquals("Rendered switches must follow saved preferences: $language/$mode", expected, actual)
                 }
                 assertStates(listOf(true, true, true))
+                // Press feedback must not paint the invisible 48dp touch margin.
+                run {
+                    var node = find(all)
+                    while (!node.isCheckable && node.parent != null) node = node.parent
+                    val rect = Rect().also { node.getBoundsInScreen(it) }
+                    val density = context.resources.displayMetrics.density
+                    val inset = (2 * density).toInt().coerceAtLeast(1)
+                    val before = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+                    val downTime = android.os.SystemClock.uptimeMillis()
+                    fun event(action: Int) = android.view.MotionEvent.obtain(downTime,
+                        android.os.SystemClock.uptimeMillis(), action, rect.exactCenterX(), rect.exactCenterY(), 0)
+                    val down = event(android.view.MotionEvent.ACTION_DOWN)
+                    instrumentation.uiAutomation.injectInputEvent(down, true); down.recycle()
+                    try {
+                        Thread.sleep(180)
+                        val pressed = requireNotNull(instrumentation.uiAutomation.takeScreenshot())
+                        for (x in listOf(rect.left + inset, rect.centerX(), rect.right - inset)) {
+                            for (y in listOf(rect.top + inset, rect.bottom - inset)) {
+                                assertEquals("Ripple escaped visible source button", before.getPixel(x, y), pressed.getPixel(x, y))
+                            }
+                        }
+                        pressed.recycle()
+                    } finally {
+                        val cancel = event(android.view.MotionEvent.ACTION_CANCEL)
+                        instrumentation.uiAutomation.injectInputEvent(cancel, true); cancel.recycle()
+                        before.recycle()
+                    }
+                }
+
                 labels.forEachIndexed { index, label ->
                     tap(label)
                     val expected = (0 until 3).map { it > index }

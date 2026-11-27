@@ -59,6 +59,19 @@ try:
     assert all(switch_state(label) for label in source_labels)
     snapshot("home-independent-sources")
     find("Settings", tap=True)
+    def credit_bounds():
+        credit = next(n for n in nodes() if "Made with" in n.get("text", ""))
+        return list(map(int, re.findall(r"\d+", credit.get("bounds"))))
+    credit = credit_bounds()
+    size = adb("shell", "wm", "size").decode()
+    width, height = map(int, re.search(r"(\d+)x(\d+)", size).groups())
+    assert credit[2] - credit[0] < width * .9, "Rights card is still full width"
+    home = next(n for n in nodes() if n.get("text") == "Home")
+    home_top = int(re.findall(r"\d+", home.get("bounds"))[1])
+    assert 0 < home_top - credit[3] < height * .08, "Rights card is not just above footer"
+    adb("shell", "input", "swipe", str(width//2), str(height//2), str(width//2), str(height//3), "350")
+    assert credit_bounds() == credit, "Rights card moved with settings content"
+    adb("shell", "input", "swipe", str(width//2), str(height//3), str(width//2), str(height//2), "350")
     snapshot("settings-hub")
     for section, control in [("Appearance", "Language"), ("Device", "File display"), ("Online sources", "Show YouTube"), ("Playback", "Battery saver")]:
         find(section, tap=True)

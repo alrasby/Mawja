@@ -37,7 +37,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         minSdk = 26
         targetSdk = 37
-        versionCode = 51
+        versionCode = 52
         versionName = "1.0.0"
         buildConfigField("String", "AUDIUS_API_KEY", "\"$audiusKey\"")
         buildConfigField("String", "YOUTUBE_DATA_API_KEY", "\"$youtubeDataApiKey\"")
