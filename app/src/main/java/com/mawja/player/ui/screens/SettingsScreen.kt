@@ -61,7 +61,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.key
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -169,11 +168,13 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
         }
     }
 
+    val settingsScroll = rememberScrollState()
+    LaunchedEffect(section) { settingsScroll.scrollTo(0) }
     Box(Modifier.fillMaxSize()) {
     Column(
         Modifier.fillMaxSize()
             .padding(bottom = if (section == null) footerBottomPadding + rightsClearance else 0.dp)
-            .verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
+            .verticalScroll(settingsScroll).padding(horizontal = 16.dp)
             .padding(top = 8.dp, bottom = if (section == null) 0.dp else footerBottomPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
