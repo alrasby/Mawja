@@ -13,6 +13,12 @@ import androidx.compose.foundation.background
 import com.mawja.player.data.youtube.RegionResolver
 import com.mawja.player.data.youtube.YouTubeRegion
 import java.util.Locale
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ripple
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -390,7 +396,7 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
             contentAlignment = Alignment.Center,
         ) {
             SettingsRights(
-                Modifier.fillMaxWidth(.78f).onSizeChanged { rightsHeightPx = it.height },
+                Modifier.fillMaxWidth(.74f).onSizeChanged { rightsHeightPx = it.height },
             )
         }
     }
@@ -546,30 +552,50 @@ private fun ChoiceDialog(title: String, options: List<LanguageOption>, selected:
     }
 }
 
-/** Fixed above the measured glass footer; opaque so text stays readable over content. */
+/** The compact visible pill shares the footer palette; its 48dp touch margin has no ripple. */
 @Composable
 private fun SettingsRights(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     val colors = MaterialTheme.colorScheme
-    Surface(
-        onClick = { uriHandler.openUri("https://nabdhserv.net") },
-        modifier = modifier.heightIn(min = 48.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = colors.primary.copy(alpha = .08f).compositeOver(colors.surface),
-        contentColor = colors.onSurface,
-        border = BorderStroke(1.dp, colors.outline.copy(alpha = .45f)),
+    val interaction = remember { MutableInteractionSource() }
+    val shape = RoundedCornerShape(20.dp)
+    val gradient = Brush.linearGradient(listOf(
+        colors.primaryContainer.copy(alpha = .94f),
+        colors.surfaceVariant.copy(alpha = .858f),
+        colors.primary.copy(alpha = .52f),
+    ))
+    val outline = Brush.linearGradient(listOf(
+        colors.surface.copy(alpha = .72f),
+        colors.primary.copy(alpha = .38f),
+        colors.onSurface.copy(alpha = .18f),
+    ))
+    Box(
+        modifier.heightIn(min = 48.dp).clickable(
+            interactionSource = interaction, indication = null, role = Role.Button,
+            onClick = { uriHandler.openUri("https://nabdhserv.net") },
+        ),
+        contentAlignment = Alignment.BottomCenter,
     ) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Box(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    buildAnnotatedString {
-                        append("Made with ")
-                        withStyle(SpanStyle(color = colors.error)) { append("♥") }
-                        append(" By NabdhServ.Net")
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    textAlign = TextAlign.Center,
-                )
+        Surface(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp).clip(shape)
+                .background(colors.surface).background(gradient).indication(interaction, ripple()),
+            shape = shape,
+            color = Color.Transparent,
+            contentColor = colors.onSurface,
+            border = BorderStroke(1.dp, outline),
+        ) {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Box(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        buildAnnotatedString {
+                            append("Made with ")
+                            withStyle(SpanStyle(color = colors.error)) { append("♥") }
+                            append(" By NabdhServ.Net")
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }
