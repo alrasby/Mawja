@@ -39,6 +39,25 @@ def back():
 try:
     adb("shell", "am", "force-stop", "com.mawja.player")
     adb("shell", "am", "start", "-W", "-n", "com.mawja.player/.MainActivity")
+    source_labels = ["Device", "Audius", "YouTube"]
+    def switch_state(label):
+        matches = [n for n in nodes() if n.get("text") == label and n.get("checkable") == "true"]
+        assert len(matches) == 1, "Missing independent home switch: " + label
+        return matches[0].get("checked") == "true"
+    assert all(switch_state(label) for label in source_labels)
+    for index, label in enumerate(source_labels):
+        find(label, tap=True)
+        assert [switch_state(name) for name in source_labels] == [i > index for i in range(3)]
+    disabled = "Enable Device, Audius or YouTube above to show content."
+    find(disabled)
+    adb("shell", "am", "force-stop", "com.mawja.player")
+    adb("shell", "am", "start", "-W", "-n", "com.mawja.player/.MainActivity")
+    find(disabled)
+    assert not any(switch_state(label) for label in source_labels), "Source states lost after process restart"
+    for label in source_labels:
+        find(label, tap=True)
+    assert all(switch_state(label) for label in source_labels)
+    snapshot("home-independent-sources")
     find("Settings", tap=True)
     snapshot("settings-hub")
     for section, control in [("Appearance", "Language"), ("Device", "File display"), ("Online sources", "Show YouTube"), ("Playback", "Battery saver")]:
