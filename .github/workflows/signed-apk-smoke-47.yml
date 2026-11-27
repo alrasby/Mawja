@@ -1,0 +1,47 @@
+name: Verify existing signed Mawja 47 APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/47-signed-smoke]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  signed-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Android media state parser
+        run: python scripts/test-media-session-state.py
+      - uses: actions/download-artifact@v4
+        with:
+          name: Mawja-release
+          run-id: 45874756597
+          github-token: ${{ github.token }}
+          path: release-apk
+      - name: Confirm exact previously signed APK
+        run: echo '90647597fb8fed4e842171637ebbe1fbeb85f62f9fa08673552f1adf7cfdd2ed  release-apk/app-release.apk' | sha256sum --check
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise exact signed APK
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          disable-animations: true
+          script: |
+            adb install release-apk/*.apk
+            adb logcat -c
+            python scripts/release-ui-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Mawja-47-signed-APK-smoke
+          path: |
+            release-smoke/
+            runtime-report/
+          retention-days: 90
