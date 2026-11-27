@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.Surface
+import androidx.compose.ui.semantics.selected
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +40,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -192,13 +194,22 @@ internal fun HomeHero(
 }
 
 @Composable
-private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) =
-    FilterChip(
-        selected = selected, onClick = onClick,
-        modifier = modifier.heightIn(min = 48.dp),
-        label = { Text(label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.labelMedium) },
-    )
+private fun SourceChip(label: String, selected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 48.dp).semantics { this.selected = selected },
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) colors.primaryContainer else androidx.compose.ui.graphics.Color.Transparent,
+        contentColor = if (selected) colors.onPrimaryContainer else colors.onSurfaceVariant,
+        border = if (selected) null else BorderStroke(1.dp, colors.outline),
+    ) {
+        Box(Modifier.padding(horizontal = 4.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+            Text(label, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelMedium,
+                maxLines = 1, softWrap = false)
+        }
+    }
+}
 
 @Composable
 private fun HomeContent(
