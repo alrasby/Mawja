@@ -17,6 +17,9 @@ def find(label,tap=False,attempts=6):
                 return n
         time.sleep(.5)
     raise AssertionError("Missing release UI: "+label)
+def is_playing_dump(sessions):
+    return "com.mawja.player" in sessions and "فرانس 24 عربي" in sessions and re.search(r"state=(?:PLAYING\(3\)|3\b)",sessions) is not None
+
 try:
     subprocess.run(["python","scripts/ui-refinement-smoke.py"],check=True)
     world=find("World");_,y1,_,y2=bounds(world);y=(y1+y2)//2
@@ -31,7 +34,7 @@ try:
     sessions=""
     while time.monotonic()<deadline:
         sessions=adb("shell","dumpsys","media_session").decode(errors="replace")
-        if "com.mawja.player" in sessions and "فرانس 24 عربي" in sessions and re.search(r"state=3\b",sessions):break
+        if is_playing_dump(sessions):break
         time.sleep(1)
     else:raise AssertionError("Signed release never reached playing state")
     (out/"media-session.txt").write_text(sessions)
@@ -40,4 +43,6 @@ try:
     assert "FATAL EXCEPTION" not in crashes,"Release crashed"
     (out/"result.txt").write_text("PASS: optimized signed APK settings, theme, language, rotation, radio countries, TV catalog and live France24 audio through public UI. No car head unit used.\n")
 finally:
+    (out/"media-session.txt").write_text(adb("shell","dumpsys","media_session").decode(errors="replace"))
+    (out/"logcat.txt").write_text(adb("logcat","-d").decode(errors="replace"))
     (out/"screen.png").write_bytes(adb("exec-out","screencap","-p"))
