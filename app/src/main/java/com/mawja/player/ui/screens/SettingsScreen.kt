@@ -83,6 +83,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.mawja.player.data.LocalMusicRepository.MediaFolder
@@ -170,8 +171,10 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
 
     Box(Modifier.fillMaxSize()) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
-            .padding(top = 8.dp, bottom = footerBottomPadding + if (section == null) rightsClearance else 0.dp),
+        Modifier.fillMaxSize()
+            .padding(bottom = if (section == null) footerBottomPadding + rightsClearance else 0.dp)
+            .verticalScroll(key(section) { rememberScrollState() }).padding(horizontal = 16.dp)
+            .padding(top = 8.dp, bottom = if (section == null) 0.dp else footerBottomPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (section == null) {
@@ -381,12 +384,14 @@ fun SettingsScreen(onBack: () -> Unit = {}) {
     }
 
     if (section == null) {
-        SettingsRights(
-            Modifier.align(Alignment.BottomCenter)
-                .padding(bottom = footerBottomPadding)
-                .fillMaxWidth(.82f)
-                .onSizeChanged { rightsHeightPx = it.height },
-        )
+        Box(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = footerBottomPadding),
+            contentAlignment = Alignment.Center,
+        ) {
+            SettingsRights(
+                Modifier.fillMaxWidth(.78f).onSizeChanged { rightsHeightPx = it.height },
+            )
+        }
     }
     }
 
@@ -549,7 +554,7 @@ private fun SettingsRights(modifier: Modifier = Modifier) {
         onClick = { uriHandler.openUri("https://nabdhserv.net") },
         modifier = modifier.heightIn(min = 48.dp),
         shape = RoundedCornerShape(24.dp),
-        color = colors.surfaceContainerHigh,
+        color = colors.primary.copy(alpha = .08f).compositeOver(colors.surface),
         contentColor = colors.onSurface,
         border = BorderStroke(1.dp, colors.outline.copy(alpha = .45f)),
     ) {
