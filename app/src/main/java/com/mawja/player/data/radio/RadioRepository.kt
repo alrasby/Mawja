@@ -59,7 +59,7 @@ object RadioFilters {
     val talk = RadioFilter("talk", tag = "talk", labelRes = R.string.radio_talk)
     val culture = RadioFilter("culture", tag = "culture", labelRes = R.string.radio_culture)
     val tvAudio = RadioFilter("tv_audio", tag = "tv_audio", labelRes = R.string.radio_tv_audio)
-    val all: List<RadioFilter> = listOf(local, world, news, music, sports, talk, culture, quran, tvAudio)
+    val all: List<RadioFilter> = listOf(local, world, news, music, sports, talk, culture, quran)
 }
 
 object OmanSeeds {

@@ -5,11 +5,12 @@ import org.junit.Test
 
 class CarRadioBrowseTest {
     @Test fun everyPhoneCategoryHasAnAutoRouteAndOldIdsStayStable() {
-        assertEquals(listOf("local", "world", "news", "music", "sports", "talk", "culture", "quran", "tv_audio"), RadioFilters.all.map { it.id })
+        assertEquals(listOf("local", "world", "news", "music", "sports", "talk", "culture", "quran"), RadioFilters.all.map { it.id })
         RadioFilters.all.forEach { assertSame(it, CarRadioBrowse.category(CarRadioBrowse.id(it))) }
         assertEquals("radio:local", CarRadioBrowse.id(RadioFilters.local))
         assertEquals("radio:world", CarRadioBrowse.id(RadioFilters.world))
         assertEquals("radio:news", CarRadioBrowse.id(RadioFilters.news))
+        assertSame(RadioFilters.news, CarRadioBrowse.category("radio:tv_audio"))
         assertNull(CarRadioBrowse.category("radio:unknown"))
     }
     @Test fun readsPerCategoryCountryAndLanguageLikePhone() {
@@ -20,6 +21,8 @@ class CarRadioBrowseTest {
         assertEquals(null to null, CarRadioBrowse.selection(RadioFilters.local, "ar") { _, _ -> "US" })
     }
     @Test fun languageRoutesKeepSelectionsIsolatedAndRejectInvalidIds() {
+        assertEquals(CarRadioBrowse.Route(RadioFilters.news, "FR", "arabic"), CarRadioBrowse.route("radio-choice:tv_audio:FR:arabic"))
+        assertEquals(CarRadioBrowse.Route(RadioFilters.news, "FR", null), CarRadioBrowse.route("radio-languages:tv_audio:FR"))
         val id = CarRadioBrowse.choiceId(RadioFilters.news, "AE", "arabic")
         val route = requireNotNull(CarRadioBrowse.route(id))
         assertEquals(RadioFilters.news, route.filter)

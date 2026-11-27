@@ -81,10 +81,11 @@ class ReviewedRadioCatalogTest {
         val channels = catalog.filter { it.isTvAudio }
         assertEquals(setOf("france24-ar-tv", "dw-ar-tv", "bbc-ar-tv", "hadath-ar-tv", "arabiya-ar-tv", "rt-ar-tv", "asharq-ar-tv"), channels.map { it.id }.toSet())
         channels.forEach { entry ->
-            assertTrue(entry.matches(RadioFilters.tvAudio, entry.countryCode, "arabic"))
+            assertTrue(entry.matches(RadioFilters.news, entry.countryCode, "arabic"))
+            assertTrue(entry.matches(RadioFilters.world, entry.countryCode, "arabic"))
             assertFalse(entry.track().isVideo)
             assertTrue(entry.track().isLive)
-            assertTrue(entry.track("صوت القناة — بث مباشر").subtitle.startsWith("صوت القناة"))
+            assertTrue(entry.track("بث تلفزيوني صوتي").subtitle.startsWith("بث تلفزيوني صوتي"))
             assertFalse(isRetiredRadioEntry(entry.name, entry.streamUrl))
         }
         assertFalse(catalog.single { it.id == "mcd-ar" }.matches(RadioFilters.tvAudio, "FR", "arabic"))

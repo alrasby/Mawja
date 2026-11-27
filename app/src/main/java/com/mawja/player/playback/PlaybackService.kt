@@ -675,7 +675,7 @@ class PlaybackService : MediaLibraryService() {
     }
 
     private fun dynamicBrowseItem(id: String): MediaItem? {
-        CarRadioBrowse.category(id)?.let { return radioCategoryItem(it) }
+        CarRadioBrowse.category(id)?.let { return radioCategoryItem(it).buildUpon().setMediaId(id).build() }
         CarRadioBrowse.route(id)?.let { route ->
             val title = if (id.startsWith("radio-languages:")) getString(R.string.radio_language)
                 else route.language?.let { com.mawja.player.data.radio.radioLanguageLabel(it, resources.configuration.locales[0]) } ?: getString(R.string.radio_all_languages)

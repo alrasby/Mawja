@@ -47,14 +47,14 @@ class CarRadioBrowserTest {
                 assertEquals(item.mediaId, resolved.mediaId)
                 assertEquals(item.mediaMetadata.title.toString(), resolved.mediaMetadata.title.toString())
             }
-            val channels = AtomicReference<ListenableFuture<LibraryResult<ImmutableList<MediaItem>>>>()
-            instrumentation.runOnMainSync { channels.set(browser.getChildren(CarRadioBrowse.id(RadioFilters.tvAudio), 0, 100, null)) }
-            val channelItems = requireNotNull(channels.get().get(10, TimeUnit.SECONDS).value)
-            assertEquals(setOf("radio:official-france24-ar-tv", "radio:official-dw-ar-tv", "radio:official-bbc-ar-tv", "radio:official-hadath-ar-tv", "radio:official-arabiya-ar-tv", "radio:official-rt-ar-tv", "radio:official-asharq-ar-tv"),
-                channelItems.filter { it.mediaMetadata.isPlayable == true }.map { it.mediaId }.toSet())
-            channelItems.filter { it.mediaMetadata.isPlayable == true }.forEach {
-                assertEquals(androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC, it.mediaMetadata.mediaType)
-            }
+            assertFalse(items.any { it.mediaId == "radio:tv_audio" })
+            val legacy = AtomicReference<ListenableFuture<LibraryResult<MediaItem>>>()
+            instrumentation.runOnMainSync { legacy.set(browser.getItem("radio:tv_audio")) }
+            val legacyItem = requireNotNull(legacy.get().get(10, TimeUnit.SECONDS).value)
+            assertEquals("radio:tv_audio", legacyItem.mediaId)
+            assertEquals(true, legacyItem.mediaMetadata.isBrowsable)
+            assertEquals(items.single { it.mediaId == "radio:news" }.mediaMetadata.title.toString(),
+                legacyItem.mediaMetadata.title.toString())
             val languageFolder = CarRadioBrowse.languagesId(RadioFilters.news, "AE")
             val languages = AtomicReference<ListenableFuture<LibraryResult<ImmutableList<MediaItem>>>>()
             instrumentation.runOnMainSync { languages.set(browser.getChildren(languageFolder, 0, 300, null)) }

@@ -151,5 +151,5 @@
     <string name="refine_playback_desc">Battery saver, volume and equalizer</string>
     <string name="playback_diagnostics">Share playback diagnostics</string>
     <string name="radio_tv_audio">TV channel audio</string>
-    <string name="radio_tv_audio_live">TV audio — Live</string>
+    <string name="radio_tv_audio_live">TV broadcast audio</string>
 </resources>

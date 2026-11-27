@@ -22,13 +22,18 @@ def is_playing_dump(sessions):
 
 try:
     subprocess.run(["python","scripts/ui-refinement-smoke.py"],check=True)
-    world=find("World");_,y1,_,y2=bounds(world);y=(y1+y2)//2
+    news=find("News",tap=True);_,y1,_,y2=bounds(news);y=(y1+y2)//2
+    find("English",tap=True)
+    find("Search",tap=True);adb("shell","input","text","Arabic")
+    find("Arabic · العربية",tap=True)
+    find("All countries",tap=True)
+    find("Search",tap=True);adb("shell","input","text","France")
+    find("🇫🇷 France",tap=True)
     size=adb("shell","wm","size").decode();width=int(re.search(r"(\d+)x\d+",size)[1])
     for _ in range(8):
-        matches=[n for n in nodes() if n.get("text")=="TV channel audio"]
-        if matches:break
-        adb("shell","input","swipe",str(width*9//10),str(y),str(width//10),str(y),"350");time.sleep(.3)
-    find("TV channel audio",tap=True)
+        assert not any(n.get("text")=="TV channel audio" for n in nodes()),"Duplicate TV category"
+        adb("shell","input","swipe",str(width*9//10),str(y),str(width//10),str(y),"350")
+    assert not any(n.get("text")=="TV channel audio" for n in nodes()),"Duplicate TV category"
     find("فرانس 24 عربي",tap=True)
     deadline=time.monotonic()+35
     sessions=""
@@ -41,7 +46,7 @@ try:
     crashes=adb("logcat","-d","-b","crash").decode(errors="replace")
     (out/"crashes.txt").write_text(crashes)
     assert "FATAL EXCEPTION" not in crashes,"Release crashed"
-    (out/"result.txt").write_text("PASS: optimized signed APK settings, theme, language, rotation, radio countries, TV catalog and live France24 audio through public UI. No car head unit used.\n")
+    (out/"result.txt").write_text("PASS: optimized signed APK settings, theme, language, rotation, radio countries/languages, no duplicate TV tab and live France24 audio from News through public UI. No car head unit used.\n")
 finally:
     (out/"media-session.txt").write_text(adb("shell","dumpsys","media_session").decode(errors="replace"))
     (out/"logcat.txt").write_text(adb("logcat","-d").decode(errors="replace"))

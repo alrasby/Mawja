@@ -61,7 +61,7 @@ internal data class ReviewedRadioStation(
             matchesRadioLanguage(language, requestedLanguage ?: filter.language) &&
             (filter.tag == null || filter.id in categories)
 
-    fun track(tvAudioLabel: String = "TV audio — Live") = Track(
+    fun track(tvAudioLabel: String = "TV broadcast audio") = Track(
         id = "radio:official-$id", source = SourceType.RADIO, title = name,
         subtitle = listOf(if (isTvAudio) tvAudioLabel else "", Locale("", countryCode).displayCountry, city, language).filter { it.isNotBlank() }.joinToString(" • "),
         streamUrl = streamUrl, isLive = true,

@@ -151,5 +151,5 @@
     <string name="refine_playback_desc">توفير البطارية والصوت والمعادل</string>
     <string name="playback_diagnostics">مشاركة تشخيص التشغيل</string>
     <string name="radio_tv_audio">صوت القنوات</string>
-    <string name="radio_tv_audio_live">صوت القناة — بث مباشر</string>
+    <string name="radio_tv_audio_live">بث تلفزيوني صوتي</string>
 </resources>
