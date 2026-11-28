@@ -93,5 +93,21 @@ class ThemeRegressionTest {
             assertTrue(labels.any { it == "All languages" })
             assertTrue(labels.any { it.contains("Arabic · العربية") })
         }
+        // Resolve through PackageManager, as the launcher does, not a raw PNG preview.
+        val launcher = context.packageManager.getApplicationIcon(context.packageName)
+        assertTrue("Launcher must resolve to an adaptive icon", launcher is android.graphics.drawable.AdaptiveIconDrawable)
+        assertEquals(R.mipmap.ic_launcher_mawja, context.applicationInfo.icon)
+        val source = requireNotNull(android.graphics.BitmapFactory.decodeResource(context.resources, R.mipmap.mawja_icon_clean))
+        assertEquals(1254, source.width)
+        assertEquals(1254, source.height)
+        source.recycle()
+        val preview = android.graphics.Bitmap.createBitmap(512, 512, android.graphics.Bitmap.Config.ARGB_8888)
+        launcher.setBounds(0, 0, 512, 512)
+        launcher.draw(android.graphics.Canvas(preview))
+        File(context.filesDir, "launcher-adaptive.png").outputStream().use {
+            preview.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
+        }
+        preview.recycle()
+
     }
 }

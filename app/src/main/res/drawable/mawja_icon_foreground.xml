@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 108dp adaptive layer: 16% inset leaves the full mark inside the safe region. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="16%">
+    <bitmap android:src="@mipmap/mawja_icon_clean" android:gravity="fill" android:filter="true" />
+</inset>

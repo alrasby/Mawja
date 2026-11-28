@@ -27,8 +27,8 @@
     <application
         android:name=".MawjaApp"
         android:allowBackup="false"
-        android:icon="@mipmap/mawja_icon_clean"
-        android:roundIcon="@mipmap/mawja_icon_clean"
+        android:icon="@mipmap/ic_launcher_mawja"
+        android:roundIcon="@mipmap/ic_launcher_mawja"
         android:label="Mawja"
         android:localeConfig="@xml/locales_config"
         android:dataExtractionRules="@xml/data_extraction_rules"

@@ -85,6 +85,7 @@ jobs:
 
             adb exec-out run-as com.mawja.player cat files/theme-dark.png > runtime-report/theme-dark.png
             adb exec-out run-as com.mawja.player cat files/theme-light.png > runtime-report/theme-light.png
+            adb exec-out run-as com.mawja.player cat files/launcher-adaptive.png > runtime-report/launcher-adaptive.png
             for image in home-hero-en-light home-hero-en-dark home-hero-ar-light home-hero-ar-dark; do adb exec-out run-as com.mawja.player cat files/$image.png > runtime-report/$image.png; done
             python3 scripts/ui-refinement-smoke.py
             bash scripts/profile-runtime.sh
