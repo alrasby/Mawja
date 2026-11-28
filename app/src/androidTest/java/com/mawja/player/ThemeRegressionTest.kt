@@ -113,9 +113,9 @@ class ThemeRegressionTest {
             val pixel = source.getPixel(x, y)
             if (android.graphics.Color.alpha(pixel) <= 32) continue
             visible++
-            // 108dp layer with 22% inset: all visible logo pixels must fit the safe 66dp circle.
-            val dx = ((x + .5) / source.width - .5) * 60.48
-            val dy = ((y + .5) / source.height - .5) * 60.48
+            // 108dp layer with 20% inset: all visible logo pixels must fit the safe 66dp circle.
+            val dx = ((x + .5) / source.width - .5) * 64.8
+            val dy = ((y + .5) / source.height - .5) * 64.8
             assertTrue("Logo would clip in a circular mask", dx * dx + dy * dy <= 33.0 * 33.0)
             val r = android.graphics.Color.red(pixel)
             val g = android.graphics.Color.green(pixel)
